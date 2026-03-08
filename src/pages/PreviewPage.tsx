@@ -38,7 +38,6 @@ const PreviewPage = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<"desktop" | "mobile" | "fullscreen">("desktop");
-  const [showEditor, setShowEditor] = useState(false);
   const [inlineEditing, setInlineEditing] = useState(false);
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [editableHtml, setEditableHtml] = useState("");
