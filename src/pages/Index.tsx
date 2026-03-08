@@ -19,10 +19,31 @@ import themeCyan from "@/assets/theme-preview-cyan.jpg";
 import themeMocha from "@/assets/theme-preview-mocha.jpg";
 import themeMidnight from "@/assets/theme-preview-midnight.jpg";
 import themeSteel from "@/assets/theme-preview-steel.jpg";
+import themeOcean from "@/assets/theme-preview-ocean.jpg";
+import themeSunset from "@/assets/theme-preview-sunset.jpg";
+import themeForest from "@/assets/theme-preview-forest.jpg";
+import themeCherry from "@/assets/theme-preview-cherry.jpg";
+import themeLavender from "@/assets/theme-preview-lavender.jpg";
+import themeArctic from "@/assets/theme-preview-arctic.jpg";
+import themeEmerald from "@/assets/theme-preview-emerald.jpg";
+import themeRoyal from "@/assets/theme-preview-royal.jpg";
+import themeRocket from "@/assets/theme-preview-rocket.jpg";
+import themeSakura from "@/assets/theme-preview-sakura.jpg";
+import themeNeon from "@/assets/theme-preview-neon.jpg";
+import themeElegant from "@/assets/theme-preview-elegant.jpg";
+import themeMinimal from "@/assets/theme-preview-minimal.jpg";
+import themeBold from "@/assets/theme-preview-bold.jpg";
+import themeCreative from "@/assets/theme-preview-creative.jpg";
+import themeTerminal from "@/assets/theme-preview-terminal.jpg";
+import themeRecruiter from "@/assets/theme-preview-recruiter.jpg";
 
 const themeImageMap: Record<string, string> = {
   blue: themeBlue, warm: themeWarm, dark: themeDark, green: themeGreen, pink: themePink,
   purple: themePurple, coral: themeCoral, cyan: themeCyan, mocha: themeMocha, midnight: themeMidnight, steel: themeSteel,
+  ocean: themeOcean, sunset: themeSunset, forest: themeForest, cherry: themeCherry, lavender: themeLavender,
+  arctic: themeArctic, emerald: themeEmerald, royal: themeRoyal, rocket: themeRocket, sakura: themeSakura,
+  neon: themeNeon, elegant: themeElegant, minimal: themeMinimal, bold: themeBold, creative: themeCreative,
+  terminal: themeTerminal, recruiter: themeRecruiter,
 };
 
 const getThemeImage = (category: string) => themeImageMap[category] || themeBlue;
@@ -102,26 +123,26 @@ const Index = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
             {[
-              { name: "Recruiter", image: "blue" },
-              { name: "Minimal", image: "blue" },
-              { name: "Bold Dark", image: "purple" },
-              { name: "Creative", image: "warm" },
-              { name: "Terminal", image: "green" },
-              { name: "Elegant", image: "mocha" },
-              { name: "Neon Cyber", image: "cyan" },
-              { name: "Ocean", image: "blue" },
-              { name: "Sunset", image: "coral" },
-              { name: "Forest", image: "green" },
-              { name: "Cherry", image: "pink" },
-              { name: "Lavender", image: "purple" },
+              { name: "Recruiter", image: "recruiter" },
+              { name: "Minimal", image: "minimal" },
+              { name: "Bold Dark", image: "bold" },
+              { name: "Creative", image: "creative" },
+              { name: "Terminal", image: "terminal" },
+              { name: "Elegant", image: "elegant" },
+              { name: "Neon Cyber", image: "neon" },
+              { name: "Ocean", image: "ocean" },
+              { name: "Sunset", image: "sunset" },
+              { name: "Forest", image: "forest" },
+              { name: "Cherry", image: "cherry" },
+              { name: "Lavender", image: "lavender" },
               { name: "Midnight", image: "midnight" },
               { name: "Coral", image: "coral" },
-              { name: "Arctic", image: "cyan" },
+              { name: "Arctic", image: "arctic" },
               { name: "Mocha", image: "mocha" },
-              { name: "Sakura", image: "pink" },
+              { name: "Sakura", image: "sakura" },
               { name: "Graphite", image: "steel" },
-              { name: "Emerald", image: "green" },
-              { name: "Royal", image: "purple" },
+              { name: "Emerald", image: "emerald" },
+              { name: "Royal", image: "royal" },
             ].map((theme, i) => (
               <motion.div
                 key={theme.name}
