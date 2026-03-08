@@ -491,13 +491,23 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               })}
             </div>
             {s && s.aiGeneratedContent > 0 && (
-              <div className="mt-4 bg-amber-500/10 border border-amber-400/30 rounded-xl p-4 flex items-start gap-3">
-                <Bot className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="mt-4 bg-red-500/15 border border-red-500/40 rounded-xl p-4 flex items-start gap-3">
+                <Bot className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-xs font-display font-semibold text-amber-700">AI Detected Generated Content</span>
-                  <p className="text-xs text-amber-600/80 mt-0.5 font-body">
-                    {s.aiGeneratedContent} {s.aiGeneratedContent === 1 ? "repository contains" : "repositories contain"} potential auto-generated code patterns. Consider verifying originality during technical interviews.
+                  <span className="text-sm font-display font-bold text-red-600 flex items-center gap-1.5">
+                    ⚠️ AI-Built Repositories Detected
+                  </span>
+                  <p className="text-xs text-red-600/90 mt-1 font-body leading-relaxed">
+                    <strong>{s.aiGeneratedContent} {s.aiGeneratedContent === 1 ? "repository" : "repositories"}</strong> appear to be built using AI coding tools (Lovable, Bolt, Cursor, Replit, etc.). 
+                    These projects may not reflect the candidate's actual coding abilities. <strong>Verify originality during technical interviews.</strong>
                   </p>
+                  {s.aiDetectedRepos && s.aiDetectedRepos.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {s.aiDetectedRepos.map((repo: string) => (
+                        <Badge key={repo} className="text-[10px] bg-red-600 text-white">{repo}</Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

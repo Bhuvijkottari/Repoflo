@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
-import { Eye, Check, Briefcase, ArrowRight } from "lucide-react";
+import { Eye, Check, Briefcase, ArrowRight, X } from "lucide-react";
 import { getThemeHtml } from "@/lib/themeTemplates";
 import { dummyPreviewData } from "@/lib/mockData";
 import themeBlue from "@/assets/theme-preview-blue.jpg";
@@ -73,9 +73,10 @@ const ThemesPage = () => {
   const [selected, setSelected] = useState<string | null>(null);
   const [previewTheme, setPreviewTheme] = useState<string | null>(null);
 
+  const selectedThemeData = themes.find(t => t.id === selected);
+
   const handleContinue = () => {
     if (!selected) return;
-    // Store selected theme and go to generate page to collect info
     sessionStorage.setItem("selectedTheme", selected);
     navigate("/generate");
   };
@@ -83,8 +84,8 @@ const ThemesPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="pt-24 pb-16 container mx-auto px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
+      <div className="pt-24 pb-32 container mx-auto px-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
             Step 1 of 2
           </div>
@@ -92,52 +93,85 @@ const ThemesPage = () => {
           <p className="text-muted-foreground font-body">20+ themes — each fully responsive with animations and clickable nav.</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 max-w-6xl mx-auto mb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 max-w-6xl mx-auto">
           {themes.map((theme, i) => (
             <motion.div
               key={theme.id}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
+              transition={{ delay: i * 0.03 }}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
               onClick={() => setSelected(theme.id)}
-              className={`relative bg-card rounded-2xl overflow-hidden shadow-card cursor-pointer transition-all duration-300 border-2 ${
-                selected === theme.id ? "border-primary shadow-glow" : "border-transparent hover:shadow-card-hover"
+              className={`relative bg-card rounded-xl overflow-hidden shadow-card cursor-pointer transition-all duration-300 border-2 ${
+                selected === theme.id ? "border-primary shadow-glow ring-2 ring-primary/30" : "border-transparent hover:shadow-card-hover"
               } ${theme.isRecruiter ? "ring-2 ring-accent/40" : ""}`}
             >
-              <div className="h-20 overflow-hidden">
+              <div className="h-16 sm:h-20 overflow-hidden">
                 <img src={themeImages[theme.image]} alt={theme.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
               </div>
               {selected === theme.id && (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                  <Check className="w-4 h-4 text-primary-foreground" />
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                  <Check className="w-3 h-3 text-primary-foreground" />
                 </motion.div>
               )}
               {theme.isRecruiter && (
-                <span className="absolute top-2 left-2 text-xs font-display font-semibold bg-background/90 text-accent px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <Briefcase className="w-3 h-3" /> For Recruiters
+                <span className="absolute top-1.5 left-1.5 text-[10px] font-display font-semibold bg-background/90 text-accent px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                  <Briefcase className="w-2.5 h-2.5" /> Recruiter
                 </span>
               )}
-              <div className="p-5">
-                <h3 className="font-display font-semibold text-foreground mb-2">{theme.name}</h3>
-                <p className="text-xs text-muted-foreground font-body mb-4">{theme.description}</p>
-                <Button variant="outline" size="sm" className="w-full" onClick={(e) => { e.stopPropagation(); setPreviewTheme(theme.id); }}>
-                  <Eye className="w-4 h-4 mr-1" /> Preview
+              <div className="p-3 sm:p-4">
+                <h3 className="font-display font-semibold text-foreground text-sm mb-1 truncate">{theme.name}</h3>
+                <p className="text-[10px] sm:text-xs text-muted-foreground font-body line-clamp-2 mb-2 sm:mb-3 h-7 sm:h-8">{theme.description}</p>
+                <Button variant="outline" size="sm" className="w-full text-xs h-7 sm:h-8" onClick={(e) => { e.stopPropagation(); setPreviewTheme(theme.id); }}>
+                  <Eye className="w-3 h-3 mr-1" /> Preview
                 </Button>
               </div>
             </motion.div>
           ))}
         </div>
-
-        <div className="text-center">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant="cta" size="lg" className="rounded-full px-12 py-6 text-lg animate-pulse-glow" disabled={!selected} onClick={handleContinue}>
-              Continue — Add Your Info <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </motion.div>
-        </div>
       </div>
 
+      {/* Sticky Bottom Bar */}
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-lg border-t border-border shadow-2xl"
+          >
+            <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border-2 border-primary">
+                  <img src={themeImages[selectedThemeData?.image || "minimal"]} alt="" className="w-full h-full object-cover" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-display font-semibold text-foreground text-sm sm:text-base truncate">
+                    {selectedThemeData?.name}
+                    {selectedThemeData?.isRecruiter && (
+                      <span className="ml-2 text-accent text-xs">For Recruiters</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate hidden sm:block">{selectedThemeData?.description}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setSelected(null)} className="text-muted-foreground">
+                  <X className="w-4 h-4" />
+                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button variant="cta" size="lg" className="rounded-full px-6 sm:px-10 animate-pulse-glow whitespace-nowrap" onClick={handleContinue}>
+                    Continue <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
+                  </Button>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Preview Modal */}
       {previewTheme && (
         <div className="fixed inset-0 z-50 bg-foreground/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPreviewTheme(null)}>
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-card rounded-2xl shadow-card-hover w-full max-w-5xl h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
