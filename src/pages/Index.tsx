@@ -109,11 +109,11 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      {/* Feature Highlights - NEW section */}
-      <section className="py-20 relative">
+      {/* Feature Highlights */}
+      <section className="py-16 sm:py-20 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.02] to-background pointer-events-none" />
-        <div className="container mx-auto px-4 relative">
-          <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="container mx-auto px-4 sm:px-6 relative">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
             {featureHighlights.map((f, i) => (
               <motion.div
                 key={f.title}
@@ -124,9 +124,9 @@ const Index = () => {
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
                 className="relative group"
               >
-                <div className="bg-card rounded-2xl p-6 border border-border shadow-card hover:shadow-card-hover transition-all duration-300 h-full">
-                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <f.icon className="w-6 h-6 text-primary-foreground" />
+                <div className="bg-card rounded-2xl p-5 sm:p-6 border border-border shadow-card hover:shadow-card-hover transition-all duration-300 h-full">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl gradient-primary flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <f.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
                   </div>
                   <h3 className="font-display font-bold text-foreground text-base mb-1.5">{f.title}</h3>
                   <p className="text-sm text-muted-foreground font-body leading-relaxed">{f.desc}</p>
