@@ -106,6 +106,7 @@ export const dummyPreviewData: PortfolioData = {
     pullRequests: 189, pushes: 920, daysOnGithub: 1200,
     recentCollaborations: ["org/open-lib", "team/dashboard"],
     aiGeneratedContent: 0,
+    aiDetectedRepos: [],
     topLanguages: [{ name: "JavaScript", percentage: 40 }, { name: "Python", percentage: 30 }, { name: "TypeScript", percentage: 20 }, { name: "Go", percentage: 10 }],
     contributionStreak: 32,
   },
