@@ -61,23 +61,41 @@ const GeneratePage = () => {
 
       if (resumeFile) {
         setStatus("Parsing resume with AI...");
+        
+        // Use raw fetch with FormData (supabase.functions.invoke doesn't handle FormData properly)
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        
         const formData = new FormData();
         formData.append("resume", resumeFile);
         formData.append("githubData", JSON.stringify(githubData));
 
-        const { data, error } = await supabase.functions.invoke("parse-resume", {
+        const response = await fetch(`${supabaseUrl}/functions/v1/parse-resume`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${supabaseKey}`,
+          },
           body: formData,
         });
-        if (error) throw error;
+        
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({ error: "Failed to parse resume" }));
+          throw new Error(errData.error || `Resume parsing failed (${response.status})`);
+        }
+        
+        const data = await response.json();
         if (data?.error) throw new Error(data.error);
-        finalData = { ...finalData, ...data, avatar: data.avatar || githubData.avatar, githubStats: githubData.githubStats };
+        
+        finalData = { 
+          ...finalData, 
+          ...data, 
+          avatar: data.avatar || githubData.avatar, 
+          githubStats: githubData.githubStats 
+        };
       }
 
       setStatus("Data ready! Selecting theme...");
-      
-      // Store portfolio data in sessionStorage for the themes/preview pages
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
-      
       navigate("/themes");
     } catch (e: any) {
       toast({
@@ -121,7 +139,6 @@ const GeneratePage = () => {
               required
               className="h-12 text-base"
             />
-            {/* GitHub fetch status */}
             {githubFetching && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" /> Fetching GitHub profile...
@@ -152,7 +169,7 @@ const GeneratePage = () => {
           <div className="space-y-3">
             <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
               <FileText className="w-5 h-5 text-primary" />
-              Upload Resume (PDF) — <span className="text-muted-foreground font-normal text-xs">optional, enriches experience & education</span>
+              Upload Resume — <span className="text-muted-foreground font-normal text-xs">enriches experience & education</span>
             </Label>
             <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 hover:bg-secondary/30 transition-colors">
               {resumeFile ? (
@@ -164,7 +181,7 @@ const GeneratePage = () => {
                 <div className="flex flex-col items-center text-muted-foreground">
                   <Upload className="w-8 h-8 mb-2" />
                   <span className="font-body text-sm">Click to upload or drag & drop</span>
-                  <span className="font-body text-xs mt-1">PDF, DOC up to 10MB</span>
+                  <span className="font-body text-xs mt-1">PDF, DOC, TXT up to 10MB</span>
                 </div>
               )}
               <input
