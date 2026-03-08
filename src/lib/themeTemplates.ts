@@ -205,7 +205,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "sunset":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Prata&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">', "'Work Sans',sans-serif", `
         <div style="background:#fff5f5;color:#1a1a2e;min-height:100vh">
-        ${nav('rgba(255,245,245,.9)', '#9f1239', '#e11d48')}
+        ${nav('rgba(255,245,245,.9)', '#9f1239', '#e11d48', d.name)}
         <div id="about" style="background:linear-gradient(135deg,#fb923c,#f43f5e);padding:80px 24px;text-align:center;color:#fff">
           <div style="width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,.5);overflow:hidden;margin:0 auto 20px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-family:'Prata',serif;font-size:3rem;font-weight:400;margin-bottom:8px">${d.name}</h1><p style="opacity:.9">${d.title}</p></div>
