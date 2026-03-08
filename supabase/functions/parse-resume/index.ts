@@ -28,18 +28,24 @@ serve(async (req) => {
       });
     }
 
-    // Read file content as text
-    const fileText = await file.text();
+    // Read file as bytes and convert to base64 for AI processing
+    const fileBytes = new Uint8Array(await file.arrayBuffer());
+    const base64Content = btoa(String.fromCharCode(...fileBytes));
     
+    // Determine MIME type
+    const fileName = file.name.toLowerCase();
+    let mimeType = "application/octet-stream";
+    if (fileName.endsWith(".pdf")) mimeType = "application/pdf";
+    else if (fileName.endsWith(".doc")) mimeType = "application/msword";
+    else if (fileName.endsWith(".docx")) mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    else if (fileName.endsWith(".txt")) mimeType = "text/plain";
+
     let parsedGithub = {};
     try {
       parsedGithub = githubData ? JSON.parse(githubData) : {};
     } catch {}
 
-    const prompt = `You are a resume parser. Extract structured information from this resume text. Merge with the GitHub data provided.
-
-RESUME TEXT:
-${fileText.substring(0, 8000)}
+    const textPrompt = `You are a resume parser. Extract structured information from this resume document. Merge with the GitHub data provided.
 
 GITHUB DATA (merge with resume data, prefer resume for experience/education, prefer github for projects/skills):
 ${JSON.stringify(parsedGithub).substring(0, 3000)}
@@ -60,7 +66,28 @@ Return a JSON object with these exact fields (fill in from resume, use github da
   "projects": [{"name": "Project", "description": "Description", "tech": ["Tech1"], "stars": 0, "link": "url"}]
 }
 
-IMPORTANT: Return ONLY valid JSON, no markdown, no explanation.`;
+IMPORTANT: Return ONLY valid JSON, no markdown, no explanation. Extract ALL experience and education entries from the resume.`;
+
+    // Use multimodal request with the file as inline_data
+    const messages = [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:${mimeType};base64,${base64Content}`,
+            },
+          },
+          {
+            type: "text",
+            text: textPrompt,
+          },
+        ],
+      },
+    ];
+
+    console.log("Sending multimodal request to AI with file type:", mimeType, "size:", fileBytes.length);
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -69,10 +96,8 @@ IMPORTANT: Return ONLY valid JSON, no markdown, no explanation.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "user", content: prompt },
-        ],
+        model: "google/gemini-2.5-flash",
+        messages,
       }),
     });
 
@@ -105,6 +130,8 @@ IMPORTANT: Return ONLY valid JSON, no markdown, no explanation.`;
     // Clean markdown code blocks if present
     content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     
+    console.log("AI response content (first 500 chars):", content.substring(0, 500));
+
     let parsed;
     try {
       parsed = JSON.parse(content);
@@ -135,6 +162,8 @@ IMPORTANT: Return ONLY valid JSON, no markdown, no explanation.`;
       projects: parsed.projects?.length ? parsed.projects : github.projects || [],
       githubStats: github.githubStats || null,
     };
+
+    console.log("Result experience count:", result.experience.length, "education count:", result.education.length);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
