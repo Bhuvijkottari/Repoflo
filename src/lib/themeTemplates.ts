@@ -95,12 +95,17 @@ const responsiveStyles = `
   .nav-links{display:none !important}
   .nav-hamburger{display:block !important}
   .nav-mobile-open{display:flex !important}
-  h1{font-size:2rem !important}
-  h2{font-size:1.2rem !important}
+  h1{font-size:1.8rem !important}
+  h2{font-size:1.15rem !important}
   .stats-grid{grid-template-columns:repeat(2,1fr) !important}
+  body>div>div{padding-left:16px !important;padding-right:16px !important}
+  section{margin-left:0 !important;margin-right:0 !important}
+  .project-card{padding:16px !important}
 }
 @media(max-width:480px){
   .stats-grid{grid-template-columns:1fr !important}
+  h1{font-size:1.5rem !important}
+  nav{padding:10px 16px !important}
 }
 `;
 
