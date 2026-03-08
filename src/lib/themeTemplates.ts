@@ -10,25 +10,36 @@ const getPortfolioData = (): PortfolioData => {
   return mockPortfolioData;
 };
 
-// Shared navbar generator for all themes - with functional smooth scroll JS
-const nav = (bg: string, text: string, accent: string, personName: string, links: string[] = ["About", "Skills", "Experience", "Projects", "Education", "Contact"]) =>
-  `<nav style="position:sticky;top:0;z-index:100;background:${bg};padding:12px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px)">
+// Shared navbar generator - dynamically builds links based on available data
+const nav = (bg: string, text: string, accent: string, personName: string, links?: string[], data?: PortfolioData) => {
+  // If data provided, auto-generate links based on available sections
+  const autoLinks = data ? [
+    "About",
+    data.skills.length > 0 ? "Skills" : null,
+    data.experience.length > 0 ? "Experience" : null,
+    data.projects.length > 0 ? "Projects" : null,
+    data.education.length > 0 ? "Education" : null,
+    "Contact",
+  ].filter(Boolean) as string[] : (links || ["About", "Skills", "Experience", "Projects", "Education", "Contact"]);
+
+  return `<nav style="position:sticky;top:0;z-index:100;background:${bg};padding:12px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px)">
     <a href="#about" style="font-weight:700;font-size:1.1rem;color:${accent};text-decoration:none;cursor:pointer">${personName.split(' ')[0]}</a>
-    <div style="display:flex;gap:16px">${links.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.85rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
+    <div style="display:flex;gap:16px">${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.85rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
   </nav>`;
+};
 
 // Shared sections generator
 const skillsHtml = (d: PortfolioData, bg: string, color: string, border?: string) =>
   d.skills.map(s => `<span style="background:${bg};color:${color};padding:6px 14px;border-radius:20px;font-size:.85rem;display:inline-block;margin:3px${border ? `;border:1px solid ${border}` : ''}">${s}</span>`).join('');
 
 const expHtml = (d: PortfolioData, roleColor: string, companyColor: string, descColor: string) =>
-  d.experience.length ? d.experience.map(e => `<div style="margin-bottom:24px"><div style="font-weight:600;font-size:1.05rem;color:${roleColor}">${e.role}</div><div style="color:${companyColor}">${e.company}</div><div style="color:#999;font-size:.85rem">${e.period}</div><p style="color:${descColor};font-size:.9rem;margin-top:4px">${e.description}</p></div>`).join('') : `<p style="color:${descColor};font-size:.9rem">No experience data available. Add a resume to include this section.</p>`;
+  d.experience.length ? d.experience.map(e => `<div style="margin-bottom:24px"><div style="font-weight:600;font-size:1.05rem;color:${roleColor}">${e.role}</div><div style="color:${companyColor}">${e.company}</div><div style="color:#999;font-size:.85rem">${e.period}</div><p style="color:${descColor};font-size:.9rem;margin-top:4px">${e.description}</p></div>`).join('') : '';
 
 const projectsHtml = (d: PortfolioData, cardBg: string, cardBorder: string, nameColor: string, descColor: string, tagBg: string, tagColor: string) =>
   d.projects.map(p => `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:20px;margin-bottom:12px"><div style="font-weight:600;color:${nameColor};margin-bottom:4px">${p.link ? `<a href="${p.link}" target="_blank" style="color:${nameColor};text-decoration:none">${p.name}</a>` : p.name} ${p.stars ? `<span style="color:#f59e0b;font-size:.85rem">★ ${p.stars}</span>` : ''}</div><p style="color:${descColor};font-size:.9rem;margin-bottom:8px">${p.description}</p><div>${p.tech.map(t => `<span style="display:inline-block;background:${tagBg};color:${tagColor};padding:2px 8px;border-radius:4px;font-size:.75rem;margin:2px">${t}</span>`).join('')}</div>${p.link ? `<a href="${p.link}" target="_blank" style="display:inline-block;margin-top:8px;font-size:.8rem;color:${tagColor};text-decoration:none">View on GitHub →</a>` : ''}</div>`).join('');
 
 const eduHtml = (d: PortfolioData, roleColor: string, instColor: string) =>
-  d.education.length ? d.education.map(e => `<div style="margin-bottom:20px"><div style="font-weight:600;color:${roleColor}">${e.degree}</div><div style="color:${instColor}">${e.institution}</div><div style="color:#999;font-size:.85rem">${e.period}</div></div>`).join('') : `<p style="color:${instColor};font-size:.9rem">No education data available.</p>`;
+  d.education.length ? d.education.map(e => `<div style="margin-bottom:20px"><div style="font-weight:600;color:${roleColor}">${e.degree}</div><div style="color:${instColor}">${e.institution}</div><div style="color:#999;font-size:.85rem">${e.period}</div></div>`).join('') : '';
 
 const volHtml = (d: PortfolioData, roleColor: string, orgColor: string, descColor: string) =>
   d.volunteering.length ? d.volunteering.map(v => `<div style="margin-bottom:20px"><div style="font-weight:600;color:${roleColor}">${v.role}</div><div style="color:${orgColor}">${v.org}</div><div style="color:#999;font-size:.85rem">${v.period}</div><p style="color:${descColor};font-size:.9rem;margin-top:4px">${v.description}</p></div>`).join('') : '';
@@ -123,16 +134,16 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "minimal":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">', "'Inter',sans-serif", `
         <div style="background:#fafafa;color:#1a1a1a;min-height:100vh">
-        ${nav('rgba(250,250,250,.9)', '#666', '#1a1a1a', d.name)}
+        ${nav('rgba(250,250,250,.9)', '#666', '#1a1a1a', d.name, undefined, d)}
         <div style="max-width:720px;margin:0 auto;padding:40px 24px">
           <div id="about" style="text-align:center;padding:60px 0 40px"><div style="width:120px;height:120px;border-radius:50%;margin:0 auto 20px;overflow:hidden"><img src="${d.avatar}" style="width:100%;height:100%"></div>
             <h1 style="font-size:2.5rem;font-weight:700;margin-bottom:8px">${d.name}</h1><p style="color:#666;font-size:1.1rem;margin-bottom:12px">${d.title}</p><p style="color:#888;max-width:500px;margin:0 auto">${d.bio}</p></div>
-          <section id="skills" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Skills</h2><div>${skillsHtml(d, '#f0f0f0', '#333')}</div></section>
-          <section id="experience" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Experience</h2>${expHtml(d, '#1a1a1a', '#666', '#666')}</section>
-          <section id="projects" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Projects</h2>${projectsHtml(d, '#fff', '#eee', '#1a1a1a', '#666', '#f5f5f5', '#888')}</section>
+          ${d.skills.length ? `<section id="skills" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Skills</h2><div>${skillsHtml(d, '#f0f0f0', '#333')}</div></section>` : ''}
+          ${d.experience.length ? `<section id="experience" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Experience</h2>${expHtml(d, '#1a1a1a', '#666', '#666')}</section>` : ''}
+          ${d.projects.length ? `<section id="projects" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Projects</h2>${projectsHtml(d, '#fff', '#eee', '#1a1a1a', '#666', '#f5f5f5', '#888')}</section>` : ''}
           ${githubActivityHtml(d, '#fff', '#eee', '#1a1a1a', '#666')}
           ${leetcodeHtml(d, '#fff', '#eee', '#1a1a1a', '#666')}
-          <section id="education" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Education</h2>${eduHtml(d, '#1a1a1a', '#666')}</section>
+          ${d.education.length ? `<section id="education" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Education</h2>${eduHtml(d, '#1a1a1a', '#666')}</section>` : ''}
           ${d.volunteering.length ? `<section id="volunteering" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Volunteering</h2>${volHtml(d, '#1a1a1a', '#666', '#666')}</section>` : ''}
           ${contactSection(d, '#fafafa', '#666', '#1a1a1a')}
         </div></div>`);
@@ -316,12 +327,12 @@ function generateGenericTheme(themeId: string, d: PortfolioData): string {
       <p style="color:${!isDark && headerIsGradient ? 'rgba(255,255,255,.7)' : descColor};margin-top:12px;max-width:500px;margin-left:auto;margin-right:auto">${d.bio}</p>
     </div>
     <div style="max-width:800px;margin:0 auto;padding:40px 24px">
-      <section id="skills" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Skills</h2><div>${skillsHtml(d, cfg.skillBg, cfg.skillColor, cfg.cardBorder)}</div></section>
-      <section id="experience" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Experience</h2>${expHtml(d, cfg.text, cfg.accent, descColor)}</section>
-      <section id="projects" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, cfg.cardBg, cfg.cardBorder, cfg.text, descColor, cfg.tagBg, cfg.tagColor)}</section>
+      ${d.skills.length ? `<section id="skills" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Skills</h2><div>${skillsHtml(d, cfg.skillBg, cfg.skillColor, cfg.cardBorder)}</div></section>` : ''}
+      ${d.experience.length ? `<section id="experience" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Experience</h2>${expHtml(d, cfg.text, cfg.accent, descColor)}</section>` : ''}
+      ${d.projects.length ? `<section id="projects" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, cfg.cardBg, cfg.cardBorder, cfg.text, descColor, cfg.tagBg, cfg.tagColor)}</section>` : ''}
       ${githubActivityHtml(d, cfg.cardBg, cfg.cardBorder, cfg.accent, descColor)}
       ${leetcodeHtml(d, cfg.cardBg, cfg.cardBorder, cfg.accent, descColor)}
-      <section id="education" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Education</h2>${eduHtml(d, cfg.text, cfg.accent)}</section>
+      ${d.education.length ? `<section id="education" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Education</h2>${eduHtml(d, cfg.text, cfg.accent)}</section>` : ''}
       ${contactSection(d, cfg.bg, descColor, cfg.accent)}
     </div></div>`);
 }
