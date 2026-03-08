@@ -320,6 +320,7 @@ function generateGenericTheme(themeId: string, d: PortfolioData): string {
       <section id="experience" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Experience</h2>${expHtml(d, cfg.text, cfg.accent, descColor)}</section>
       <section id="projects" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, cfg.cardBg, cfg.cardBorder, cfg.text, descColor, cfg.tagBg, cfg.tagColor)}</section>
       ${githubActivityHtml(d, cfg.cardBg, cfg.cardBorder, cfg.accent, descColor)}
+      ${leetcodeHtml(d, cfg.cardBg, cfg.cardBorder, cfg.accent, descColor)}
       <section id="education" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Education</h2>${eduHtml(d, cfg.text, cfg.accent)}</section>
       ${contactSection(d, cfg.bg, descColor, cfg.accent)}
     </div></div>`);
