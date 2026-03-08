@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
 import RecruiterAnalysisPanel from "@/components/RecruiterAnalysisPanel";
 import TechStackInput from "@/components/TechStackInput";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AtsScore {
   overall: number;
@@ -35,12 +36,13 @@ interface LeetcodeInsights {
 const PreviewPage = () => {
   const { themeId } = useParams<{ themeId: string }>();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<"desktop" | "mobile" | "fullscreen">("desktop");
   const [showEditor, setShowEditor] = useState(false);
   const [inlineEditing, setInlineEditing] = useState(false);
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [editableHtml, setEditableHtml] = useState("");
-  const [cleanHtml, setCleanHtml] = useState(""); // HTML without editor artifacts
+  const [cleanHtml, setCleanHtml] = useState("");
   const [finalized, setFinalized] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -67,7 +69,6 @@ const PreviewPage = () => {
     }
   }, [themeId, portfolioData]);
 
-  // Listen for postMessage from inline editor
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === '__editor_update') {
@@ -78,7 +79,6 @@ const PreviewPage = () => {
     return () => window.removeEventListener('message', handler);
   }, []);
 
-  // Auto-trigger analysis for recruiter theme
   useEffect(() => {
     if (isRecruiter && portfolioData && !analysis && !isAnalyzing) {
       runAnalysis();
@@ -96,11 +96,7 @@ const PreviewPage = () => {
       if (data?.error) throw new Error(data.error);
       setAnalysis(data as CandidateAnalysis);
     } catch (e: any) {
-      toast({
-        title: "Analysis Failed",
-        description: e.message || "Could not generate candidate analysis.",
-        variant: "destructive",
-      });
+      toast({ title: "Analysis Failed", description: e.message || "Could not generate candidate analysis.", variant: "destructive" });
     } finally {
       setIsAnalyzing(false);
     }
@@ -116,10 +112,7 @@ const PreviewPage = () => {
     a.download = `${sanitizedName}-recruiter-report.html`;
     a.click();
     URL.revokeObjectURL(url);
-    toast({
-      title: "Report Downloaded",
-      description: "Open the HTML file in any browser to view or print as PDF.",
-    });
+    toast({ title: "Report Downloaded", description: "Open the HTML file in any browser to view or print as PDF." });
   };
 
   const updateField = (field: keyof PortfolioData, value: any) => {
@@ -164,15 +157,11 @@ const PreviewPage = () => {
     a.download = `${sanitizedName}-source.html`;
     a.click();
     URL.revokeObjectURL(url);
-    toast({
-      title: "Source Code Downloaded",
-      description: `Open "${sanitizedName}-source.html" in any code editor to customize further.`,
-    });
+    toast({ title: "Source Code Downloaded", description: `Open "${sanitizedName}-source.html" in any code editor to customize further.` });
   };
 
   const handleFinalize = () => {
     if (inlineEditing) {
-      // Apply inline edits back to the main HTML
       setEditableHtml(cleanHtml);
       setInlineEditing(false);
     }
@@ -185,25 +174,17 @@ const PreviewPage = () => {
     a.download = `${sanitizedName}.html`;
     a.click();
     URL.revokeObjectURL(url);
-    toast({
-      title: "Portfolio Finalized",
-      description: `Your edits have been saved and "${sanitizedName}.html" has been downloaded.`,
-    });
+    toast({ title: "Portfolio Finalized", description: `Your edits have been saved and "${sanitizedName}.html" has been downloaded.` });
   };
 
   const toggleInlineEditor = () => {
     if (!inlineEditing) {
-      // Enter inline editing mode
       setInlineEditing(true);
-      setShowEditor(false); // hide panel editor
+      setShowEditor(false);
     } else {
-      // Exit inline editing, apply changes
       setEditableHtml(cleanHtml);
       setInlineEditing(false);
-      toast({
-        title: "Edits Applied",
-        description: "Your inline changes have been saved to the preview.",
-      });
+      toast({ title: "Edits Applied", description: "Your inline changes have been saved to the preview." });
     }
   };
 
@@ -252,7 +233,6 @@ const PreviewPage = () => {
     updateField("skills", portfolioData.skills.filter((_, idx) => idx !== i));
   };
 
-
   if (viewMode === "fullscreen") {
     return (
       <div className="fixed inset-0 z-50 bg-background">
@@ -270,52 +250,56 @@ const PreviewPage = () => {
       <Navbar />
       <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
       
-      <div className="pt-24 pb-16 container mx-auto px-4">
+      <div className="pt-20 pb-16 container mx-auto px-4">
         {/* Top bar */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6 flex-wrap gap-4">
-          <div className="flex items-center gap-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Button variant="ghost" size="sm" asChild>
               <Link to="/themes"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Link>
             </Button>
-            <h1 className="font-display text-xl font-bold text-foreground">
-              {portfolioData?.name || "Preview"} — <span className="capitalize text-primary">{themeId}</span>
+            <h1 className="font-display text-lg sm:text-xl font-bold text-foreground">
+              {portfolioData?.name || "Preview"} <span className="capitalize text-primary">{themeId}</span>
             </h1>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {!isRecruiter && (
               <>
-                <div className="flex bg-secondary rounded-lg p-1">
-                  <button onClick={() => setViewMode("desktop")} className={`p-2 rounded-md transition-colors ${viewMode === "desktop" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}><Monitor className="w-4 h-4" /></button>
-                  <button onClick={() => setViewMode("mobile")} className={`p-2 rounded-md transition-colors ${viewMode === "mobile" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}><Smartphone className="w-4 h-4" /></button>
-                  <button onClick={() => setViewMode("fullscreen")} className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"><Maximize className="w-4 h-4" /></button>
-                </div>
-                {!inlineEditing && (
+                {!isMobile && (
+                  <div className="flex bg-secondary rounded-lg p-1">
+                    <button onClick={() => setViewMode("desktop")} className={`p-2 rounded-md transition-colors ${viewMode === "desktop" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}><Monitor className="w-4 h-4" /></button>
+                    <button onClick={() => setViewMode("mobile")} className={`p-2 rounded-md transition-colors ${viewMode === "mobile" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}><Smartphone className="w-4 h-4" /></button>
+                    <button onClick={() => setViewMode("fullscreen")} className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"><Maximize className="w-4 h-4" /></button>
+                  </div>
+                )}
+                {!isMobile && !inlineEditing && (
                   <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
-                    <Pencil className="w-4 h-4 mr-1" /> {showEditor ? "Hide Editor" : "Edit Content"}
+                    <Pencil className="w-4 h-4 mr-1" /> {showEditor ? "Hide" : "Edit"}
                   </Button>
                 )}
                 <Button variant={inlineEditing ? "default" : "outline"} size="sm" onClick={toggleInlineEditor}>
-                  {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Editor</> : <><Edit3 className="w-4 h-4 mr-1" /> Open in Editor</>}
+                  {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit</> : <><Edit3 className="w-4 h-4 mr-1" /> Editor</>}
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleDownloadCode}>
-                  <Code className="w-4 h-4 mr-1" /> Download Code
-                </Button>
+                {!isMobile && (
+                  <Button variant="outline" size="sm" onClick={handleDownloadCode}>
+                    <Code className="w-4 h-4 mr-1" /> Code
+                  </Button>
+                )}
                 <Button variant="cta" size="sm" onClick={handleFinalize}>
-                  <Check className="w-4 h-4 mr-1" /> {inlineEditing ? "Finalize Website" : "Finalize & Download"}
+                  <Check className="w-4 h-4 mr-1" /> {isMobile ? "Download" : "Finalize"}
                 </Button>
               </>
             )}
             {isRecruiter && (
               <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!analysis}>
-                <FileText className="w-4 h-4 mr-1" /> Download Report
+                <FileText className="w-4 h-4 mr-1" /> Report
               </Button>
             )}
           </div>
         </motion.div>
 
-        <div className={`flex gap-4 ${showEditor ? '' : 'justify-center'}`}>
-          {/* Visual Editor Panel */}
-          {showEditor && portfolioData && (
+        <div className={`flex gap-4 ${showEditor && !isMobile ? '' : 'justify-center'}`}>
+          {/* Visual Editor Panel - hidden on mobile */}
+          {showEditor && portfolioData && !isMobile && (
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -438,10 +422,10 @@ const PreviewPage = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className={showEditor ? "flex-1 min-w-0" : "w-full max-w-5xl"}
+            className={showEditor && !isMobile ? "flex-1 min-w-0" : "w-full max-w-5xl"}
           >
             <div className={`bg-card rounded-2xl shadow-card-hover overflow-hidden transition-all duration-500 ${
-              viewMode === "mobile" ? "w-[390px] h-[844px] mx-auto" : "w-full h-[80vh]"
+              viewMode === "mobile" && !isMobile ? "w-[390px] h-[844px] mx-auto" : "w-full h-[80vh]"
             }`}>
               <div className="bg-secondary/50 px-4 py-2 flex items-center gap-2 border-b border-border">
                 <div className="flex gap-1.5">
@@ -449,8 +433,8 @@ const PreviewPage = () => {
                   <div className="w-3 h-3 rounded-full bg-accent/60" />
                   <div className="w-3 h-3 rounded-full bg-primary/40" />
                 </div>
-                <div className="flex-1 text-center text-xs text-muted-foreground font-body">
-                  {sanitizedName}.html {inlineEditing && <span className="text-primary font-semibold ml-1">- Editing Mode</span>}
+                <div className="flex-1 text-center text-xs text-muted-foreground font-body truncate">
+                  {sanitizedName}.html {inlineEditing && <span className="text-primary font-semibold ml-1">Editing</span>}
                 </div>
               </div>
               <iframe
@@ -500,7 +484,7 @@ const PreviewPage = () => {
           >
             <p className="font-display font-semibold text-foreground">Portfolio Finalized</p>
             <p className="text-sm text-muted-foreground mt-1">Your file <code className="bg-secondary px-1.5 py-0.5 rounded text-xs">{sanitizedName}.html</code> has been downloaded.</p>
-            <div className="flex gap-2 justify-center mt-3">
+            <div className="flex gap-2 justify-center mt-3 flex-wrap">
               <Button variant="outline" size="sm" onClick={handleDownload}><Download className="w-4 h-4 mr-1" /> Download Again</Button>
               <Button variant="outline" size="sm" onClick={handleOpenInVSCode}><Code className="w-4 h-4 mr-1" /> Open in VS Code</Button>
             </div>

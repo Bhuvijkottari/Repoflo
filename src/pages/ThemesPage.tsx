@@ -92,7 +92,7 @@ const ThemesPage = () => {
           <p className="text-muted-foreground font-body">20+ themes — each fully responsive with animations and clickable nav.</p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 max-w-6xl mx-auto mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 max-w-6xl mx-auto mb-12">
           {themes.map((theme, i) => (
             <motion.div
               key={theme.id}
