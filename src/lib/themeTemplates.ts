@@ -105,21 +105,77 @@ const responsiveStyles = `
 `;
 
 const baseStyle = `*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}img{max-width:100%}a{transition:all .3s ease}a:hover{opacity:.85}
-/* Scroll animations */
-.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}.reveal.visible{opacity:1;transform:translateY(0)}
+/* Scroll reveal animations with stagger */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-40px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(40px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}.reveal-right.visible{opacity:1;transform:translateX(0)}
+.reveal-scale{opacity:0;transform:scale(.9);transition:opacity .7s ease,transform .7s cubic-bezier(.16,1,.3,1)}.reveal-scale.visible{opacity:1;transform:scale(1)}
+/* Stagger delays */
+.stagger-1{transition-delay:.1s}.stagger-2{transition-delay:.2s}.stagger-3{transition-delay:.3s}.stagger-4{transition-delay:.4s}.stagger-5{transition-delay:.5s}
 /* Skill hover */
-.skill-tag{transition:transform .2s,box-shadow .2s;cursor:default}.skill-tag:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.skill-tag{transition:transform .2s,box-shadow .2s,background .3s;cursor:default}.skill-tag:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 6px 20px rgba(0,0,0,.12)}
 /* Card hover */
-.project-card{transition:transform .3s,box-shadow .3s}.project-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+.project-card{transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s ease}.project-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(0,0,0,.15)}
 /* Animated skill bar */
-.skill-bar{height:6px;border-radius:3px;overflow:hidden;background:rgba(128,128,128,.15)}.skill-bar-fill{height:100%;border-radius:3px;transition:width 1.2s ease}
+.skill-bar{height:6px;border-radius:3px;overflow:hidden;background:rgba(128,128,128,.15)}.skill-bar-fill{height:100%;border-radius:3px;width:0;transition:width 1.5s cubic-bezier(.16,1,.3,1)}.skill-bar-fill.visible{width:var(--bar-width)}
 /* Avatar pulse */
-.avatar-ring{animation:pulse-ring 2s ease-in-out infinite}
-@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.3)}50%{box-shadow:0 0 0 12px rgba(99,102,241,0)}}
+.avatar-ring{animation:pulse-ring 2.5s ease-in-out infinite}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)}50%{box-shadow:0 0 0 16px rgba(99,102,241,0)}}
+/* Smooth section divider */
+.section-divider{width:60px;height:3px;border-radius:3px;margin:0 auto 24px;opacity:.6;transition:width .6s ease}.section-divider:hover{width:100px}
+/* Typing cursor effect */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.cursor-blink::after{content:'|';animation:blink 1s step-end infinite;margin-left:2px}
+/* Smooth counter animation */
+.counter{display:inline-block;transition:transform .3s ease}.counter:hover{transform:scale(1.1)}
+/* Nav active indicator */
+nav a{position:relative}nav a::after{content:'';position:absolute;bottom:-2px;left:50%;width:0;height:2px;transition:all .3s ease;transform:translateX(-50%)}nav a:hover::after{width:80%}
+/* Parallax-like scroll effect on hero */
+.hero-parallax{transition:transform .1s linear}
 ${responsiveStyles}
 `;
 
-const scrollScript = `<script>document.addEventListener('DOMContentLoaded',()=>{const r=document.querySelectorAll('.reveal');const o=new IntersectionObserver((e)=>{e.forEach(i=>{if(i.isIntersecting){i.target.classList.add('visible');o.unobserve(i.target)}})},{threshold:.15});r.forEach(el=>o.observe(el))})</script>`;
+const scrollScript = `<script>document.addEventListener('DOMContentLoaded',()=>{
+  // Reveal animations with stagger
+  const allReveal=document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale');
+  const obs=new IntersectionObserver((entries)=>{
+    entries.forEach((e,i)=>{if(e.isIntersecting){
+      setTimeout(()=>e.target.classList.add('visible'),i*80);
+      obs.unobserve(e.target);
+    }});
+  },{threshold:.1,rootMargin:'0px 0px -50px 0px'});
+  allReveal.forEach(el=>obs.observe(el));
+  
+  // Skill bar animation
+  const bars=document.querySelectorAll('.skill-bar-fill');
+  const barObs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');barObs.unobserve(e.target)}});
+  },{threshold:.5});
+  bars.forEach(b=>barObs.observe(b));
+  
+  // Smooth nav highlight on scroll
+  const sections=document.querySelectorAll('section[id]');
+  const navLinks=document.querySelectorAll('nav a[href^="#"]');
+  window.addEventListener('scroll',()=>{
+    let current='';
+    sections.forEach(s=>{if(window.scrollY>=s.offsetTop-100)current=s.id});
+    navLinks.forEach(l=>{
+      l.style.opacity=l.getAttribute('href')==='#'+current?'1':'.7';
+    });
+  },{passive:true});
+  
+  // Counter animation
+  document.querySelectorAll('.animate-count').forEach(el=>{
+    const target=parseInt(el.dataset.count||'0');
+    const obs2=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){
+      let c=0;const step=Math.max(1,Math.floor(target/40));
+      const timer=setInterval(()=>{c=Math.min(c+step,target);el.textContent=c.toLocaleString();if(c>=target)clearInterval(timer)},30);
+      obs2.unobserve(e.target);
+    }})},{threshold:.5});
+    obs2.observe(el);
+  });
+})</script>`;
+
 
 const wrapTheme = (fontImport: string, fontFamily: string, body: string) =>
   `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.7;font-size:16px}</style></head><body>${body}${scrollScript}</body></html>`;
