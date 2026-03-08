@@ -1,47 +1,103 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
-import { Github, Upload, ArrowRight, FileText, CheckCircle2 } from "lucide-react";
+import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import type { PortfolioData } from "@/lib/mockData";
 
 const GeneratePage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [githubUrl, setGithubUrl] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [status, setStatus] = useState("");
+  const [githubData, setGithubData] = useState<PortfolioData | null>(null);
+  const [githubFetching, setGithubFetching] = useState(false);
+  const [githubError, setGithubError] = useState("");
+
+  // Auto-fetch GitHub data when URL changes
+  useEffect(() => {
+    const match = githubUrl.match(/github\.com\/([^\/\?#]+)/);
+    if (!match) {
+      setGithubData(null);
+      setGithubError("");
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setGithubFetching(true);
+      setGithubError("");
+      try {
+        const { data, error } = await supabase.functions.invoke("fetch-github", {
+          body: { githubUrl },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        setGithubData(data as PortfolioData);
+      } catch (e: any) {
+        setGithubError(e.message || "Failed to fetch GitHub data");
+        setGithubData(null);
+      } finally {
+        setGithubFetching(false);
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [githubUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!githubUrl) return;
+    if (!githubData) return;
     setIsProcessing(true);
 
-    // Simulate AI processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      navigate("/themes", {
-        state: { githubUrl, hasResume: !!resumeFile },
+    try {
+      let finalData = { ...githubData };
+
+      if (resumeFile) {
+        setStatus("Parsing resume with AI...");
+        const formData = new FormData();
+        formData.append("resume", resumeFile);
+        formData.append("githubData", JSON.stringify(githubData));
+
+        const { data, error } = await supabase.functions.invoke("parse-resume", {
+          body: formData,
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        finalData = { ...finalData, ...data, avatar: data.avatar || githubData.avatar, githubStats: githubData.githubStats };
+      }
+
+      setStatus("Data ready! Selecting theme...");
+      
+      // Store portfolio data in sessionStorage for the themes/preview pages
+      sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
+      
+      navigate("/themes");
+    } catch (e: any) {
+      toast({
+        title: "Error processing data",
+        description: e.message || "Something went wrong. Please try again.",
+        variant: "destructive",
       });
-    }, 2000);
+    } finally {
+      setIsProcessing(false);
+      setStatus("");
+    }
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-24 pb-16 container mx-auto px-4 max-w-xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-10"
-        >
-          <h1 className="font-display text-4xl font-bold text-foreground mb-3">
-            Let's Build Your Portfolio
-          </h1>
-          <p className="text-muted-foreground font-body">
-            Provide your GitHub profile and resume — AI does the rest.
-          </p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+          <h1 className="font-display text-4xl font-bold text-foreground mb-3">Let's Build Your Portfolio</h1>
+          <p className="text-muted-foreground font-body">Provide your GitHub profile and resume — AI does the rest.</p>
         </motion.div>
 
         <motion.form
@@ -65,13 +121,38 @@ const GeneratePage = () => {
               required
               className="h-12 text-base"
             />
+            {/* GitHub fetch status */}
+            {githubFetching && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" /> Fetching GitHub profile...
+              </div>
+            )}
+            {githubError && (
+              <div className="flex items-center gap-2 text-sm text-destructive">
+                <AlertCircle className="w-4 h-4" /> {githubError}
+              </div>
+            )}
+            {githubData && !githubFetching && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-3 p-3 bg-secondary/50 rounded-xl"
+              >
+                <img src={githubData.avatar} alt={githubData.name} className="w-12 h-12 rounded-full" />
+                <div>
+                  <p className="font-display font-semibold text-sm text-foreground">{githubData.name}</p>
+                  <p className="text-xs text-muted-foreground">{githubData.title} · {githubData.githubStats?.publicRepos || 0} repos · {githubData.skills.slice(0, 4).join(", ")}</p>
+                </div>
+                <CheckCircle2 className="w-5 h-5 text-primary ml-auto" />
+              </motion.div>
+            )}
           </div>
 
           {/* Resume Upload */}
           <div className="space-y-3">
             <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
               <FileText className="w-5 h-5 text-primary" />
-              Upload Resume (PDF)
+              Upload Resume (PDF) — <span className="text-muted-foreground font-normal text-xs">optional, enriches experience & education</span>
             </Label>
             <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 hover:bg-secondary/30 transition-colors">
               {resumeFile ? (
@@ -88,7 +169,7 @@ const GeneratePage = () => {
               )}
               <input
                 type="file"
-                accept=".pdf,.doc,.docx"
+                accept=".pdf,.doc,.docx,.txt"
                 className="hidden"
                 onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
               />
@@ -100,14 +181,13 @@ const GeneratePage = () => {
             variant="cta"
             size="lg"
             className="w-full rounded-xl py-6 text-lg"
-            disabled={!githubUrl || isProcessing}
+            disabled={!githubData || isProcessing || githubFetching}
           >
             {isProcessing ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
-              />
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>{status || "Processing..."}</span>
+              </div>
             ) : (
               <>
                 Continue to Themes <ArrowRight className="ml-2 w-5 h-5" />
