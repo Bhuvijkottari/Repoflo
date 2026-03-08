@@ -18,7 +18,7 @@ const fadeInUp = {
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-40px" },
-  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+  transition: { duration: 0.6, ease: "easeOut" as const },
 };
 
 const CircularGauge = ({ value, size = 100, strokeWidth = 8, color, label }: { value: number; size?: number; strokeWidth?: number; color: string; label: string }) => {
