@@ -14,10 +14,10 @@ interface Props {
 }
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 20 } as const,
-  whileInView: { opacity: 1, y: 0 } as const,
-  viewport: { once: true, margin: "-40px" } as const,
-  transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as const },
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-40px" },
+  transition: { duration: 0.5 },
 };
 
 const CircularGauge = ({ value, size = 100, strokeWidth = 8, color, label }: { value: number; size?: number; strokeWidth?: number; color: string; label: string }) => {
