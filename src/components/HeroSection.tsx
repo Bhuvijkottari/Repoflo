@@ -46,7 +46,7 @@ const HeroSection = () => {
             transition={{ delay: 0.2 }}
             className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-display font-semibold"
           >
-            <Palette className="w-4 h-4" /> 20+ Themes by ADITHYA & THARUN K SHETTY
+            <Palette className="w-4 h-4" /> Powered by CODEHEXA
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -62,7 +62,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-lg text-muted-foreground max-w-md font-body"
+            className="text-lg text-muted-foreground max-w-md font-body mb-6"
           >
             No coding. No stress. Just results.
           </motion.p>
@@ -70,17 +70,18 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4 pt-4"
+            transition={{ delay: 0.45 }}
+            className="flex justify-center lg:justify-start"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="cta" size="lg" className="rounded-full px-8 py-6 text-lg animate-pulse-glow" asChild>
+              <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-xl animate-pulse-glow" asChild>
                 <Link to="/themes">
                   Get Started <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
             </motion.div>
           </motion.div>
+
 
           <motion.div
             initial={{ opacity: 0 }}
