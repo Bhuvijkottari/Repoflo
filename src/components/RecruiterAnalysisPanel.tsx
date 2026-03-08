@@ -37,7 +37,7 @@ const CircularGauge = ({ value, size = 100, strokeWidth = 8, color, label }: { v
             initial={{ strokeDashoffset: circumference }}
             whileInView={{ strokeDashoffset: offset }}
             viewport={{ once: true }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
+            transition={{ duration: 1.2 }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
