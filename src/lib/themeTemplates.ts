@@ -151,6 +151,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="experience" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Experience</h2>${expHtml(d, '#fff', '#a855f7', '#999')}</section>
           <section id="projects" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Projects</h2>${projectsHtml(d, 'rgba(255,255,255,.05)', 'rgba(255,255,255,.1)', '#fff', '#999', 'rgba(59,130,246,.15)', '#60a5fa')}</section>
           ${githubActivityHtml(d, 'rgba(255,255,255,.05)', 'rgba(255,255,255,.1)', '#a855f7', '#999')}
+          ${leetcodeHtml(d, 'rgba(255,255,255,.05)', 'rgba(255,255,255,.1)', '#a855f7', '#999')}
           <section id="education" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Education</h2>${eduHtml(d, '#fff', '#a855f7')}</section>
           ${contactSection(d, '#0a0a0a', '#999', '#a855f7')}
         </div></div>`);
