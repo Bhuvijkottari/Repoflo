@@ -319,7 +319,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                 )}
               </div>
               {analysis.leetcodeInsights && (
-                <div className="grid md:grid-cols-2 gap-3 mt-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
                   {Object.entries(analysis.leetcodeInsights).map(([key, val]) => (
                     <div key={key} className="bg-secondary/30 rounded-xl p-3 border border-border/50">
                       <span className="text-[10px] font-display font-semibold text-foreground uppercase tracking-wider">
