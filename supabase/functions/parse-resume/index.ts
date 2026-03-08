@@ -28,16 +28,9 @@ serve(async (req) => {
       });
     }
 
-    // Read file as bytes and convert to base64 for AI processing
+    // Read file as bytes and convert to base64 using Deno's encoder (no stack overflow)
     const fileBytes = new Uint8Array(await file.arrayBuffer());
-    // Chunk the conversion to avoid stack overflow on large files
-    let binary = "";
-    const chunkSize = 8192;
-    for (let i = 0; i < fileBytes.length; i += chunkSize) {
-      const chunk = fileBytes.subarray(i, i + chunkSize);
-      binary += String.fromCharCode(...chunk);
-    }
-    const base64Content = btoa(binary);
+    const base64Content = base64Encode(fileBytes);
     
     // Determine MIME type
     const fileName = file.name.toLowerCase();
