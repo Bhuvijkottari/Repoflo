@@ -50,6 +50,7 @@ const PreviewPage = () => {
   const [analysis, setAnalysis] = useState<CandidateAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
+  const [experienceLevel, setExperienceLevel] = useState<string>("");
 
   const isRecruiter = themeId === "recruiter";
 
@@ -57,6 +58,13 @@ const PreviewPage = () => {
     try {
       const stored = sessionStorage.getItem("portfolioData");
       if (stored) setPortfolioData(JSON.parse(stored));
+      // Load recruiter preferences
+      const prefs = sessionStorage.getItem("recruiterPrefs");
+      if (prefs) {
+        const parsed = JSON.parse(prefs);
+        if (parsed.requiredTechStack?.length) setRequiredTechStack(parsed.requiredTechStack);
+        if (parsed.experienceLevel) setExperienceLevel(parsed.experienceLevel);
+      }
     } catch {}
   }, []);
 
@@ -89,7 +97,11 @@ const PreviewPage = () => {
     setIsAnalyzing(true);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-candidate", {
-        body: { portfolioData, requiredTechStack: requiredTechStack.length > 0 ? requiredTechStack : undefined },
+        body: {
+          portfolioData,
+          requiredTechStack: requiredTechStack.length > 0 ? requiredTechStack : undefined,
+          experienceLevel: experienceLevel || undefined,
+        },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);

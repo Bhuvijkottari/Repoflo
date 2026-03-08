@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Loader2, Bot, GitFork, Star, AlertTriangle, TrendingUp, Award, Brain, Target, Zap, Shield, BookOpen, Code2 } from "lucide-react";
+import { Download, Loader2, Bot, GitFork, Star, AlertTriangle, TrendingUp, Award, Brain, Target, Zap, Shield, BookOpen, Code2, Briefcase } from "lucide-react";
 import type { CandidateAnalysis } from "@/lib/generateReport";
 import type { PortfolioData } from "@/lib/mockData";
 
@@ -250,6 +250,31 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                   </div>
                 );
               })()}
+            </motion.div>
+          )}
+
+          {/* Experience Level Match */}
+          {analysis.experienceLevelMatch && (
+            <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
+              <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Briefcase className="w-3.5 h-3.5" /> Experience Level Match
+              </h4>
+              <div className="flex items-center gap-4">
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl ${analysis.experienceLevelMatch.isMatch ? "bg-green-500/15" : "bg-red-500/15"}`}>
+                  {analysis.experienceLevelMatch.isMatch ? "✅" : "⚠️"}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <Badge className={`text-xs font-body ${analysis.experienceLevelMatch.isMatch ? "bg-green-500/15 text-green-700 border-green-400/30" : "bg-red-500/15 text-red-600 border-red-400/30"}`}>
+                      Required: {analysis.experienceLevelMatch.required}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs font-body">
+                      Assessed: {analysis.experienceLevelMatch.assessed}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground font-body leading-relaxed">{analysis.experienceLevelMatch.explanation}</p>
+                </div>
+              </div>
             </motion.div>
           )}
 
