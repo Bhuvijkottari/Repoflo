@@ -98,7 +98,7 @@ const Index = () => {
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-lg" asChild>
-                <Link to="/generate">Start Building Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
+                <Link to="/themes">Start Building Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
               </Button>
             </motion.div>
           </motion.div>
