@@ -11,6 +11,7 @@ interface Props {
   portfolioData: PortfolioData;
   onReanalyze: () => void;
   onDownloadReport: () => void;
+  requiredTechStack?: string[];
 }
 
 const fadeInUp = {
