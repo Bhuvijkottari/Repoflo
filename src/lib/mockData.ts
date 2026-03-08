@@ -1,4 +1,35 @@
-export const mockPortfolioData = {
+export interface PortfolioData {
+  name: string;
+  title: string;
+  bio: string;
+  avatar: string;
+  email: string;
+  location: string;
+  github: string;
+  linkedin: string;
+  website: string;
+  skills: string[];
+  experience: { company: string; role: string; period: string; description: string }[];
+  education: { institution: string; degree: string; period: string }[];
+  volunteering: { org: string; role: string; period: string; description: string }[];
+  projects: { name: string; description: string; tech: string[]; stars: number; link: string }[];
+  githubStats?: {
+    totalCommits: number;
+    publicRepos: number;
+    privateRepos: number;
+    followers: number;
+    following: number;
+    pullRequests: number;
+    pushes: number;
+    daysOnGithub: number;
+    recentCollaborations: string[];
+    aiGeneratedContent: number;
+    topLanguages: { name: string; percentage: number }[];
+    contributionStreak: number;
+  } | null;
+}
+
+export const mockPortfolioData: PortfolioData = {
   name: "Alex Johnson",
   title: "Full Stack Developer",
   bio: "Passionate developer with 4+ years of experience building scalable web applications. Open source contributor and tech blogger.",
