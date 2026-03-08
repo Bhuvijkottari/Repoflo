@@ -93,7 +93,7 @@ const Index = () => {
               <span className="font-display font-bold text-foreground text-sm">Are you a Recruiter?</span>
             </div>
             <p className="text-xs text-muted-foreground font-body mb-3">
-              Try our Recruiter View for Nova powered candidate assessments, GitHub analytics, and evaluation reports.
+              Try our Recruiter View for AI powered candidate assessments, GitHub analytics, and evaluation reports.
             </p>
             <div className="flex gap-2">
               <Button variant="cta" size="sm" className="rounded-full text-xs px-4" asChild>
