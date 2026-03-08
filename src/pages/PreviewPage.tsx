@@ -50,6 +50,7 @@ const PreviewPage = () => {
   const [analysis, setAnalysis] = useState<CandidateAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
+  const [experienceLevel, setExperienceLevel] = useState<string>("");
 
   const isRecruiter = themeId === "recruiter";
 
