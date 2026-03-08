@@ -128,7 +128,7 @@ const ThemesPage = () => {
               </div>
             </div>
             <div className="flex-1 overflow-hidden">
-              <iframe srcDoc={getThemeHtml(previewTheme)} className="w-full h-full border-0" title="Theme Preview" />
+              <iframe srcDoc={getThemeHtml(previewTheme, dummyPreviewData)} className="w-full h-full border-0" title="Theme Preview" />
             </div>
           </motion.div>
         </div>
