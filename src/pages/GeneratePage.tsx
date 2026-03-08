@@ -13,6 +13,7 @@ import type { PortfolioData } from "@/lib/mockData";
 const GeneratePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [githubUrl, setGithubUrl] = useState("");
   const [leetcodeUsername, setLeetcodeUsername] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -24,6 +25,17 @@ const GeneratePage = () => {
   const [leetcodeFetching, setLeetcodeFetching] = useState(false);
   const [leetcodeData, setLeetcodeData] = useState<any>(null);
   const [leetcodeError, setLeetcodeError] = useState("");
+
+  const isRecruiter = selectedTheme === "recruiter";
+
+  useEffect(() => {
+    const theme = sessionStorage.getItem("selectedTheme");
+    if (!theme) {
+      navigate("/themes");
+      return;
+    }
+    setSelectedTheme(theme);
+  }, [navigate]);
 
   // Auto-fetch GitHub data when URL changes
   useEffect(() => {
@@ -51,8 +63,13 @@ const GeneratePage = () => {
     return () => clearTimeout(timer);
   }, [githubUrl]);
 
-  // Auto-fetch LeetCode data when username changes
+  // Auto-fetch LeetCode data when username changes (only for recruiter theme)
   useEffect(() => {
+    if (!isRecruiter) {
+      setLeetcodeData(null);
+      setLeetcodeError("");
+      return;
+    }
     const username = leetcodeUsername.trim();
     if (!username) {
       setLeetcodeData(null);
@@ -75,7 +92,7 @@ const GeneratePage = () => {
       }
     }, 800);
     return () => clearTimeout(timer);
-  }, [leetcodeUsername]);
+  }, [leetcodeUsername, isRecruiter]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,8 +101,8 @@ const GeneratePage = () => {
     try {
       let finalData: PortfolioData = { ...githubData };
 
-      // Attach LeetCode stats if available
-      if (leetcodeData) {
+      // Attach LeetCode stats if available (recruiter only)
+      if (isRecruiter && leetcodeData) {
         finalData.leetcodeStats = leetcodeData;
       }
 
@@ -110,9 +127,9 @@ const GeneratePage = () => {
         finalData = { ...finalData, ...data, avatar: data.avatar || githubData.avatar, githubStats: githubData.githubStats, leetcodeStats: finalData.leetcodeStats };
       }
 
-      setStatus("Data ready! Selecting theme...");
+      setStatus("Generating portfolio...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
-      navigate("/themes");
+      navigate(`/preview/${selectedTheme}`);
     } catch (e: any) {
       toast({ title: "Error processing data", description: e.message || "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
@@ -121,13 +138,20 @@ const GeneratePage = () => {
     }
   };
 
+  if (!selectedTheme) return null;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-24 pb-16 container mx-auto px-4 max-w-xl">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="font-display text-4xl font-bold text-foreground mb-3">Let's Build Your Portfolio</h1>
-          <p className="text-muted-foreground font-body">Provide your GitHub profile and resume — AI does the rest.</p>
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
+            Step 2 of 2 — Theme: <span className="capitalize">{selectedTheme}</span>
+          </div>
+          <h1 className="font-display text-4xl font-bold text-foreground mb-3">Add Your Info</h1>
+          <p className="text-muted-foreground font-body">
+            Provide your GitHub profile{isRecruiter ? ", LeetCode username," : ""} and resume — AI does the rest.
+          </p>
         </motion.div>
 
         <motion.form
@@ -161,34 +185,40 @@ const GeneratePage = () => {
             )}
           </div>
 
-          {/* LeetCode Username */}
-          <div className="space-y-3">
-            <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
-              <Code2 className="w-5 h-5 text-accent" /> LeetCode Username
-              <span className="text-muted-foreground font-normal text-xs ml-1">(optional)</span>
-            </Label>
-            <Input type="text" placeholder="your_leetcode_username" value={leetcodeUsername} onChange={(e) => setLeetcodeUsername(e.target.value)} className="h-12 text-base" />
-            {leetcodeFetching && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Fetching LeetCode profile...</div>
-            )}
-            {leetcodeError && (
-              <div className="flex items-center gap-2 text-sm text-destructive"><AlertCircle className="w-4 h-4" /> {leetcodeError}</div>
-            )}
-            {leetcodeData && !leetcodeFetching && (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 p-3 bg-accent/10 rounded-xl">
-                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Code2 className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <p className="font-display font-semibold text-sm text-foreground">{leetcodeData.username}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {leetcodeData.totalSolved} solved · Easy {leetcodeData.easySolved} · Med {leetcodeData.mediumSolved} · Hard {leetcodeData.hardSolved}
-                  </p>
-                </div>
-                <CheckCircle2 className="w-5 h-5 text-accent ml-auto" />
-              </motion.div>
-            )}
-          </div>
+          {/* LeetCode Username - Only for Recruiter theme */}
+          {isRecruiter && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="space-y-3"
+            >
+              <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
+                <Code2 className="w-5 h-5 text-accent" /> LeetCode Username
+                <span className="text-muted-foreground font-normal text-xs ml-1">(for recruiter analysis)</span>
+              </Label>
+              <Input type="text" placeholder="your_leetcode_username" value={leetcodeUsername} onChange={(e) => setLeetcodeUsername(e.target.value)} className="h-12 text-base" />
+              {leetcodeFetching && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Fetching LeetCode profile...</div>
+              )}
+              {leetcodeError && (
+                <div className="flex items-center gap-2 text-sm text-destructive"><AlertCircle className="w-4 h-4" /> {leetcodeError}</div>
+              )}
+              {leetcodeData && !leetcodeFetching && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 p-3 bg-accent/10 rounded-xl">
+                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                    <Code2 className="w-5 h-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="font-display font-semibold text-sm text-foreground">{leetcodeData.username}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {leetcodeData.totalSolved} solved · Easy {leetcodeData.easySolved} · Med {leetcodeData.mediumSolved} · Hard {leetcodeData.hardSolved}
+                    </p>
+                  </div>
+                  <CheckCircle2 className="w-5 h-5 text-accent ml-auto" />
+                </motion.div>
+              )}
+            </motion.div>
+          )}
 
           {/* Resume Upload */}
           <div className="space-y-3">
@@ -217,7 +247,7 @@ const GeneratePage = () => {
               {isProcessing ? (
                 <div className="flex items-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /><span>{status || "Processing..."}</span></div>
               ) : (
-                <>Generate Your Portfolio <ArrowRight className="ml-2 w-5 h-5" /></>
+                <>Generate Portfolio <ArrowRight className="ml-2 w-5 h-5" /></>
               )}
             </Button>
           </motion.div>

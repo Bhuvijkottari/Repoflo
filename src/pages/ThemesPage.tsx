@@ -51,8 +51,11 @@ const ThemesPage = () => {
   const [selected, setSelected] = useState<string | null>(null);
   const [previewTheme, setPreviewTheme] = useState<string | null>(null);
 
-  const handleGenerate = () => {
-    if (selected) navigate(`/preview/${selected}`);
+  const handleContinue = () => {
+    if (!selected) return;
+    // Store selected theme and go to generate page to collect info
+    sessionStorage.setItem("selectedTheme", selected);
+    navigate("/generate");
   };
 
   return (
@@ -60,8 +63,11 @@ const ThemesPage = () => {
       <Navbar />
       <div className="pt-24 pb-16 container mx-auto px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
+            Step 1 of 2
+          </div>
           <h1 className="font-display text-4xl font-bold text-foreground mb-3">Choose Your Theme</h1>
-          <p className="text-muted-foreground font-body">20+ themes -- each fully responsive with animations and clickable nav.</p>
+          <p className="text-muted-foreground font-body">20+ themes — each fully responsive with animations and clickable nav.</p>
         </motion.div>
 
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 max-w-6xl mx-auto mb-12">
@@ -103,8 +109,8 @@ const ThemesPage = () => {
 
         <div className="text-center">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant="cta" size="lg" className="rounded-full px-12 py-6 text-lg animate-pulse-glow" disabled={!selected} onClick={handleGenerate}>
-              Generate Portfolio <ArrowRight className="ml-2 w-5 h-5" />
+            <Button variant="cta" size="lg" className="rounded-full px-12 py-6 text-lg animate-pulse-glow" disabled={!selected} onClick={handleContinue}>
+              Continue — Add Your Info <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </motion.div>
         </div>
