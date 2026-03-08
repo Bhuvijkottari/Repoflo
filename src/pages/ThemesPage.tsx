@@ -3,31 +3,40 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
-import { Eye, Check, Sparkles, Code, Palette, Crown, Briefcase, Gem, Zap, Waves, Sun, Trees, Cherry, Flower2, Moon, Flame, Snowflake, Coffee, BarChart3, Layers, Diamond, Rocket } from "lucide-react";
+import { Eye, Check, Code, Briefcase } from "lucide-react";
 import { getThemeHtml } from "@/lib/themeTemplates";
+import themeBlue from "@/assets/theme-preview-blue.jpg";
+import themeWarm from "@/assets/theme-preview-warm.jpg";
+import themeDark from "@/assets/theme-preview-dark.jpg";
+import themeGreen from "@/assets/theme-preview-green.jpg";
+import themePink from "@/assets/theme-preview-pink.jpg";
+
+const themeImages: Record<string, string> = {
+  blue: themeBlue, warm: themeWarm, dark: themeDark, green: themeGreen, pink: themePink,
+};
 
 const themes = [
-  { id: "recruiter", name: "Recruiter View", icon: Briefcase, description: "Data-rich dashboard with GitHub analytics, AI detection & detailed stats", gradient: "from-blue-500 to-indigo-600", isRecruiter: true },
-  { id: "minimal", name: "Minimal", icon: Sparkles, description: "Clean, whitespace-focused design with elegant typography", gradient: "from-gray-300 to-gray-500" },
-  { id: "bold", name: "Bold Dark", icon: Crown, description: "Eye-catching dark theme with purple gradients", gradient: "from-purple-600 to-blue-500" },
-  { id: "creative", name: "Creative Warm", icon: Palette, description: "Artistic warm palette with playful layouts", gradient: "from-amber-400 to-orange-500" },
-  { id: "developer", name: "Developer Terminal", icon: Code, description: "Terminal-inspired design for code-first devs", gradient: "from-green-500 to-emerald-700" },
-  { id: "elegant", name: "Elegant Luxe", icon: Gem, description: "Sophisticated dark design with gold accents", gradient: "from-yellow-600 to-amber-800" },
-  { id: "neon", name: "Neon Cyber", icon: Zap, description: "Futuristic neon glows on dark background", gradient: "from-cyan-400 to-pink-500" },
-  { id: "ocean", name: "Ocean Breeze", icon: Waves, description: "Cool ocean blues with fluid layouts", gradient: "from-blue-400 to-teal-500" },
-  { id: "sunset", name: "Sunset Glow", icon: Sun, description: "Warm sunset gradients with soft tones", gradient: "from-orange-400 to-rose-500" },
-  { id: "forest", name: "Forest Green", icon: Trees, description: "Natural earth tones with green accents", gradient: "from-green-600 to-emerald-800" },
-  { id: "cherry", name: "Cherry Blossom", icon: Cherry, description: "Soft pink theme with delicate aesthetics", gradient: "from-rose-500 to-red-700" },
-  { id: "lavender", name: "Lavender Dream", icon: Flower2, description: "Soft violet gradients with calming tones", gradient: "from-violet-400 to-purple-600" },
-  { id: "midnight", name: "Midnight Blue", icon: Moon, description: "Deep midnight blues with starlight accents", gradient: "from-slate-700 to-slate-900" },
-  { id: "coral", name: "Coral Reef", icon: Flame, description: "Vibrant coral and warm red tones", gradient: "from-red-400 to-orange-500" },
-  { id: "arctic", name: "Arctic Frost", icon: Snowflake, description: "Icy cool blues with frosted glass effects", gradient: "from-cyan-200 to-blue-400" },
-  { id: "mocha", name: "Mocha Brown", icon: Coffee, description: "Rich coffee tones with warm contrast", gradient: "from-amber-700 to-yellow-900" },
-  { id: "sakura", name: "Sakura Pink", icon: Flower2, description: "Japanese-inspired soft pink design", gradient: "from-pink-300 to-rose-400" },
-  { id: "graphite", name: "Graphite Steel", icon: BarChart3, description: "Industrial steel gray with sharp edges", gradient: "from-gray-600 to-gray-800" },
-  { id: "emerald", name: "Emerald Luxe", icon: Diamond, description: "Rich emerald greens with gold touches", gradient: "from-emerald-400 to-green-600" },
-  { id: "royal", name: "Royal Purple", icon: Crown, description: "Regal purple tones with luxurious feel", gradient: "from-indigo-500 to-purple-700" },
-  { id: "rocket", name: "Launch Pad", icon: Rocket, description: "Space-inspired dark theme with starry vibes", gradient: "from-indigo-900 to-slate-900" },
+  { id: "recruiter", name: "Recruiter View", description: "Data-rich dashboard with GitHub analytics and AI-powered candidate assessment", image: "blue", isRecruiter: true },
+  { id: "minimal", name: "Minimal", description: "Clean, whitespace-focused design with elegant typography", image: "blue" },
+  { id: "bold", name: "Bold Dark", description: "Eye-catching dark theme with purple gradients", image: "dark" },
+  { id: "creative", name: "Creative Warm", description: "Artistic warm palette with playful layouts", image: "warm" },
+  { id: "developer", name: "Developer Terminal", description: "Terminal-inspired design for code-first devs", image: "green" },
+  { id: "elegant", name: "Elegant Luxe", description: "Sophisticated dark design with gold accents", image: "warm" },
+  { id: "neon", name: "Neon Cyber", description: "Futuristic neon glows on dark background", image: "dark" },
+  { id: "ocean", name: "Ocean Breeze", description: "Cool ocean blues with fluid layouts", image: "blue" },
+  { id: "sunset", name: "Sunset Glow", description: "Warm sunset gradients with soft tones", image: "warm" },
+  { id: "forest", name: "Forest Green", description: "Natural earth tones with green accents", image: "green" },
+  { id: "cherry", name: "Cherry Blossom", description: "Soft pink theme with delicate aesthetics", image: "pink" },
+  { id: "lavender", name: "Lavender Dream", description: "Soft violet gradients with calming tones", image: "pink" },
+  { id: "midnight", name: "Midnight Blue", description: "Deep midnight blues with starlight accents", image: "dark" },
+  { id: "coral", name: "Coral Reef", description: "Vibrant coral and warm red tones", image: "warm" },
+  { id: "arctic", name: "Arctic Frost", description: "Icy cool blues with frosted glass effects", image: "blue" },
+  { id: "mocha", name: "Mocha Brown", description: "Rich coffee tones with warm contrast", image: "warm" },
+  { id: "sakura", name: "Sakura Pink", description: "Japanese-inspired soft pink design", image: "pink" },
+  { id: "graphite", name: "Graphite Steel", description: "Industrial steel gray with sharp edges", image: "dark" },
+  { id: "emerald", name: "Emerald Luxe", description: "Rich emerald greens with gold touches", image: "green" },
+  { id: "royal", name: "Royal Purple", description: "Regal purple tones with luxurious feel", image: "dark" },
+  { id: "rocket", name: "Launch Pad", description: "Space-inspired dark theme with starry vibes", image: "dark" },
 ];
 
 const ThemesPage = () => {
@@ -36,9 +45,7 @@ const ThemesPage = () => {
   const [previewTheme, setPreviewTheme] = useState<string | null>(null);
 
   const handleGenerate = () => {
-    if (selected) {
-      navigate(`/preview/${selected}`);
-    }
+    if (selected) navigate(`/preview/${selected}`);
   };
 
   return (
@@ -47,7 +54,7 @@ const ThemesPage = () => {
       <div className="pt-24 pb-16 container mx-auto px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
           <h1 className="font-display text-4xl font-bold text-foreground mb-3">Choose Your Theme</h1>
-          <p className="text-muted-foreground font-body">20+ themes — each fully responsive with animations & clickable nav.</p>
+          <p className="text-muted-foreground font-body">20+ themes -- each fully responsive with animations and clickable nav.</p>
         </motion.div>
 
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 max-w-6xl mx-auto mb-12">
@@ -62,8 +69,10 @@ const ThemesPage = () => {
                 selected === theme.id ? "border-primary shadow-glow" : "border-transparent hover:shadow-card-hover"
               } ${theme.isRecruiter ? "ring-2 ring-accent/40" : ""}`}
             >
-              {/* Gradient preview bar */}
-              <div className={`h-20 bg-gradient-to-br ${theme.gradient}`} />
+              {/* Theme image preview */}
+              <div className="h-20 overflow-hidden">
+                <img src={themeImages[theme.image]} alt={theme.name} className="w-full h-full object-cover" />
+              </div>
 
               {selected === theme.id && (
                 <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
@@ -71,14 +80,13 @@ const ThemesPage = () => {
                 </div>
               )}
               {theme.isRecruiter && (
-                <span className="absolute top-2 left-2 text-xs font-display font-semibold bg-background/90 text-accent px-2 py-0.5 rounded-full">
-                  For Recruiters
+                <span className="absolute top-2 left-2 text-xs font-display font-semibold bg-background/90 text-accent px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Briefcase className="w-3 h-3" /> For Recruiters
                 </span>
               )}
 
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <theme.icon className="w-5 h-5 text-primary" />
                   <h3 className="font-display font-semibold text-foreground">{theme.name}</h3>
                 </div>
                 <p className="text-xs text-muted-foreground font-body mb-4">{theme.description}</p>
