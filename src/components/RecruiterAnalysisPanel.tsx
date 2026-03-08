@@ -118,24 +118,22 @@ const LeetCodeDonut = ({ easy, medium, hard }: { easy: number; medium: number; h
   );
 };
 
-const badgeColor = (rec: string) => {
-  switch (rec) {
-    case "STRONG_HIRE": return "bg-green-600 text-white";
-    case "HIRE": return "bg-blue-600 text-white";
-    case "CONSIDER": return "bg-amber-500 text-white";
-    case "PASS": return "bg-red-600 text-white";
-    default: return "bg-muted text-foreground";
-  }
+const verdictColor = (score: number) => {
+  if (score >= 90) return "bg-green-600 text-white";
+  if (score >= 80) return "bg-green-500 text-white";
+  if (score >= 70) return "bg-blue-600 text-white";
+  if (score >= 60) return "bg-amber-500 text-white";
+  if (score >= 50) return "bg-orange-500 text-white";
+  return "bg-red-600 text-white";
 };
 
-const recEmoji = (rec: string) => {
-  switch (rec) {
-    case "STRONG_HIRE": return "🟢";
-    case "HIRE": return "🔵";
-    case "CONSIDER": return "🟡";
-    case "PASS": return "🔴";
-    default: return "⚪";
-  }
+const verdictEmoji = (score: number) => {
+  if (score >= 90) return "🌟";
+  if (score >= 80) return "🟢";
+  if (score >= 70) return "🔵";
+  if (score >= 60) return "🟡";
+  if (score >= 50) return "🟠";
+  return "🔴";
 };
 
 const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanalyze, onDownloadReport, requiredTechStack = [] }: Props) => {
