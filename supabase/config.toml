@@ -1,1 +1,7 @@
 project_id = "tojouxiwpgezwrfswapk"
+
+[functions.fetch-github]
+verify_jwt = false
+
+[functions.parse-resume]
+verify_jwt = false
