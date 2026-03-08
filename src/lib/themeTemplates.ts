@@ -10,11 +10,11 @@ const getPortfolioData = (): PortfolioData => {
   return mockPortfolioData;
 };
 
-// Shared navbar generator for all themes
-const nav = (bg: string, text: string, accent: string, links: string[] = ["About", "Skills", "Experience", "Projects", "Education", "Contact"]) =>
+// Shared navbar generator for all themes - with functional smooth scroll JS
+const nav = (bg: string, text: string, accent: string, personName: string, links: string[] = ["About", "Skills", "Experience", "Projects", "Education", "Contact"]) =>
   `<nav style="position:sticky;top:0;z-index:100;background:${bg};padding:12px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px)">
-    <span style="font-weight:700;font-size:1.1rem;color:${accent}">${getPortfolioData().name.split(' ')[0]}</span>
-    <div style="display:flex;gap:16px">${links.map(l => `<a href="#${l.toLowerCase()}" style="color:${text};text-decoration:none;font-size:.85rem;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
+    <a href="#about" style="font-weight:700;font-size:1.1rem;color:${accent};text-decoration:none;cursor:pointer">${personName.split(' ')[0]}</a>
+    <div style="display:flex;gap:16px">${links.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.85rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
   </nav>`;
 
 // Shared sections generator
