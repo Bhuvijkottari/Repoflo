@@ -117,8 +117,7 @@ const Index = () => {
             <span className="font-display font-bold text-foreground">Repoflow</span>
           </div>
           <p className="text-sm text-muted-foreground font-body mb-2">
-            20+ Themes Developed by <span className="font-semibold text-foreground">ADITHYA</span> and{" "}
-            <span className="font-semibold text-foreground">THARUN K SHETTY</span>
+            Powered by <span className="font-semibold text-foreground">CODEHEXA</span>
           </p>
           <p className="text-xs text-muted-foreground font-body flex items-center justify-center gap-1">
             <Shield className="w-3 h-3" /> 2026 Repoflow. All Rights Reserved.

@@ -62,10 +62,25 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-lg text-muted-foreground max-w-md font-body"
+            className="text-lg text-muted-foreground max-w-md font-body mb-6"
           >
             No coding. No stress. Just results.
           </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="flex justify-center lg:justify-start"
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-xl animate-pulse-glow" asChild>
+                <Link to="/themes">
+                  Get Started <ArrowRight className="ml-2 w-5 h-5" />
+                </Link>
+              </Button>
+            </motion.div>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
