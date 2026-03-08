@@ -175,6 +175,24 @@ IMPORTANT: Return ONLY valid JSON, no markdown, no explanation.`;
     }
 
     const github = parsedGithub as any;
+
+    // Name matching validation: check if GitHub name and resume name share at least one word
+    const githubName = (github.name || "").toLowerCase().trim();
+    const resumeName = (parsed.name || "").toLowerCase().trim();
+    if (githubName && resumeName) {
+      const githubWords = githubName.split(/\s+/).filter((w: string) => w.length > 1);
+      const resumeWords = resumeName.split(/\s+/).filter((w: string) => w.length > 1);
+      const hasMatch = githubWords.some((gw: string) => resumeWords.some((rw: string) => gw === rw || gw.includes(rw) || rw.includes(gw)));
+      if (!hasMatch) {
+        return new Response(JSON.stringify({ 
+          error: `Name mismatch detected. GitHub profile name "${github.name}" does not match resume name "${parsed.name}". Please ensure the resume belongs to the same person as the GitHub profile.`
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const result = {
       name: parsed.name || github.name || "Developer",
       title: parsed.title || github.title || "Software Developer",

@@ -25,13 +25,27 @@ const expHtml = (d: PortfolioData, roleColor: string, companyColor: string, desc
   d.experience.length ? d.experience.map(e => `<div style="margin-bottom:24px"><div style="font-weight:600;font-size:1.05rem;color:${roleColor}">${e.role}</div><div style="color:${companyColor}">${e.company}</div><div style="color:#999;font-size:.85rem">${e.period}</div><p style="color:${descColor};font-size:.9rem;margin-top:4px">${e.description}</p></div>`).join('') : `<p style="color:${descColor};font-size:.9rem">No experience data available. Add a resume to include this section.</p>`;
 
 const projectsHtml = (d: PortfolioData, cardBg: string, cardBorder: string, nameColor: string, descColor: string, tagBg: string, tagColor: string) =>
-  d.projects.map(p => `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:20px;margin-bottom:12px"><div style="font-weight:600;color:${nameColor};margin-bottom:4px">${p.name} ${p.stars ? `<span style="color:#f59e0b;font-size:.85rem">★ ${p.stars}</span>` : ''}</div><p style="color:${descColor};font-size:.9rem;margin-bottom:8px">${p.description}</p><div>${p.tech.map(t => `<span style="display:inline-block;background:${tagBg};color:${tagColor};padding:2px 8px;border-radius:4px;font-size:.75rem;margin:2px">${t}</span>`).join('')}</div></div>`).join('');
+  d.projects.map(p => `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:20px;margin-bottom:12px"><div style="font-weight:600;color:${nameColor};margin-bottom:4px">${p.link ? `<a href="${p.link}" target="_blank" style="color:${nameColor};text-decoration:none">${p.name}</a>` : p.name} ${p.stars ? `<span style="color:#f59e0b;font-size:.85rem">★ ${p.stars}</span>` : ''}</div><p style="color:${descColor};font-size:.9rem;margin-bottom:8px">${p.description}</p><div>${p.tech.map(t => `<span style="display:inline-block;background:${tagBg};color:${tagColor};padding:2px 8px;border-radius:4px;font-size:.75rem;margin:2px">${t}</span>`).join('')}</div>${p.link ? `<a href="${p.link}" target="_blank" style="display:inline-block;margin-top:8px;font-size:.8rem;color:${tagColor};text-decoration:none">View on GitHub →</a>` : ''}</div>`).join('');
 
 const eduHtml = (d: PortfolioData, roleColor: string, instColor: string) =>
   d.education.length ? d.education.map(e => `<div style="margin-bottom:20px"><div style="font-weight:600;color:${roleColor}">${e.degree}</div><div style="color:${instColor}">${e.institution}</div><div style="color:#999;font-size:.85rem">${e.period}</div></div>`).join('') : `<p style="color:${instColor};font-size:.9rem">No education data available.</p>`;
 
 const volHtml = (d: PortfolioData, roleColor: string, orgColor: string, descColor: string) =>
   d.volunteering.length ? d.volunteering.map(v => `<div style="margin-bottom:20px"><div style="font-weight:600;color:${roleColor}">${v.role}</div><div style="color:${orgColor}">${v.org}</div><div style="color:#999;font-size:.85rem">${v.period}</div><p style="color:${descColor};font-size:.9rem;margin-top:4px">${v.description}</p></div>`).join('') : '';
+
+const githubActivityHtml = (d: PortfolioData, cardBg: string, cardBorder: string, accentColor: string, descColor: string) => {
+  const s = d.githubStats;
+  if (!s) return '';
+  return `<section id="github" style="margin:48px 0"><h2 style="color:${accentColor};font-size:1.4rem;font-weight:600;margin-bottom:20px">GitHub Activity</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+    ${[[s.totalCommits.toLocaleString(),'Commits'],[s.publicRepos,'Repos'],[s.followers.toLocaleString(),'Followers'],[s.pullRequests,'PRs'],
+      [`${Math.floor(s.daysOnGithub/365)}y ${s.daysOnGithub%365}d`,'On GitHub']].map(([v,l]) =>
+      `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:${accentColor}">${v}</div><div style="font-size:.7rem;color:${descColor};text-transform:uppercase;letter-spacing:1px;margin-top:2px">${l}</div></div>`).join('')}
+  </div>
+  ${s.topLanguages.length ? `<div style="display:flex;border-radius:8px;overflow:hidden;height:22px;margin-bottom:16px">${s.topLanguages.map((l,i) => `<div style="width:${l.percentage}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;background:${['#6366f1','#f59e0b','#10b981','#ef4444'][i]}">${l.name} ${l.percentage}%</div>`).join('')}</div>` : ''}
+  ${s.recentCollaborations.length ? `<p style="font-size:.85rem;color:${descColor};margin-top:8px">Recent collaborations: ${s.recentCollaborations.join(', ')}</p>` : ''}
+  </section>`;
+};
 
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
   `<section id="contact" style="padding:48px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:16px">Contact</h2>
@@ -98,6 +112,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Skills</h2><div>${skillsHtml(d, '#f0f0f0', '#333')}</div></section>
           <section id="experience" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Experience</h2>${expHtml(d, '#1a1a1a', '#666', '#666')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Projects</h2>${projectsHtml(d, '#fff', '#eee', '#1a1a1a', '#666', '#f5f5f5', '#888')}</section>
+          ${githubActivityHtml(d, '#fff', '#eee', '#1a1a1a', '#666')}
           <section id="education" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Education</h2>${eduHtml(d, '#1a1a1a', '#666')}</section>
           ${d.volunteering.length ? `<section id="volunteering" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Volunteering</h2>${volHtml(d, '#1a1a1a', '#666', '#666')}</section>` : ''}
           ${contactSection(d, '#fafafa', '#666', '#1a1a1a')}
@@ -116,6 +131,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Skills</h2><div>${skillsHtml(d, 'rgba(168,85,247,.15)', '#c084fc', 'rgba(168,85,247,.3)')}</div></section>
           <section id="experience" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Experience</h2>${expHtml(d, '#fff', '#a855f7', '#999')}</section>
           <section id="projects" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Projects</h2>${projectsHtml(d, 'rgba(255,255,255,.05)', 'rgba(255,255,255,.1)', '#fff', '#999', 'rgba(59,130,246,.15)', '#60a5fa')}</section>
+          ${githubActivityHtml(d, 'rgba(255,255,255,.05)', 'rgba(255,255,255,.1)', '#a855f7', '#999')}
           <section id="education" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Education</h2>${eduHtml(d, '#fff', '#a855f7')}</section>
           ${contactSection(d, '#0a0a0a', '#999', '#a855f7')}
         </div></div>`);
@@ -132,6 +148,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">~ Skills ~</h2><div>${skillsHtml(d, '#fde68a', '#92400e')}</div></section>
           <section id="experience" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">~ Experience ~</h2>${expHtml(d, '#2d1b00', '#d97706', '#666')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">~ Projects ~</h2>${projectsHtml(d, '#fff', '#fed7aa', '#2d1b00', '#666', '#fff7ed', '#ea580c')}</section>
+          ${githubActivityHtml(d, '#fff', '#fed7aa', '#92400e', '#666')}
           <section id="education" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">~ Education ~</h2>${eduHtml(d, '#2d1b00', '#d97706')}</section>
           ${contactSection(d, '#fef7ed', '#666', '#f97316')}
         </div></div>`);
@@ -150,6 +167,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <h2 id="skills" style="color:#89b4fa;font-size:1.3rem;margin:32px 0 16px;padding-bottom:4px;border-bottom:1px solid #313244">$ skills --list</h2><div>${skillsHtml(d, '#313244', '#a6e3a1')}</div>
           <h2 id="experience" style="color:#89b4fa;font-size:1.3rem;margin:32px 0 16px;padding-bottom:4px;border-bottom:1px solid #313244">$ experience --all</h2>${expHtml(d, '#f9e2af', '#cba6f7', '#a6adc8')}
           <h2 id="projects" style="color:#89b4fa;font-size:1.3rem;margin:32px 0 16px;padding-bottom:4px;border-bottom:1px solid #313244">$ projects --show</h2>${projectsHtml(d, '#181825', '#313244', '#f9e2af', '#a6adc8', '#1e1e2e', '#89b4fa')}
+          ${githubActivityHtml(d, '#181825', '#313244', '#89b4fa', '#a6adc8')}
           <h2 style="color:#89b4fa;font-size:1.3rem;margin:32px 0 16px;padding-bottom:4px;border-bottom:1px solid #313244">$ education</h2>${eduHtml(d, '#f9e2af', '#cba6f7')}
           ${contactSection(d, '#1e1e2e', '#a6adc8', '#cba6f7')}
         </div></div>`);
@@ -167,6 +185,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:60px 0;text-align:center"><h2 style="font-size:1.2rem;text-transform:uppercase;letter-spacing:3px;color:#d4a574;margin-bottom:24px">Expertise</h2><div style="width:40px;height:1px;background:#d4a574;margin:0 auto 24px"></div><div style="text-align:center">${skillsHtml(d, 'transparent', '#d4a574', '#3a3530')}</div></section>
           <section id="experience" style="margin:60px 0;text-align:center"><h2 style="font-size:1.2rem;text-transform:uppercase;letter-spacing:3px;color:#d4a574;margin-bottom:24px">Experience</h2><div style="width:40px;height:1px;background:#d4a574;margin:0 auto 24px"></div>${expHtml(d, '#e8e4df', '#d4a574', '#8a8078')}</section>
           <section id="projects" style="margin:60px 0;text-align:center"><h2 style="font-size:1.2rem;text-transform:uppercase;letter-spacing:3px;color:#d4a574;margin-bottom:24px">Projects</h2><div style="width:40px;height:1px;background:#d4a574;margin:0 auto 24px"></div>${projectsHtml(d, 'transparent', '#2a2520', '#d4a574', '#8a8078', '#1a1714', '#d4a574')}</section>
+          ${githubActivityHtml(d, 'transparent', '#2a2520', '#d4a574', '#8a8078')}
           <section id="education" style="margin:60px 0;text-align:center"><h2 style="font-size:1.2rem;text-transform:uppercase;letter-spacing:3px;color:#d4a574;margin-bottom:24px">Education</h2><div style="width:40px;height:1px;background:#d4a574;margin:0 auto 24px"></div>${eduHtml(d, '#e8e4df', '#d4a574')}</section>
           ${contactSection(d, '#0c0c0c', '#8a8078', '#d4a574')}
         </div></div>`);
@@ -183,6 +202,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:48px 0"><h2 style="font-family:'Orbitron',sans-serif;color:#0ff;font-size:1.3rem;margin-bottom:20px;text-shadow:0 0 10px rgba(0,255,255,.3)">SKILLS</h2><div>${skillsHtml(d, 'rgba(0,255,255,.1)', '#0ff', 'rgba(0,255,255,.3)')}</div></section>
           <section id="experience" style="margin:48px 0"><h2 style="font-family:'Orbitron',sans-serif;color:#0ff;font-size:1.3rem;margin-bottom:20px">EXPERIENCE</h2>${expHtml(d, '#e0e0ff', '#f0f', '#888')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="font-family:'Orbitron',sans-serif;color:#0ff;font-size:1.3rem;margin-bottom:20px">PROJECTS</h2>${projectsHtml(d, 'rgba(0,255,255,.05)', 'rgba(0,255,255,.15)', '#0ff', '#888', 'rgba(255,0,255,.1)', '#f0f')}</section>
+          ${githubActivityHtml(d, 'rgba(0,255,255,.05)', 'rgba(0,255,255,.15)', '#0ff', '#888')}
           <section id="education" style="margin:48px 0"><h2 style="font-family:'Orbitron',sans-serif;color:#0ff;font-size:1.3rem;margin-bottom:20px">EDUCATION</h2>${eduHtml(d, '#e0e0ff', '#f0f')}</section>
           ${contactSection(d, '#0a0a1a', '#888', '#0ff')}
         </div></div>`);
@@ -198,6 +218,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:48px 0"><h2 style="color:#0284c7;font-size:1.4rem;font-weight:700;margin-bottom:20px">Skills</h2><div>${skillsHtml(d, '#e0f2fe', '#0369a1')}</div></section>
           <section id="experience" style="margin:48px 0"><h2 style="color:#0284c7;font-size:1.4rem;font-weight:700;margin-bottom:20px">Experience</h2>${expHtml(d, '#0c4a6e', '#0284c7', '#64748b')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="color:#0284c7;font-size:1.4rem;font-weight:700;margin-bottom:20px">Projects</h2>${projectsHtml(d, '#fff', '#e0f2fe', '#0c4a6e', '#64748b', '#f0f9ff', '#0369a1')}</section>
+          ${githubActivityHtml(d, '#fff', '#e0f2fe', '#0284c7', '#64748b')}
           <section id="education" style="margin:48px 0"><h2 style="color:#0284c7;font-size:1.4rem;font-weight:700;margin-bottom:20px">Education</h2>${eduHtml(d, '#0c4a6e', '#0284c7')}</section>
           ${contactSection(d, '#f0f9ff', '#64748b', '#0284c7')}
         </div></div>`);
@@ -214,6 +235,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:48px 0"><h2 style="color:#e11d48;font-size:1.4rem;margin-bottom:20px">Skills</h2><div>${skillsHtml(d, '#ffe4e6', '#9f1239')}</div></section>
           <section id="experience" style="margin:48px 0"><h2 style="color:#e11d48;font-size:1.4rem;margin-bottom:20px">Experience</h2>${expHtml(d, '#1a1a2e', '#e11d48', '#666')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="color:#e11d48;font-size:1.4rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, '#fff', '#ffe4e6', '#1a1a2e', '#666', '#fff1f2', '#e11d48')}</section>
+          ${githubActivityHtml(d, '#fff', '#ffe4e6', '#e11d48', '#666')}
           <section id="education" style="margin:48px 0"><h2 style="color:#e11d48;font-size:1.4rem;margin-bottom:20px">Education</h2>${eduHtml(d, '#1a1a2e', '#e11d48')}</section>
           ${contactSection(d, '#fff5f5', '#666', '#e11d48')}
         </div></div>`);
@@ -230,6 +252,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:48px 0"><h2 style="color:#16a34a;font-size:1.4rem;margin-bottom:20px">Skills</h2><div>${skillsHtml(d, '#dcfce7', '#166534')}</div></section>
           <section id="experience" style="margin:48px 0"><h2 style="color:#16a34a;font-size:1.4rem;margin-bottom:20px">Experience</h2>${expHtml(d, '#14532d', '#16a34a', '#666')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="color:#16a34a;font-size:1.4rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, '#fff', '#dcfce7', '#14532d', '#666', '#f0fdf4', '#166534')}</section>
+          ${githubActivityHtml(d, '#fff', '#dcfce7', '#16a34a', '#666')}
           <section id="education" style="margin:48px 0"><h2 style="color:#16a34a;font-size:1.4rem;margin-bottom:20px">Education</h2>${eduHtml(d, '#14532d', '#16a34a')}</section>
           ${contactSection(d, '#f0fdf4', '#666', '#16a34a')}
         </div></div>`);
@@ -276,6 +299,7 @@ function generateGenericTheme(themeId: string, d: PortfolioData): string {
       <section id="skills" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Skills</h2><div>${skillsHtml(d, cfg.skillBg, cfg.skillColor, cfg.cardBorder)}</div></section>
       <section id="experience" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Experience</h2>${expHtml(d, cfg.text, cfg.accent, descColor)}</section>
       <section id="projects" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, cfg.cardBg, cfg.cardBorder, cfg.text, descColor, cfg.tagBg, cfg.tagColor)}</section>
+      ${githubActivityHtml(d, cfg.cardBg, cfg.cardBorder, cfg.accent, descColor)}
       <section id="education" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Education</h2>${eduHtml(d, cfg.text, cfg.accent)}</section>
       ${contactSection(d, cfg.bg, descColor, cfg.accent)}
     </div></div>`);
