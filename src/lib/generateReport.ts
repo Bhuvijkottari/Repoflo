@@ -1,9 +1,8 @@
 import type { PortfolioData } from "./mockData";
 
 export interface CandidateAnalysis {
-  recommendation: "STRONG_HIRE" | "HIRE" | "CONSIDER" | "PASS";
-  confidence: number;
   overallScore: number;
+  verdict: string;
   summary: string;
   strengths: string[];
   concerns: string[];
@@ -43,14 +42,13 @@ export interface CandidateAnalysis {
   };
 }
 
-const badgeColor = (rec: string) => {
-  switch (rec) {
-    case "STRONG_HIRE": return "#16a34a";
-    case "HIRE": return "#2563eb";
-    case "CONSIDER": return "#d97706";
-    case "PASS": return "#dc2626";
-    default: return "#6b7280";
-  }
+const verdictColor = (score: number) => {
+  if (score >= 90) return "#16a34a";
+  if (score >= 80) return "#22c55e";
+  if (score >= 70) return "#2563eb";
+  if (score >= 60) return "#f59e0b";
+  if (score >= 50) return "#d97706";
+  return "#dc2626";
 };
 
 export function generateReportHtml(data: PortfolioData, analysis: CandidateAnalysis): string {
@@ -93,8 +91,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;background:#fff;l
         <p>Generated: ${date}</p>
       </div>
       <div style="text-align:right">
-        <span class="badge" style="background:${badgeColor(analysis.recommendation)}">${analysis.recommendation.replace("_", " ")}</span>
-        <div style="margin-top:8px;font-size:.85rem;color:#64748b">Confidence: ${analysis.confidence}%</div>
+        <span class="badge" style="background:${verdictColor(analysis.overallScore)}">${analysis.verdict}</span>
+        <div style="margin-top:8px;font-size:.85rem;color:#64748b">Score: ${analysis.overallScore}/100</div>
       </div>
     </div>
   </div>
@@ -106,7 +104,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;background:#fff;l
       <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px">
         <span>Overall Score</span><span style="font-weight:700">${analysis.overallScore}/100</span>
       </div>
-      <div class="score-bar"><div class="score-fill" style="width:${analysis.overallScore}%;background:${badgeColor(analysis.recommendation)}"></div></div>
+      <div class="score-bar"><div class="score-fill" style="width:${analysis.overallScore}%;background:${verdictColor(analysis.overallScore)}"></div></div>
     </div>
   </div>
 
