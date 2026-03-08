@@ -46,7 +46,7 @@ const HeroSection = () => {
             transition={{ delay: 0.2 }}
             className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-display font-semibold"
           >
-            <Palette className="w-4 h-4" /> 20+ Themes by ADITHYA & THARUN K SHETTY
+            <Palette className="w-4 h-4" /> Powered by CODEHEXA
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
