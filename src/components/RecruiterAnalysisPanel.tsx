@@ -65,7 +65,7 @@ const ScoreBar = ({ label, value, icon: Icon }: { label: string; value: number; 
           initial={{ width: 0 }}
           whileInView={{ width: `${value}%` }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.8 }}
         />
       </div>
     </div>
