@@ -1,9 +1,25 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ProcessSection from "@/components/ProcessSection";
+import RecruiterSection from "@/components/RecruiterSection";
 import FeedbackSection from "@/components/FeedbackSection";
-import { Sparkles, Palette, Shield } from "lucide-react";
+import { Sparkles, Shield } from "lucide-react";
 import { motion } from "framer-motion";
+import themeBlue from "@/assets/theme-preview-blue.jpg";
+import themeWarm from "@/assets/theme-preview-warm.jpg";
+import themeDark from "@/assets/theme-preview-dark.jpg";
+import themeGreen from "@/assets/theme-preview-green.jpg";
+import themePink from "@/assets/theme-preview-pink.jpg";
+
+const themeImageMap: Record<string, string> = {
+  blue: themeBlue,
+  warm: themeWarm,
+  dark: themeDark,
+  green: themeGreen,
+  pink: themePink,
+};
+
+const getThemeImage = (category: string) => themeImageMap[category] || themeBlue;
 
 const Index = () => {
   return (
@@ -21,7 +37,7 @@ const Index = () => {
             className="text-center mb-16"
           >
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
-              <Palette className="w-4 h-4" /> 20+ Premium Themes
+              20+ Premium Themes
             </div>
             <h2 className="font-display text-4xl font-bold text-foreground mb-4">
               Themes for Every Style
@@ -33,26 +49,26 @@ const Index = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
             {[
-              { name: "Recruiter", color: "from-blue-500 to-indigo-600" },
-              { name: "Minimal", color: "from-gray-300 to-gray-500" },
-              { name: "Bold Dark", color: "from-purple-600 to-blue-500" },
-              { name: "Creative", color: "from-amber-400 to-orange-500" },
-              { name: "Terminal", color: "from-green-500 to-emerald-700" },
-              { name: "Elegant", color: "from-yellow-600 to-amber-800" },
-              { name: "Neon Cyber", color: "from-cyan-400 to-pink-500" },
-              { name: "Ocean", color: "from-blue-400 to-teal-500" },
-              { name: "Sunset", color: "from-orange-400 to-rose-500" },
-              { name: "Forest", color: "from-green-600 to-emerald-800" },
-              { name: "Cherry", color: "from-rose-500 to-red-700" },
-              { name: "Lavender", color: "from-violet-400 to-purple-600" },
-              { name: "Midnight", color: "from-slate-700 to-slate-900" },
-              { name: "Coral", color: "from-red-400 to-orange-500" },
-              { name: "Arctic", color: "from-cyan-200 to-blue-400" },
-              { name: "Mocha", color: "from-amber-700 to-yellow-900" },
-              { name: "Sakura", color: "from-pink-300 to-rose-400" },
-              { name: "Graphite", color: "from-gray-600 to-gray-800" },
-              { name: "Emerald", color: "from-emerald-400 to-green-600" },
-              { name: "Royal", color: "from-indigo-500 to-purple-700" },
+              { name: "Recruiter", image: "blue" },
+              { name: "Minimal", image: "blue" },
+              { name: "Bold Dark", image: "dark" },
+              { name: "Creative", image: "warm" },
+              { name: "Terminal", image: "green" },
+              { name: "Elegant", image: "warm" },
+              { name: "Neon Cyber", image: "dark" },
+              { name: "Ocean", image: "blue" },
+              { name: "Sunset", image: "warm" },
+              { name: "Forest", image: "green" },
+              { name: "Cherry", image: "pink" },
+              { name: "Lavender", image: "pink" },
+              { name: "Midnight", image: "dark" },
+              { name: "Coral", image: "warm" },
+              { name: "Arctic", image: "blue" },
+              { name: "Mocha", image: "warm" },
+              { name: "Sakura", image: "pink" },
+              { name: "Graphite", image: "dark" },
+              { name: "Emerald", image: "green" },
+              { name: "Royal", image: "dark" },
             ].map((theme, i) => (
               <motion.div
                 key={theme.name}
@@ -62,7 +78,9 @@ const Index = () => {
                 transition={{ delay: i * 0.03 }}
                 className="group cursor-pointer"
               >
-                <div className={`h-24 rounded-xl bg-gradient-to-br ${theme.color} mb-2 group-hover:scale-105 transition-transform duration-300 shadow-sm`} />
+                <div className="h-24 rounded-xl overflow-hidden mb-2 group-hover:scale-105 transition-transform duration-300 shadow-sm">
+                  <img src={getThemeImage(theme.image)} alt={theme.name} className="w-full h-full object-cover" />
+                </div>
                 <p className="text-xs font-display font-medium text-foreground text-center">{theme.name}</p>
               </motion.div>
             ))}
@@ -71,6 +89,7 @@ const Index = () => {
       </section>
 
       <ProcessSection />
+      <RecruiterSection />
       <FeedbackSection />
 
       {/* Footer */}
@@ -85,7 +104,7 @@ const Index = () => {
             <span className="font-semibold text-foreground">THARUN K SHETTY</span>
           </p>
           <p className="text-xs text-muted-foreground font-body flex items-center justify-center gap-1">
-            <Shield className="w-3 h-3" /> © 2026 PortfolioForge. All Rights Reserved.
+            <Shield className="w-3 h-3" /> 2026 PortfolioForge. All Rights Reserved.
           </p>
         </div>
       </footer>

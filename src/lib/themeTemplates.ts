@@ -35,7 +35,7 @@ const volHtml = (d: PortfolioData, roleColor: string, orgColor: string, descColo
 
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
   `<section id="contact" style="padding:48px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:16px">Contact</h2>
-  <p style="color:${textColor}">📧 ${d.email}</p><p style="color:${textColor}">📍 ${d.location}</p>
+  <p style="color:${textColor}">Email: ${d.email}</p><p style="color:${textColor}">Location: ${d.location}</p>
   <div style="margin-top:16px;display:flex;gap:12px;justify-content:center">
     ${d.github ? `<a href="${d.github}" style="color:${accentColor};text-decoration:none" target="_blank">GitHub</a>` : ''}
     ${d.linkedin ? `<a href="${d.linkedin}" style="color:${accentColor};text-decoration:none" target="_blank">LinkedIn</a>` : ''}
@@ -60,7 +60,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <div><h1 style="font-size:1.5rem;font-weight:700">${d.name}</h1><p style="color:#64748b">${d.title} · ${d.location}</p></div></div></div>
         <div style="max-width:900px;margin:0 auto;padding:24px">
-          <h2 id="overview" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">📊 GitHub Overview</h2>
+          <h2 id="overview" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">GitHub Overview</h2>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px">
             ${[
               [s.totalCommits.toLocaleString(), 'Total Commits'],
@@ -73,17 +73,17 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
               [`${s.contributionStreak}d`, 'Streak'],
             ].map(([v,l]) => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;text-align:center"><div style="font-size:1.5rem;font-weight:700;color:#6366f1">${v}</div><div style="font-size:.75rem;color:#64748b;text-transform:uppercase;letter-spacing:1px">${l}</div></div>`).join('')}
           </div>
-          <h2 id="languages" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">🔤 Top Languages</h2>
+          <h2 id="languages" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Top Languages</h2>
           ${s.topLanguages.length ? `<div style="display:flex;border-radius:8px;overflow:hidden;height:24px;margin:8px 0">${s.topLanguages.map((l:any,i:number) => `<div style="width:${l.percentage}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600;color:#fff;background:${['#6366f1','#f59e0b','#10b981','#ef4444'][i]}">${l.name} ${l.percentage}%</div>`).join('')}</div>` : '<p style="color:#64748b">No language data</p>'}
-          ${s.aiGeneratedContent > 0 ? `<div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:.9rem;color:#92400e">⚠️ <strong>AI-Generated Content Detected:</strong> ${s.aiGeneratedContent} repositories contain potential AI-generated code patterns.</div>` : ''}
-          ${s.recentCollaborations.length ? `<h2 style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">🤝 Recent Collaborations</h2>${s.recentCollaborations.map((c:string) => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin:6px 0;font-size:.9rem">📁 ${c}</div>`).join('')}` : ''}
-          <h2 id="experience" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">💼 Experience</h2>
+          ${s.aiGeneratedContent > 0 ? `<div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:.9rem;color:#92400e"><strong>AI-Generated Content Detected:</strong> ${s.aiGeneratedContent} repositories contain potential AI-generated code patterns.</div>` : ''}
+          ${s.recentCollaborations.length ? `<h2 style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Recent Collaborations</h2>${s.recentCollaborations.map((c:string) => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin:6px 0;font-size:.9rem">${c}</div>`).join('')}` : ''}
+          <h2 id="experience" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Experience</h2>
           ${d.experience.map(e => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-weight:600">${e.role}</div><div style="color:#6366f1">${e.company}</div><div style="color:#94a3b8;font-size:.85rem">${e.period}</div><p style="color:#64748b;font-size:.9rem;margin-top:4px">${e.description}</p></div>`).join('') || '<p style="color:#64748b">No experience data. Upload a resume to add this.</p>'}
-          <h2 style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">🎓 Education</h2>
+          <h2 style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Education</h2>
           ${d.education.map(e => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-weight:600">${e.degree}</div><div style="color:#6366f1">${e.institution}</div><div style="color:#94a3b8;font-size:.85rem">${e.period}</div></div>`).join('') || '<p style="color:#64748b">No education data.</p>'}
-          <h2 id="projects" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">🛠️ Projects</h2>
+          <h2 id="projects" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Projects</h2>
           ${d.projects.map(p => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-weight:600">${p.name} ${p.stars ? `<span style="color:#f59e0b">★ ${p.stars}</span>` : ''}</div><p style="color:#64748b;font-size:.85rem">${p.description}</p><div style="margin-top:8px">${p.tech.map(t => `<span style="display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 10px;border-radius:6px;font-size:.8rem;margin:2px;color:#475569">${t}</span>`).join('')}</div></div>`).join('')}
-          <h2 id="skills" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">🔧 Skills</h2>
+          <h2 id="skills" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Skills</h2>
           <div style="margin-bottom:24px">${d.skills.map(s => `<span style="display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 10px;border-radius:6px;font-size:.8rem;margin:2px;color:#475569">${s}</span>`).join('')}</div>
         </div></div>`);
     }

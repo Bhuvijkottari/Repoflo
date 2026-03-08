@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { getThemeHtml } from "@/lib/themeTemplates";
-import { Download, ArrowLeft, Smartphone, Monitor, Maximize, ImagePlus, Pencil, Check, X, Trash2, Plus, Code } from "lucide-react";
+import { Download, ArrowLeft, Smartphone, Monitor, Maximize, ImagePlus, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText } from "lucide-react";
 import type { PortfolioData } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
 
 const PreviewPage = () => {
   const { themeId } = useParams<{ themeId: string }>();
@@ -20,6 +22,12 @@ const PreviewPage = () => {
   const [finalized, setFinalized] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
+  // Recruiter analysis state
+  const [analysis, setAnalysis] = useState<CandidateAnalysis | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const isRecruiter = themeId === "recruiter";
+
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem("portfolioData");
@@ -27,12 +35,55 @@ const PreviewPage = () => {
     } catch {}
   }, []);
 
-  // Regenerate HTML when portfolioData changes
   useEffect(() => {
     if (portfolioData) {
       setEditableHtml(getThemeHtml(themeId || "minimal", portfolioData));
     }
   }, [themeId, portfolioData]);
+
+  // Auto-trigger analysis for recruiter theme
+  useEffect(() => {
+    if (isRecruiter && portfolioData && !analysis && !isAnalyzing) {
+      runAnalysis();
+    }
+  }, [isRecruiter, portfolioData]);
+
+  const runAnalysis = async () => {
+    if (!portfolioData) return;
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-candidate", {
+        body: { portfolioData },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAnalysis(data as CandidateAnalysis);
+    } catch (e: any) {
+      toast({
+        title: "Analysis Failed",
+        description: e.message || "Could not generate candidate analysis.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleDownloadReport = () => {
+    if (!portfolioData || !analysis) return;
+    const reportHtml = generateReportHtml(portfolioData, analysis);
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${sanitizedName}-recruiter-report.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({
+      title: "Report Downloaded",
+      description: "Open the HTML file in any browser to view or print as PDF.",
+    });
+  };
 
   const updateField = (field: keyof PortfolioData, value: any) => {
     if (!portfolioData) return;
@@ -46,16 +97,12 @@ const PreviewPage = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      if (ev.target?.result) {
-        updateField("avatar", ev.target.result as string);
-      }
+      if (ev.target?.result) updateField("avatar", ev.target.result as string);
     };
     reader.readAsDataURL(file);
   };
 
-  const removePhoto = () => {
-    updateField("avatar", "");
-  };
+  const removePhoto = () => updateField("avatar", "");
 
   const personName = portfolioData?.name || "portfolio";
   const sanitizedName = personName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
@@ -74,7 +121,7 @@ const PreviewPage = () => {
     setFinalized(true);
     handleDownload();
     toast({
-      title: "Portfolio Finalized! 🎉",
+      title: "Portfolio Finalized",
       description: `${sanitizedName}.html has been downloaded. Open it in VS Code or any browser.`,
     });
   };
@@ -87,7 +134,6 @@ const PreviewPage = () => {
     });
   };
 
-  // Experience helpers
   const addExperience = () => {
     if (!portfolioData) return;
     updateField("experience", [...portfolioData.experience, { company: "Company", role: "Role", period: "2024 - Present", description: "Description" }]);
@@ -103,7 +149,6 @@ const PreviewPage = () => {
     updateField("experience", updated);
   };
 
-  // Education helpers
   const addEducation = () => {
     if (!portfolioData) return;
     updateField("education", [...portfolioData.education, { institution: "University", degree: "Degree", period: "2020 - 2024" }]);
@@ -119,7 +164,6 @@ const PreviewPage = () => {
     updateField("education", updated);
   };
 
-  // Skills helpers
   const [newSkill, setNewSkill] = useState("");
   const addSkill = () => {
     if (!portfolioData || !newSkill.trim()) return;
@@ -129,6 +173,16 @@ const PreviewPage = () => {
   const removeSkill = (i: number) => {
     if (!portfolioData) return;
     updateField("skills", portfolioData.skills.filter((_, idx) => idx !== i));
+  };
+
+  const badgeColor = (rec: string) => {
+    switch (rec) {
+      case "STRONG_HIRE": return "bg-green-600 text-white";
+      case "HIRE": return "bg-blue-600 text-white";
+      case "CONSIDER": return "bg-amber-500 text-white";
+      case "PASS": return "bg-red-600 text-white";
+      default: return "bg-muted text-foreground";
+    }
   };
 
   if (viewMode === "fullscreen") {
@@ -168,6 +222,11 @@ const PreviewPage = () => {
             <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
               <Pencil className="w-4 h-4 mr-1" /> {showEditor ? "Hide Editor" : "Edit Content"}
             </Button>
+            {isRecruiter && (
+              <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!analysis}>
+                <FileText className="w-4 h-4 mr-1" /> Download Report
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={handleOpenInVSCode}>
               <Code className="w-4 h-4 mr-1" /> VS Code
             </Button>
@@ -327,6 +386,111 @@ const PreviewPage = () => {
           </motion.div>
         </div>
 
+        {/* Recruiter Analysis Panel */}
+        {isRecruiter && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 bg-card rounded-2xl border border-border p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-bold text-lg text-foreground">AI Candidate Analysis</h3>
+              {analysis && (
+                <Button variant="outline" size="sm" onClick={runAnalysis} disabled={isAnalyzing}>
+                  {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                  Re-analyze
+                </Button>
+              )}
+            </div>
+
+            {isAnalyzing && !analysis && (
+              <div className="flex items-center justify-center py-12 gap-3 text-muted-foreground">
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <span className="font-body">Analyzing candidate profile with AI...</span>
+              </div>
+            )}
+
+            {analysis && (
+              <div className="space-y-6">
+                {/* Top row: recommendation + score */}
+                <div className="flex flex-wrap gap-6 items-start">
+                  <div>
+                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Recommendation</span>
+                    <div className="mt-1">
+                      <span className={`inline-block px-4 py-2 rounded-lg font-display font-bold text-sm ${badgeColor(analysis.recommendation)}`}>
+                        {analysis.recommendation.replace("_", " ")}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Confidence</span>
+                    <div className="mt-1 font-display text-2xl font-bold text-foreground">{analysis.confidence}%</div>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Overall Score</span>
+                    <div className="mt-1 font-display text-2xl font-bold text-foreground">{analysis.overallScore}/100</div>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div>
+                  <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Executive Summary</span>
+                  <p className="mt-1 text-sm text-foreground font-body leading-relaxed">{analysis.summary}</p>
+                </div>
+
+                {/* Strengths & Concerns */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Key Strengths</span>
+                    <ul className="mt-2 space-y-1.5">
+                      {analysis.strengths?.map((s, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm font-body text-foreground">
+                          <span className="text-green-600 mt-0.5 font-bold">+</span> {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Concerns</span>
+                    <ul className="mt-2 space-y-1.5">
+                      {analysis.concerns?.map((c, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm font-body text-foreground">
+                          <span className="text-red-600 mt-0.5 font-bold">-</span> {c}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* GitHub Insights */}
+                <div>
+                  <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">GitHub Insights</span>
+                  <div className="grid md:grid-cols-2 gap-3 mt-2">
+                    {analysis.githubInsights && Object.entries(analysis.githubInsights).map(([key, val]) => (
+                      <div key={key} className="bg-secondary/50 rounded-lg p-3">
+                        <span className="text-xs font-display font-semibold text-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+                        <p className="text-xs text-muted-foreground mt-1 font-body">{val}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Hiring Notes */}
+                <div>
+                  <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Hiring Manager Notes</span>
+                  <p className="mt-1 text-sm text-foreground font-body leading-relaxed bg-secondary/30 rounded-lg p-4">{analysis.hiringNotes}</p>
+                </div>
+
+                <div className="pt-2">
+                  <Button variant="cta" onClick={handleDownloadReport}>
+                    <Download className="w-4 h-4 mr-2" /> Download Full Report
+                  </Button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
         {/* Finalized banner */}
         {finalized && (
           <motion.div
@@ -334,7 +498,7 @@ const PreviewPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mt-6 bg-primary/10 border border-primary/20 rounded-xl p-4 text-center"
           >
-            <p className="font-display font-semibold text-foreground">✅ Portfolio Finalized!</p>
+            <p className="font-display font-semibold text-foreground">Portfolio Finalized</p>
             <p className="text-sm text-muted-foreground mt-1">Your file <code className="bg-secondary px-1.5 py-0.5 rounded text-xs">{sanitizedName}.html</code> has been downloaded.</p>
             <div className="flex gap-2 justify-center mt-3">
               <Button variant="outline" size="sm" onClick={handleDownload}><Download className="w-4 h-4 mr-1" /> Download Again</Button>
