@@ -85,10 +85,24 @@ const contactSection = (d: PortfolioData, bg: string, textColor: string, accentC
     ${d.website ? `<a href="${d.website}" style="color:${accentColor};text-decoration:none" target="_blank">Website</a>` : ''}
   </div></section>`;
 
-const baseStyle = `*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}img{max-width:100%}a{transition:opacity .2s}a:hover{opacity:.8}`;
+const baseStyle = `*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}img{max-width:100%}a{transition:all .3s ease}a:hover{opacity:.85}
+/* Scroll animations */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}.reveal.visible{opacity:1;transform:translateY(0)}
+/* Skill hover */
+.skill-tag{transition:transform .2s,box-shadow .2s;cursor:default}.skill-tag:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+/* Card hover */
+.project-card{transition:transform .3s,box-shadow .3s}.project-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+/* Animated skill bar */
+.skill-bar{height:6px;border-radius:3px;overflow:hidden;background:rgba(128,128,128,.15)}.skill-bar-fill{height:100%;border-radius:3px;transition:width 1.2s ease}
+/* Avatar pulse */
+.avatar-ring{animation:pulse-ring 2s ease-in-out infinite}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.3)}50%{box-shadow:0 0 0 12px rgba(99,102,241,0)}}
+`;
+
+const scrollScript = `<script>document.addEventListener('DOMContentLoaded',()=>{const r=document.querySelectorAll('.reveal');const o=new IntersectionObserver((e)=>{e.forEach(i=>{if(i.isIntersecting){i.target.classList.add('visible');o.unobserve(i.target)}})},{threshold:.15});r.forEach(el=>o.observe(el))})</script>`;
 
 const wrapTheme = (fontImport: string, fontFamily: string, body: string) =>
-  `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.6}</style></head><body>${body}</body></html>`;
+  `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.7;font-size:16px}</style></head><body>${body}${scrollScript}</body></html>`;
 
 export const getThemeHtml = (themeId: string, customData?: PortfolioData): string => {
   const d = customData || getPortfolioData();
