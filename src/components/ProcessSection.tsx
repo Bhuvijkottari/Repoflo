@@ -4,7 +4,7 @@ import { Palette, Github, Upload, Rocket, ArrowRight } from "lucide-react";
 const steps = [
   { icon: Palette, title: "Pick a Theme", desc: "Choose from 20+ stunning themes or Recruiter mode", color: "from-primary to-accent" },
   { icon: Github, title: "Connect GitHub", desc: "Link your GitHub profile to auto-import projects", color: "from-accent to-primary" },
-  { icon: Upload, title: "Upload Resume", desc: "Nova reads your resume and extracts all sections", color: "from-primary/80 to-accent/80" },
+  { icon: Upload, title: "Upload Resume", desc: "AI reads your resume and extracts all sections", color: "from-primary/80 to-accent/80" },
   { icon: Rocket, title: "Generate & Deploy", desc: "Get a production-ready portfolio instantly", color: "from-accent/80 to-primary" },
 ];
 

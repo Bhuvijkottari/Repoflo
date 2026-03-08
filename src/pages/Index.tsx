@@ -49,7 +49,7 @@ const themeImageMap: Record<string, string> = {
 const getThemeImage = (category: string) => themeImageMap[category] || themeBlue;
 
 const featureHighlights = [
-  { icon: Wand2, title: "Nova Powered", desc: "Smart content generation from your GitHub and resume data" },
+  { icon: Wand2, title: "AI Powered", desc: "Smart content generation from your GitHub and resume data" },
   { icon: Layers, title: "20+ Themes", desc: "Handcrafted, fully responsive designs with smooth animations" },
   { icon: Globe, title: "One Click Deploy", desc: "Download production-ready HTML instantly, host anywhere" },
 ];
@@ -93,7 +93,7 @@ const Index = () => {
               <span className="font-display font-bold text-foreground text-sm">Are you a Recruiter?</span>
             </div>
             <p className="text-xs text-muted-foreground font-body mb-3">
-              Try our Recruiter View for Nova powered candidate assessments, GitHub analytics, and evaluation reports.
+              Try our Recruiter View for AI powered candidate assessments, GitHub analytics, and evaluation reports.
             </p>
             <div className="flex gap-2">
               <Button variant="cta" size="sm" className="rounded-full text-xs px-4" asChild>
@@ -109,11 +109,11 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      {/* Feature Highlights - NEW section */}
-      <section className="py-20 relative">
+      {/* Feature Highlights */}
+      <section className="py-16 sm:py-20 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.02] to-background pointer-events-none" />
-        <div className="container mx-auto px-4 relative">
-          <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="container mx-auto px-4 sm:px-6 relative">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
             {featureHighlights.map((f, i) => (
               <motion.div
                 key={f.title}
@@ -124,9 +124,9 @@ const Index = () => {
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
                 className="relative group"
               >
-                <div className="bg-card rounded-2xl p-6 border border-border shadow-card hover:shadow-card-hover transition-all duration-300 h-full">
-                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <f.icon className="w-6 h-6 text-primary-foreground" />
+                <div className="bg-card rounded-2xl p-5 sm:p-6 border border-border shadow-card hover:shadow-card-hover transition-all duration-300 h-full">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl gradient-primary flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <f.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
                   </div>
                   <h3 className="font-display font-bold text-foreground text-base mb-1.5">{f.title}</h3>
                   <p className="text-sm text-muted-foreground font-body leading-relaxed">{f.desc}</p>
@@ -138,9 +138,8 @@ const Index = () => {
       </section>
 
       {/* Themes Showcase */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-16 sm:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-secondary/20 via-primary/[0.03] to-background pointer-events-none" />
-        {/* Decorative orbs */}
         <motion.div
           animate={{ scale: [1, 1.15, 1], opacity: [0.03, 0.06, 0.03] }}
           transition={{ duration: 8, repeat: Infinity }}
@@ -152,12 +151,12 @@ const Index = () => {
           className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-accent blur-3xl pointer-events-none"
         />
 
-        <div className="container mx-auto px-4 relative">
+        <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-10 sm:mb-16"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -170,12 +169,12 @@ const Index = () => {
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
               Themes for Every <span className="text-gradient">Style</span>
             </h2>
-            <p className="text-muted-foreground font-body max-w-lg mx-auto text-base">
+            <p className="text-muted-foreground font-body max-w-lg mx-auto text-base px-2">
               From minimal to bold, terminal to luxury. Every theme is fully responsive with animations and smooth navigation.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 max-w-5xl mx-auto">
             {[
               { name: "Recruiter", image: "recruiter" },
               { name: "Minimal", image: "minimal" },

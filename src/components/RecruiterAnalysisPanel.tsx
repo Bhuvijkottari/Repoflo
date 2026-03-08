@@ -150,7 +150,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" />
-            <h3 className="font-display font-bold text-lg text-foreground">Nova Candidate Analysis</h3>
+            <h3 className="font-display font-bold text-lg text-foreground">AI Candidate Analysis</h3>
           </div>
           {analysis && (
             <Button variant="outline" size="sm" onClick={onReanalyze} disabled={isAnalyzing}>
@@ -159,7 +159,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
             </Button>
           )}
         </div>
-        <p className="text-xs text-muted-foreground font-body">Powered by Nova — comprehensive evaluation with graphical insights</p>
+        <p className="text-xs text-muted-foreground font-body">Powered by AI — comprehensive evaluation with graphical insights</p>
       </motion.div>
 
       {isAnalyzing && !analysis && (
@@ -427,7 +427,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                           )}
                           {isAiGenerated && (
                             <Badge variant="outline" className="text-[10px] border-blue-400/50 text-blue-600 bg-blue-500/10">
-                              <Bot className="w-2.5 h-2.5 mr-0.5" /> Nova Inferred Desc
+                              <Bot className="w-2.5 h-2.5 mr-0.5" /> AI Inferred Desc
                             </Badge>
                           )}
                         </div>
@@ -456,7 +456,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               <div className="mt-4 bg-amber-500/10 border border-amber-400/30 rounded-xl p-4 flex items-start gap-3">
                 <Bot className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-xs font-display font-semibold text-amber-700">Nova Detected Generated Content</span>
+                  <span className="text-xs font-display font-semibold text-amber-700">AI Detected Generated Content</span>
                   <p className="text-xs text-amber-600/80 mt-0.5 font-body">
                     {s.aiGeneratedContent} {s.aiGeneratedContent === 1 ? "repository contains" : "repositories contain"} potential auto-generated code patterns. Consider verifying originality during technical interviews.
                   </p>

@@ -45,7 +45,7 @@ const themeImages: Record<string, string> = {
 };
 
 const themes = [
-  { id: "recruiter", name: "Recruiter View", description: "Data-rich dashboard with GitHub analytics and Nova powered candidate assessment", image: "recruiter", isRecruiter: true },
+  { id: "recruiter", name: "Recruiter View", description: "Data-rich dashboard with GitHub analytics and AI powered candidate assessment", image: "recruiter", isRecruiter: true },
   { id: "minimal", name: "Minimal", description: "Clean, whitespace-focused design with elegant typography", image: "minimal" },
   { id: "bold", name: "Bold Dark", description: "Eye-catching dark theme with purple gradients", image: "bold" },
   { id: "creative", name: "Creative Warm", description: "Artistic warm palette with playful layouts", image: "creative" },
