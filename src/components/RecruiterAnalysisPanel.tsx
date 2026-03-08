@@ -297,7 +297,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <Code2 className="w-3.5 h-3.5" /> LeetCode Performance Analysis
               </h4>
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {lc && lc.totalSolved > 0 && (
                   <LeetCodeDonut easy={lc.easySolved} medium={lc.mediumSolved} hard={lc.hardSolved} />
                 )}
