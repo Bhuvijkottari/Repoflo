@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { getThemeHtml } from "@/lib/themeTemplates";
-import { Download, ArrowLeft, Smartphone, Monitor, Maximize, ImagePlus, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText } from "lucide-react";
+import { injectEditor, stripEditor } from "@/lib/editorInjection";
+import { Download, ArrowLeft, Smartphone, Monitor, Maximize, ImagePlus, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye, Edit3 } from "lucide-react";
 import type { PortfolioData } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,10 +18,13 @@ const PreviewPage = () => {
   const { toast } = useToast();
   const [viewMode, setViewMode] = useState<"desktop" | "mobile" | "fullscreen">("desktop");
   const [showEditor, setShowEditor] = useState(false);
+  const [inlineEditing, setInlineEditing] = useState(false);
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [editableHtml, setEditableHtml] = useState("");
+  const [cleanHtml, setCleanHtml] = useState(""); // HTML without editor artifacts
   const [finalized, setFinalized] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Recruiter analysis state
   const [analysis, setAnalysis] = useState<CandidateAnalysis | null>(null);
@@ -37,9 +41,22 @@ const PreviewPage = () => {
 
   useEffect(() => {
     if (portfolioData) {
-      setEditableHtml(getThemeHtml(themeId || "minimal", portfolioData));
+      const html = getThemeHtml(themeId || "minimal", portfolioData);
+      setEditableHtml(html);
+      setCleanHtml(html);
     }
   }, [themeId, portfolioData]);
+
+  // Listen for postMessage from inline editor
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === '__editor_update') {
+        setCleanHtml(e.data.html);
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
 
   // Auto-trigger analysis for recruiter theme
   useEffect(() => {
@@ -108,7 +125,8 @@ const PreviewPage = () => {
   const sanitizedName = personName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
 
   const handleDownload = () => {
-    const blob = new Blob([editableHtml], { type: "text/html" });
+    const html = inlineEditing ? cleanHtml : editableHtml;
+    const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -117,21 +135,60 @@ const PreviewPage = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleFinalize = () => {
-    setFinalized(true);
-    handleDownload();
+  const handleDownloadCode = () => {
+    const html = inlineEditing ? cleanHtml : editableHtml;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${sanitizedName}-source.html`;
+    a.click();
+    URL.revokeObjectURL(url);
     toast({
-      title: "Portfolio Finalized",
-      description: `${sanitizedName}.html has been downloaded. Open it in VS Code or any browser.`,
+      title: "Source Code Downloaded",
+      description: `Open "${sanitizedName}-source.html" in any code editor to customize further.`,
     });
   };
 
-  const handleOpenInVSCode = () => {
-    handleDownload();
+  const handleFinalize = () => {
+    if (inlineEditing) {
+      // Apply inline edits back to the main HTML
+      setEditableHtml(cleanHtml);
+      setInlineEditing(false);
+    }
+    setFinalized(true);
+    const html = inlineEditing ? cleanHtml : editableHtml;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${sanitizedName}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
     toast({
-      title: "File Downloaded",
-      description: `Open VS Code and drag "${sanitizedName}.html" into it, or run: code ${sanitizedName}.html`,
+      title: "Portfolio Finalized",
+      description: `Your edits have been saved and "${sanitizedName}.html" has been downloaded.`,
     });
+  };
+
+  const toggleInlineEditor = () => {
+    if (!inlineEditing) {
+      // Enter inline editing mode
+      setInlineEditing(true);
+      setShowEditor(false); // hide panel editor
+    } else {
+      // Exit inline editing, apply changes
+      setEditableHtml(cleanHtml);
+      setInlineEditing(false);
+      toast({
+        title: "Edits Applied",
+        description: "Your inline changes have been saved to the preview.",
+      });
+    }
+  };
+
+  const handleOpenInVSCode = () => {
+    handleDownloadCode();
   };
 
   const addExperience = () => {
@@ -219,19 +276,24 @@ const PreviewPage = () => {
               <button onClick={() => setViewMode("mobile")} className={`p-2 rounded-md transition-colors ${viewMode === "mobile" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}><Smartphone className="w-4 h-4" /></button>
               <button onClick={() => setViewMode("fullscreen")} className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"><Maximize className="w-4 h-4" /></button>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
-              <Pencil className="w-4 h-4 mr-1" /> {showEditor ? "Hide Editor" : "Edit Content"}
+            {!inlineEditing && (
+              <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
+                <Pencil className="w-4 h-4 mr-1" /> {showEditor ? "Hide Editor" : "Edit Content"}
+              </Button>
+            )}
+            <Button variant={inlineEditing ? "default" : "outline"} size="sm" onClick={toggleInlineEditor}>
+              {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Editor</> : <><Edit3 className="w-4 h-4 mr-1" /> Open in Editor</>}
             </Button>
             {isRecruiter && (
               <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!analysis}>
                 <FileText className="w-4 h-4 mr-1" /> Download Report
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={handleOpenInVSCode}>
-              <Code className="w-4 h-4 mr-1" /> VS Code
+            <Button variant="outline" size="sm" onClick={handleDownloadCode}>
+              <Code className="w-4 h-4 mr-1" /> Download Code
             </Button>
             <Button variant="cta" size="sm" onClick={handleFinalize}>
-              <Check className="w-4 h-4 mr-1" /> Finalize & Download
+              <Check className="w-4 h-4 mr-1" /> {inlineEditing ? "Finalize Website" : "Finalize & Download"}
             </Button>
           </div>
         </motion.div>
@@ -373,11 +435,12 @@ const PreviewPage = () => {
                   <div className="w-3 h-3 rounded-full bg-primary/40" />
                 </div>
                 <div className="flex-1 text-center text-xs text-muted-foreground font-body">
-                  {sanitizedName}.html
+                  {sanitizedName}.html {inlineEditing && <span className="text-primary font-semibold ml-1">- Editing Mode</span>}
                 </div>
               </div>
               <iframe
-                srcDoc={editableHtml}
+                ref={iframeRef}
+                srcDoc={inlineEditing ? injectEditor(editableHtml) : editableHtml}
                 className="w-full border-0"
                 style={{ height: "calc(100% - 36px)" }}
                 title="Portfolio Preview"
