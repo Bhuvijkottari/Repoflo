@@ -24,7 +24,7 @@ const RecruiterSection = () => {
           </h2>
           <p className="text-muted-foreground font-body max-w-2xl mx-auto text-lg">
             A dedicated analytics dashboard designed for technical recruiters and hiring managers. 
-            Get AI-powered candidate assessments, GitHub activity insights, and downloadable evaluation reports.
+            Get Nova powered candidate assessments, GitHub activity insights, and downloadable evaluation reports.
           </p>
         </motion.div>
 
@@ -37,7 +37,7 @@ const RecruiterSection = () => {
             },
             {
               icon: FileCheck,
-              title: "AI-Powered Assessment",
+              title: "Nova Powered Assessment",
               desc: "Get a hire/no-hire recommendation with confidence score, strengths analysis, and actionable hiring notes.",
             },
             {

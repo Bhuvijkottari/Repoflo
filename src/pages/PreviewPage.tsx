@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { getThemeHtml } from "@/lib/themeTemplates";
 import { injectEditor, stripEditor } from "@/lib/editorInjection";
-import { Download, ArrowLeft, Smartphone, Monitor, Maximize, ImagePlus, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye, Edit3 } from "lucide-react";
+import { Download, ArrowLeft, Smartphone, Monitor, Maximize, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye } from "lucide-react";
 import type { PortfolioData } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,7 +38,6 @@ const PreviewPage = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<"desktop" | "mobile" | "fullscreen">("desktop");
-  const [showEditor, setShowEditor] = useState(false);
   const [inlineEditing, setInlineEditing] = useState(false);
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [editableHtml, setEditableHtml] = useState("");
@@ -180,11 +179,10 @@ const PreviewPage = () => {
   const toggleInlineEditor = () => {
     if (!inlineEditing) {
       setInlineEditing(true);
-      setShowEditor(false);
     } else {
       setEditableHtml(cleanHtml);
       setInlineEditing(false);
-      toast({ title: "Edits Applied", description: "Your inline changes have been saved to the preview." });
+      toast({ title: "Edits Applied", description: "Your changes have been saved to the preview." });
     }
   };
 
@@ -271,13 +269,8 @@ const PreviewPage = () => {
                     <button onClick={() => setViewMode("fullscreen")} className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"><Maximize className="w-4 h-4" /></button>
                   </div>
                 )}
-                {!isMobile && !inlineEditing && (
-                  <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
-                    <Pencil className="w-4 h-4 mr-1" /> {showEditor ? "Hide" : "Edit"}
-                  </Button>
-                )}
                 <Button variant={inlineEditing ? "default" : "outline"} size="sm" onClick={toggleInlineEditor}>
-                  {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit</> : <><Edit3 className="w-4 h-4 mr-1" /> Editor</>}
+                  {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Edit</> : <><Pencil className="w-4 h-4 mr-1" /> Edit</>}
                 </Button>
                 {!isMobile && (
                   <Button variant="outline" size="sm" onClick={handleDownloadCode}>
@@ -297,132 +290,13 @@ const PreviewPage = () => {
           </div>
         </motion.div>
 
-        <div className={`flex gap-4 ${showEditor && !isMobile ? '' : 'justify-center'}`}>
-          {/* Visual Editor Panel - hidden on mobile */}
-          {showEditor && portfolioData && !isMobile && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="w-[400px] flex-shrink-0 overflow-y-auto max-h-[80vh] bg-card rounded-2xl border border-border p-5 space-y-6"
-            >
-              <h3 className="font-display font-bold text-foreground text-lg">Edit Your Portfolio</h3>
-
-              {/* Photo */}
-              <div className="space-y-2">
-                <Label className="font-display font-semibold text-sm text-foreground">Profile Photo</Label>
-                <div className="flex items-center gap-3">
-                  {portfolioData.avatar ? (
-                    <img src={portfolioData.avatar} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-border" />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">
-                      <ImagePlus className="w-6 h-6" />
-                    </div>
-                  )}
-                  <div className="flex flex-col gap-1">
-                    <Button variant="outline" size="sm" onClick={() => photoInputRef.current?.click()}>
-                      <ImagePlus className="w-4 h-4 mr-1" /> {portfolioData.avatar ? "Change" : "Upload"} Photo
-                    </Button>
-                    {portfolioData.avatar && (
-                      <Button variant="ghost" size="sm" className="text-destructive" onClick={removePhoto}>
-                        <Trash2 className="w-3 h-3 mr-1" /> Remove
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Basic Info */}
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">Full Name</Label>
-                  <Input value={portfolioData.name} onChange={(e) => updateField("name", e.target.value)} className="h-9 text-sm" />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Title</Label>
-                  <Input value={portfolioData.title} onChange={(e) => updateField("title", e.target.value)} className="h-9 text-sm" />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Bio</Label>
-                  <textarea value={portfolioData.bio} onChange={(e) => updateField("bio", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-ring" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Email</Label>
-                    <Input value={portfolioData.email} onChange={(e) => updateField("email", e.target.value)} className="h-9 text-sm" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Location</Label>
-                    <Input value={portfolioData.location} onChange={(e) => updateField("location", e.target.value)} className="h-9 text-sm" />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">LinkedIn URL</Label>
-                  <Input value={portfolioData.linkedin} onChange={(e) => updateField("linkedin", e.target.value)} className="h-9 text-sm" placeholder="https://linkedin.com/in/..." />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Website</Label>
-                  <Input value={portfolioData.website} onChange={(e) => updateField("website", e.target.value)} className="h-9 text-sm" placeholder="https://yoursite.com" />
-                </div>
-              </div>
-
-              {/* Skills */}
-              <div className="space-y-2">
-                <Label className="font-display font-semibold text-sm text-foreground">Skills</Label>
-                <div className="flex flex-wrap gap-1.5">
-                  {portfolioData.skills.map((skill, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 bg-secondary text-foreground px-2.5 py-1 rounded-full text-xs font-medium">
-                      {skill}
-                      <button onClick={() => removeSkill(i)} className="hover:text-destructive"><X className="w-3 h-3" /></button>
-                    </span>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Input value={newSkill} onChange={(e) => setNewSkill(e.target.value)} placeholder="Add skill" className="h-8 text-xs flex-1" onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())} />
-                  <Button variant="outline" size="sm" onClick={addSkill} className="h-8 px-2"><Plus className="w-3 h-3" /></Button>
-                </div>
-              </div>
-
-              {/* Experience */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="font-display font-semibold text-sm text-foreground">Experience</Label>
-                  <Button variant="ghost" size="sm" onClick={addExperience} className="h-7 text-xs"><Plus className="w-3 h-3 mr-1" /> Add</Button>
-                </div>
-                {portfolioData.experience.map((exp, i) => (
-                  <div key={i} className="bg-secondary/50 rounded-lg p-3 space-y-2 relative">
-                    <button onClick={() => removeExperience(i)} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><Trash2 className="w-3 h-3" /></button>
-                    <Input value={exp.role} onChange={(e) => updateExperience(i, "role", e.target.value)} placeholder="Role" className="h-8 text-xs" />
-                    <Input value={exp.company} onChange={(e) => updateExperience(i, "company", e.target.value)} placeholder="Company" className="h-8 text-xs" />
-                    <Input value={exp.period} onChange={(e) => updateExperience(i, "period", e.target.value)} placeholder="2020 - 2024" className="h-8 text-xs" />
-                    <textarea value={exp.description} onChange={(e) => updateExperience(i, "description", e.target.value)} placeholder="Description" className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs resize-none h-14 focus:outline-none focus:ring-1 focus:ring-ring" />
-                  </div>
-                ))}
-              </div>
-
-              {/* Education */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="font-display font-semibold text-sm text-foreground">Education</Label>
-                  <Button variant="ghost" size="sm" onClick={addEducation} className="h-7 text-xs"><Plus className="w-3 h-3 mr-1" /> Add</Button>
-                </div>
-                {portfolioData.education.map((edu, i) => (
-                  <div key={i} className="bg-secondary/50 rounded-lg p-3 space-y-2 relative">
-                    <button onClick={() => removeEducation(i)} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><Trash2 className="w-3 h-3" /></button>
-                    <Input value={edu.degree} onChange={(e) => updateEducation(i, "degree", e.target.value)} placeholder="Degree" className="h-8 text-xs" />
-                    <Input value={edu.institution} onChange={(e) => updateEducation(i, "institution", e.target.value)} placeholder="Institution" className="h-8 text-xs" />
-                    <Input value={edu.period} onChange={(e) => updateEducation(i, "period", e.target.value)} placeholder="2016 - 2020" className="h-8 text-xs" />
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
+        <div className="flex gap-4 justify-center">
           {/* Preview Panel */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className={showEditor && !isMobile ? "flex-1 min-w-0" : "w-full max-w-5xl"}
+            className="w-full max-w-5xl"
           >
             <div className={`bg-card rounded-2xl shadow-card-hover overflow-hidden transition-all duration-500 ${
               viewMode === "mobile" && !isMobile ? "w-[390px] h-[844px] mx-auto" : "w-full h-[80vh]"
