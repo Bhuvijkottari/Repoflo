@@ -33,6 +33,20 @@ const eduHtml = (d: PortfolioData, roleColor: string, instColor: string) =>
 const volHtml = (d: PortfolioData, roleColor: string, orgColor: string, descColor: string) =>
   d.volunteering.length ? d.volunteering.map(v => `<div style="margin-bottom:20px"><div style="font-weight:600;color:${roleColor}">${v.role}</div><div style="color:${orgColor}">${v.org}</div><div style="color:#999;font-size:.85rem">${v.period}</div><p style="color:${descColor};font-size:.9rem;margin-top:4px">${v.description}</p></div>`).join('') : '';
 
+const githubActivityHtml = (d: PortfolioData, cardBg: string, cardBorder: string, accentColor: string, descColor: string) => {
+  const s = d.githubStats;
+  if (!s) return '';
+  return `<section id="github" style="margin:48px 0"><h2 style="color:${accentColor};font-size:1.4rem;font-weight:600;margin-bottom:20px">GitHub Activity</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+    ${[[s.totalCommits.toLocaleString(),'Commits'],[s.publicRepos,'Repos'],[s.followers.toLocaleString(),'Followers'],[s.pullRequests,'PRs'],
+      [`${Math.floor(s.daysOnGithub/365)}y ${s.daysOnGithub%365}d`,'On GitHub']].map(([v,l]) =>
+      `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:${accentColor}">${v}</div><div style="font-size:.7rem;color:${descColor};text-transform:uppercase;letter-spacing:1px;margin-top:2px">${l}</div></div>`).join('')}
+  </div>
+  ${s.topLanguages.length ? `<div style="display:flex;border-radius:8px;overflow:hidden;height:22px;margin-bottom:16px">${s.topLanguages.map((l,i) => `<div style="width:${l.percentage}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;background:${['#6366f1','#f59e0b','#10b981','#ef4444'][i]}">${l.name} ${l.percentage}%</div>`).join('')}</div>` : ''}
+  ${s.recentCollaborations.length ? `<p style="font-size:.85rem;color:${descColor};margin-top:8px">Recent collaborations: ${s.recentCollaborations.join(', ')}</p>` : ''}
+  </section>`;
+};
+
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
   `<section id="contact" style="padding:48px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:16px">Contact</h2>
   <p style="color:${textColor}">Email: ${d.email}</p><p style="color:${textColor}">Location: ${d.location}</p>
