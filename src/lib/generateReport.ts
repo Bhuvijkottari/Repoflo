@@ -104,7 +104,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;background:#fff;l
       <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px">
         <span>Overall Score</span><span style="font-weight:700">${analysis.overallScore}/100</span>
       </div>
-      <div class="score-bar"><div class="score-fill" style="width:${analysis.overallScore}%;background:${badgeColor(analysis.recommendation)}"></div></div>
+      <div class="score-bar"><div class="score-fill" style="width:${analysis.overallScore}%;background:${verdictColor(analysis.overallScore)}"></div></div>
     </div>
   </div>
 
