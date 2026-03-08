@@ -42,14 +42,13 @@ export interface CandidateAnalysis {
   };
 }
 
-const badgeColor = (rec: string) => {
-  switch (rec) {
-    case "STRONG_HIRE": return "#16a34a";
-    case "HIRE": return "#2563eb";
-    case "CONSIDER": return "#d97706";
-    case "PASS": return "#dc2626";
-    default: return "#6b7280";
-  }
+const verdictColor = (score: number) => {
+  if (score >= 90) return "#16a34a";
+  if (score >= 80) return "#22c55e";
+  if (score >= 70) return "#2563eb";
+  if (score >= 60) return "#f59e0b";
+  if (score >= 50) return "#d97706";
+  return "#dc2626";
 };
 
 export function generateReportHtml(data: PortfolioData, analysis: CandidateAnalysis): string {
