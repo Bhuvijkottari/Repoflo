@@ -49,7 +49,7 @@ const themeImageMap: Record<string, string> = {
 const getThemeImage = (category: string) => themeImageMap[category] || themeBlue;
 
 const featureHighlights = [
-  { icon: Wand2, title: "Nova Powered", desc: "Smart content generation from your GitHub and resume data" },
+  { icon: Wand2, title: "AI Powered", desc: "Smart content generation from your GitHub and resume data" },
   { icon: Layers, title: "20+ Themes", desc: "Handcrafted, fully responsive designs with smooth animations" },
   { icon: Globe, title: "One Click Deploy", desc: "Download production-ready HTML instantly, host anywhere" },
 ];
