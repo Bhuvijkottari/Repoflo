@@ -427,7 +427,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                           )}
                           {isAiGenerated && (
                             <Badge variant="outline" className="text-[10px] border-blue-400/50 text-blue-600 bg-blue-500/10">
-                              <Bot className="w-2.5 h-2.5 mr-0.5" /> Nova Inferred Desc
+                              <Bot className="w-2.5 h-2.5 mr-0.5" /> AI Inferred Desc
                             </Badge>
                           )}
                         </div>
