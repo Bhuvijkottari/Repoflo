@@ -35,6 +35,12 @@ export interface CandidateAnalysis {
     summary: string;
   } | null;
   inferredProjectDescriptions?: Record<string, string>;
+  experienceLevelMatch?: {
+    required: string;
+    assessed: string;
+    isMatch: boolean;
+    explanation: string;
+  };
 }
 
 const badgeColor = (rec: string) => {
