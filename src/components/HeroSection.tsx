@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github, Palette, Zap, Star, Users, ChevronDown } from "lucide-react";
+import { ArrowRight, Github, Palette, Zap, Star, Users, ChevronDown, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroShapes from "@/assets/hero-shapes.png";
-import { getVisitorCount, incrementVisitorCount } from "@/lib/firebase";
+import { incrementVisitorCount } from "@/lib/firebase";
 
 const HeroSection = () => {
   const [visitorCount, setVisitorCount] = useState(0);
@@ -17,20 +17,22 @@ const HeroSection = () => {
     <section className="relative min-h-screen gradient-hero overflow-hidden flex items-center pt-16">
       {/* Animated background blobs */}
       <motion.div
-        animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.1, 0.05] }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.04, 0.1, 0.04] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-20 right-0 w-96 h-96 rounded-full bg-primary/5 blur-3xl"
+        className="absolute top-20 right-0 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl"
       />
       <motion.div
-        animate={{ scale: [1, 1.3, 1], opacity: [0.05, 0.08, 0.05] }}
+        animate={{ scale: [1, 1.3, 1], opacity: [0.03, 0.08, 0.03] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-20 left-0 w-80 h-80 rounded-full bg-accent/5 blur-3xl"
+        className="absolute bottom-20 left-0 w-96 h-96 rounded-full bg-accent/5 blur-3xl"
       />
       <motion.div
         animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full bg-primary/3 blur-3xl"
       />
+      {/* Grid pattern overlay */}
+      <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
       <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center relative z-10">
         {/* Left content */}
@@ -44,15 +46,15 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-display font-semibold"
+            className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold backdrop-blur-sm border border-primary/10"
           >
-            <Palette className="w-4 h-4" /> Powered by CODEHEXA
+            <Sparkles className="w-4 h-4" /> Powered by CODEHEXA
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-foreground"
+            className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] text-foreground tracking-tight"
           >
             Create a Stunning{" "}
             <span className="text-gradient">Portfolio</span>{" "}
@@ -62,7 +64,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-lg text-muted-foreground max-w-md font-body mb-6"
+            className="text-lg md:text-xl text-muted-foreground max-w-md font-body mb-6 leading-relaxed"
           >
             No coding. No stress. Just results.
           </motion.p>
@@ -81,7 +83,7 @@ const HeroSection = () => {
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button variant="outline" size="lg" className="rounded-full px-8 py-6 text-lg border-2" asChild>
+              <Button variant="outline" size="lg" className="rounded-full px-8 py-6 text-lg border-2 backdrop-blur-sm" asChild>
                 <a href="#process" onClick={(e) => { e.preventDefault(); document.getElementById("process")?.scrollIntoView({ behavior: "smooth" }) }}>
                   How it Works <ChevronDown className="ml-1 w-4 h-4" />
                 </a>
@@ -95,10 +97,12 @@ const HeroSection = () => {
             transition={{ delay: 0.7 }}
             className="flex items-center gap-3 pt-4 text-muted-foreground font-body text-sm"
           >
-            <Github className="w-5 h-5" />
-            <span>GitHub + Resume</span>
-            <ArrowRight className="w-4 h-4" />
-            <span className="font-semibold text-foreground">Website</span>
+            <div className="flex items-center gap-2 bg-secondary/60 px-3 py-1.5 rounded-full backdrop-blur-sm">
+              <Github className="w-4 h-4" />
+              <span>GitHub + Resume</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+              <span className="font-semibold text-foreground">Website</span>
+            </div>
           </motion.div>
 
           {/* Stats row */}
@@ -118,9 +122,11 @@ const HeroSection = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9 + i * 0.1 }}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2.5"
               >
-                {stat.icon}
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  {stat.icon}
+                </div>
                 <div>
                   <span className="font-display font-bold text-foreground text-sm">{stat.value}</span>
                   <span className="text-muted-foreground text-xs ml-1">{stat.label}</span>
@@ -137,7 +143,7 @@ const HeroSection = () => {
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           className="relative hidden lg:block"
         >
-          <img src={heroShapes} alt="Portfolio preview shapes" className="w-full" />
+          <img src={heroShapes} alt="Portfolio preview shapes" className="w-full drop-shadow-2xl" />
 
           <motion.div
             animate={{ y: [0, -10, 0], rotate: [0, 2, 0] }}
@@ -146,9 +152,9 @@ const HeroSection = () => {
           >
             <p className="font-display font-semibold text-sm text-foreground">Skills</p>
             <div className="mt-2 space-y-1.5">
-              <div className="h-2 rounded-full bg-primary/70 w-full" />
-              <div className="h-2 rounded-full bg-accent/60 w-4/5" />
-              <div className="h-2 rounded-full bg-primary/40 w-3/5" />
+              <motion.div className="h-2 rounded-full bg-primary/70 w-full" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.3 }} style={{ transformOrigin: 'left' }} />
+              <motion.div className="h-2 rounded-full bg-accent/60 w-4/5" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.5 }} style={{ transformOrigin: 'left' }} />
+              <motion.div className="h-2 rounded-full bg-primary/40 w-3/5" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.7 }} style={{ transformOrigin: 'left' }} />
             </div>
           </motion.div>
 
@@ -159,9 +165,9 @@ const HeroSection = () => {
           >
             <p className="font-display font-semibold text-sm text-foreground">20+ Themes</p>
             <div className="flex gap-1.5 mt-2">
-              <div className="w-8 h-8 rounded-lg bg-primary/20" />
-              <div className="w-8 h-8 rounded-lg bg-accent/20" />
-              <div className="w-8 h-8 rounded-lg bg-primary/30" />
+              <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/10" />
+              <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/10" />
+              <div className="w-8 h-8 rounded-lg bg-primary/30 border border-primary/10" />
             </div>
           </motion.div>
 
