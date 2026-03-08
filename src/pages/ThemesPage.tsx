@@ -17,10 +17,31 @@ import themeCyan from "@/assets/theme-preview-cyan.jpg";
 import themeMocha from "@/assets/theme-preview-mocha.jpg";
 import themeMidnight from "@/assets/theme-preview-midnight.jpg";
 import themeSteel from "@/assets/theme-preview-steel.jpg";
+import themeOcean from "@/assets/theme-preview-ocean.jpg";
+import themeSunset from "@/assets/theme-preview-sunset.jpg";
+import themeForest from "@/assets/theme-preview-forest.jpg";
+import themeCherry from "@/assets/theme-preview-cherry.jpg";
+import themeLavender from "@/assets/theme-preview-lavender.jpg";
+import themeArctic from "@/assets/theme-preview-arctic.jpg";
+import themeEmerald from "@/assets/theme-preview-emerald.jpg";
+import themeRoyal from "@/assets/theme-preview-royal.jpg";
+import themeRocket from "@/assets/theme-preview-rocket.jpg";
+import themeSakura from "@/assets/theme-preview-sakura.jpg";
+import themeNeon from "@/assets/theme-preview-neon.jpg";
+import themeElegant from "@/assets/theme-preview-elegant.jpg";
+import themeMinimal from "@/assets/theme-preview-minimal.jpg";
+import themeBold from "@/assets/theme-preview-bold.jpg";
+import themeCreative from "@/assets/theme-preview-creative.jpg";
+import themeTerminal from "@/assets/theme-preview-terminal.jpg";
+import themeRecruiter from "@/assets/theme-preview-recruiter.jpg";
 
 const themeImages: Record<string, string> = {
   blue: themeBlue, warm: themeWarm, dark: themeDark, green: themeGreen, pink: themePink,
   purple: themePurple, coral: themeCoral, cyan: themeCyan, mocha: themeMocha, midnight: themeMidnight, steel: themeSteel,
+  ocean: themeOcean, sunset: themeSunset, forest: themeForest, cherry: themeCherry, lavender: themeLavender,
+  arctic: themeArctic, emerald: themeEmerald, royal: themeRoyal, rocket: themeRocket, sakura: themeSakura,
+  neon: themeNeon, elegant: themeElegant, minimal: themeMinimal, bold: themeBold, creative: themeCreative,
+  terminal: themeTerminal, recruiter: themeRecruiter,
 };
 
 const themes = [
