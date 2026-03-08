@@ -190,7 +190,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "ocean":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">', "'Nunito',sans-serif", `
         <div style="background:#f0f9ff;color:#0c4a6e;min-height:100vh">
-        ${nav('rgba(240,249,255,.9)', '#0369a1', '#0284c7')}
+        ${nav('rgba(240,249,255,.9)', '#0369a1', '#0284c7', d.name)}
         <div id="about" style="background:linear-gradient(135deg,#0284c7,#14b8a6);padding:80px 24px;text-align:center;color:#fff">
           <div style="width:120px;height:120px;border-radius:50%;border:4px solid #fff;overflow:hidden;margin:0 auto 20px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-size:2.8rem;font-weight:800;margin-bottom:8px">${d.name}</h1><p style="opacity:.9;font-size:1.1rem">${d.title}</p><p style="opacity:.8;margin-top:8px;max-width:400px;margin-left:auto;margin-right:auto">${d.bio}</p></div>
