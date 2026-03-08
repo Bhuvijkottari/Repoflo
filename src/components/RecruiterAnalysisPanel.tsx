@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Download, Loader2, Bot, GitFork, Star, AlertTriangle, TrendingUp, Award, Brain, Target, Zap, Shield, BookOpen, Code2 } from "lucide-react";
 import type { CandidateAnalysis } from "@/lib/generateReport";
@@ -13,6 +12,13 @@ interface Props {
   onReanalyze: () => void;
   onDownloadReport: () => void;
 }
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-40px" },
+  transition: { duration: 0.5, ease: "easeOut" },
+};
 
 const CircularGauge = ({ value, size = 100, strokeWidth = 8, color, label }: { value: number; size?: number; strokeWidth?: number; color: string; label: string }) => {
   const radius = (size - strokeWidth) / 2;
@@ -29,7 +35,8 @@ const CircularGauge = ({ value, size = 100, strokeWidth = 8, color, label }: { v
             stroke={color} strokeWidth={strokeWidth} strokeLinecap="round"
             strokeDasharray={circumference}
             initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: offset }}
+            whileInView={{ strokeDashoffset: offset }}
+            viewport={{ once: true }}
             transition={{ duration: 1.2, ease: "easeOut" }}
           />
         </svg>
@@ -56,7 +63,8 @@ const ScoreBar = ({ label, value, icon: Icon }: { label: string; value: number; 
         <motion.div
           className={`h-full rounded-full ${color}`}
           initial={{ width: 0 }}
-          animate={{ width: `${value}%` }}
+          whileInView={{ width: `${value}%` }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         />
       </div>
@@ -78,13 +86,13 @@ const LeetCodeDonut = ({ easy, medium, hard }: { easy: number; medium: number; h
           <circle cx="18" cy="18" r="14" fill="none" stroke="hsl(var(--secondary))" strokeWidth="3.5" />
           <motion.circle cx="18" cy="18" r="14" fill="none" stroke="#22c55e" strokeWidth="3.5" strokeLinecap="round"
             strokeDasharray={`${easyPct * 0.88} ${88 - easyPct * 0.88}`} strokeDashoffset="0"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} />
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }} />
           <motion.circle cx="18" cy="18" r="14" fill="none" stroke="#f59e0b" strokeWidth="3.5" strokeLinecap="round"
             strokeDasharray={`${medPct * 0.88} ${88 - medPct * 0.88}`} strokeDashoffset={`${-easyPct * 0.88}`}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} />
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 }} />
           <motion.circle cx="18" cy="18" r="14" fill="none" stroke="#ef4444" strokeWidth="3.5" strokeLinecap="round"
             strokeDasharray={`${hardPct * 0.88} ${88 - hardPct * 0.88}`} strokeDashoffset={`${-(easyPct + medPct) * 0.88}`}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} />
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.6 }} />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="font-display text-xl font-bold text-foreground">{total}</span>
@@ -135,9 +143,9 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
   const lc = d.leetcodeStats;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6 space-y-6">
+    <div className="mt-6 space-y-6">
       {/* Header */}
-      <div className="bg-card rounded-2xl border border-border p-6">
+      <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" />
@@ -151,24 +159,23 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
           )}
         </div>
         <p className="text-xs text-muted-foreground font-body">Powered by AI — comprehensive evaluation with graphical insights</p>
-      </div>
+      </motion.div>
 
       {isAnalyzing && !analysis && (
-        <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground bg-card rounded-2xl border border-border">
+        <motion.div {...fadeInUp} className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground bg-card rounded-2xl border border-border">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <div className="text-center">
             <p className="font-display font-semibold text-foreground">Analyzing candidate profile...</p>
             <p className="text-xs text-muted-foreground mt-1 font-body">GitHub activity, ATS compatibility, LeetCode performance, and project authenticity</p>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {analysis && (
         <>
           {/* Recommendation + Overall Scores Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Recommendation Card */}
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
+            <motion.div {...fadeInUp} transition={{ ...fadeInUp.transition, delay: 0.1 }}
               className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">
               <span className="text-3xl mb-2">{recEmoji(analysis.recommendation)}</span>
               <span className={`inline-block px-5 py-2.5 rounded-xl font-display font-bold text-base ${badgeColor(analysis.recommendation)}`}>
@@ -177,15 +184,13 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               <span className="text-xs text-muted-foreground mt-3 font-body">Confidence: <strong className="text-foreground">{analysis.confidence}%</strong></span>
             </motion.div>
 
-            {/* Overall Score Gauge */}
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}
+            <motion.div {...fadeInUp} transition={{ ...fadeInUp.transition, delay: 0.15 }}
               className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center">
               <CircularGauge value={analysis.overallScore} size={110} strokeWidth={10} color="hsl(var(--primary))" label="Overall Score" />
             </motion.div>
 
-            {/* ATS Overall Gauge */}
             {analysis.atsScore && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
+              <motion.div {...fadeInUp} transition={{ ...fadeInUp.transition, delay: 0.2 }}
                 className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center">
                 <CircularGauge
                   value={analysis.atsScore.overall} size={110} strokeWidth={10}
@@ -197,8 +202,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
           </div>
 
           {/* Executive Summary */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-            className="bg-card rounded-2xl border border-border p-6">
+          <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
             <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Target className="w-3.5 h-3.5" /> Executive Summary
             </h4>
@@ -207,8 +211,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
 
           {/* ATS Score Breakdown */}
           {analysis.atsScore && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-              className="bg-card rounded-2xl border border-border p-6">
+            <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5" /> ATS Resume Score Breakdown
               </h4>
@@ -238,17 +241,14 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
 
           {/* LeetCode Analysis */}
           {(analysis.leetcodeInsights || lc) && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="bg-card rounded-2xl border border-border p-6">
+            <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <Code2 className="w-3.5 h-3.5" /> LeetCode Performance Analysis
               </h4>
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Donut chart */}
                 {lc && lc.totalSolved > 0 && (
                   <LeetCodeDonut easy={lc.easySolved} medium={lc.mediumSolved} hard={lc.hardSolved} />
                 )}
-                {/* Stats cards */}
                 {lc && (
                   <div className="grid grid-cols-2 gap-3">
                     {[
@@ -266,7 +266,6 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                   </div>
                 )}
               </div>
-              {/* AI LeetCode Insights */}
               {analysis.leetcodeInsights && (
                 <div className="grid md:grid-cols-2 gap-3 mt-5">
                   {Object.entries(analysis.leetcodeInsights).map(([key, val]) => (
@@ -287,14 +286,14 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
 
           {/* Strengths & Concerns */}
           <div className="grid md:grid-cols-2 gap-4">
-            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}
-              className="bg-card rounded-2xl border border-border p-6">
+            <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-green-600" /> Key Strengths
               </h4>
               <ul className="space-y-2">
                 {analysis.strengths?.map((s, i) => (
-                  <motion.li key={i} initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.05 }}
+                  <motion.li key={i} initial={{ opacity: 0, x: -5 }} whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }} transition={{ delay: i * 0.05, duration: 0.3 }}
                     className="flex items-start gap-2.5 text-sm font-body text-foreground bg-green-500/5 rounded-lg p-2.5">
                     <span className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="text-green-600 text-xs font-bold">✓</span>
@@ -304,14 +303,14 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                 ))}
               </ul>
             </motion.div>
-            <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}
-              className="bg-card rounded-2xl border border-border p-6">
+            <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> Concerns
               </h4>
               <ul className="space-y-2">
                 {analysis.concerns?.map((c, i) => (
-                  <motion.li key={i} initial={{ opacity: 0, x: 5 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.05 }}
+                  <motion.li key={i} initial={{ opacity: 0, x: 5 }} whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }} transition={{ delay: i * 0.05, duration: 0.3 }}
                     className="flex items-start gap-2.5 text-sm font-body text-foreground bg-red-500/5 rounded-lg p-2.5">
                     <span className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="text-red-500 text-xs font-bold">!</span>
@@ -324,8 +323,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
           </div>
 
           {/* GitHub Insights */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-            className="bg-card rounded-2xl border border-border p-6">
+          <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
             <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
               <GitFork className="w-3.5 h-3.5" /> GitHub Insights
             </h4>
@@ -342,8 +340,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
           </motion.div>
 
           {/* Projects with AI/Copied Detection */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
-            className="bg-card rounded-2xl border border-border p-6">
+          <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
             <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
               <Code2 className="w-3.5 h-3.5" /> Project Authenticity Analysis
             </h4>
@@ -359,7 +356,9 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                 if (lowStars && d.projects.length > 3) suspiciousFlags.push("No stars");
 
                 return (
-                  <div key={i} className="bg-secondary/30 rounded-xl p-4 border border-border/50">
+                  <motion.div key={i} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ delay: i * 0.04, duration: 0.3 }}
+                    className="bg-secondary/30 rounded-xl p-4 border border-border/50">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -397,7 +396,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                         )}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -415,8 +414,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
           </motion.div>
 
           {/* Technical Assessment */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-            className="bg-card rounded-2xl border border-border p-6">
+          <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
             <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5" /> Technical Assessment
             </h4>
@@ -438,8 +436,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
           </motion.div>
 
           {/* Hiring Notes */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}
-            className="bg-card rounded-2xl border border-border p-6">
+          <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
             <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5" /> Hiring Manager Notes
             </h4>
@@ -447,15 +444,14 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
           </motion.div>
 
           {/* Download Report CTA */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
-            className="flex justify-center pt-2 pb-4">
+          <motion.div {...fadeInUp} className="flex justify-center pt-2 pb-4">
             <Button variant="cta" size="lg" onClick={onDownloadReport} className="rounded-full px-8">
               <Download className="w-5 h-5 mr-2" /> Download Full Report
             </Button>
           </motion.div>
         </>
       )}
-    </motion.div>
+    </div>
   );
 };
 
