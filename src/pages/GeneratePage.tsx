@@ -232,6 +232,52 @@ const GeneratePage = () => {
             </motion.div>
           )}
 
+          {/* Recruiter Preferences - Only for Recruiter theme */}
+          {isRecruiter && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="space-y-5"
+            >
+              {/* Required Tech Stack */}
+              <div className="space-y-3">
+                <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
+                  <Search className="w-5 h-5 text-primary" /> Required Tech Stack
+                  <span className="text-muted-foreground font-normal text-xs ml-1">(optional — AI will compare)</span>
+                </Label>
+                <TechStackInput selected={requiredTechStack} onChange={setRequiredTechStack} />
+                {requiredTechStack.length > 0 && (
+                  <p className="text-xs text-muted-foreground font-body">
+                    {requiredTechStack.length} technolog{requiredTechStack.length === 1 ? "y" : "ies"} selected — AI will evaluate the candidate's match.
+                  </p>
+                )}
+              </div>
+
+              {/* Experience Level */}
+              <div className="space-y-3">
+                <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
+                  <Briefcase className="w-5 h-5 text-primary" /> Experience Level
+                  <span className="text-muted-foreground font-normal text-xs ml-1">(optional — hiring preference)</span>
+                </Label>
+                <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+                  <SelectTrigger className="h-12 text-base">
+                    <SelectValue placeholder="Any experience level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Level</SelectItem>
+                    <SelectItem value="intern">Intern</SelectItem>
+                    <SelectItem value="fresher">Fresher / Just Graduated</SelectItem>
+                    <SelectItem value="entry">Entry Level (0-2 years)</SelectItem>
+                    <SelectItem value="mid">Mid Level (2-5 years)</SelectItem>
+                    <SelectItem value="senior">Senior (5-8 years)</SelectItem>
+                    <SelectItem value="staff">Staff / Lead (8+ years)</SelectItem>
+                    <SelectItem value="principal">Principal / Architect (10+ years)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </motion.div>
+          )}
+
           {/* Resume Upload */}
           <div className="space-y-3">
             <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
