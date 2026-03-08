@@ -379,9 +379,9 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
             <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
               <GitFork className="w-3.5 h-3.5" /> GitHub Insights
             </h4>
-            <div className="grid md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {analysis.githubInsights && Object.entries(analysis.githubInsights).map(([key, val]) => (
-                <div key={key} className="bg-secondary/40 rounded-xl p-4 border border-border/50">
+                <div key={key} className="bg-secondary/40 rounded-xl p-4 border border-border/50 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                   <span className="text-[10px] font-display font-semibold text-foreground uppercase tracking-wider">
                     {key.replace(/([A-Z])/g, ' $1').trim()}
                   </span>
