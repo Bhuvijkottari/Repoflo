@@ -221,7 +221,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "forest":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">', "'Lora',serif", `
         <div style="background:#f0fdf4;color:#14532d;min-height:100vh">
-        ${nav('rgba(240,253,244,.9)', '#166534', '#16a34a')}
+        ${nav('rgba(240,253,244,.9)', '#166534', '#16a34a', d.name)}
         <div id="about" style="background:linear-gradient(135deg,#16a34a,#065f46);padding:80px 24px;text-align:center;color:#fff">
           <div style="width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,.4);overflow:hidden;margin:0 auto 20px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-size:2.8rem;font-weight:700;margin-bottom:8px">${d.name}</h1><p style="opacity:.9">${d.title}</p></div>
