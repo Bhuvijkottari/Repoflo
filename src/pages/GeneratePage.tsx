@@ -110,6 +110,14 @@ const GeneratePage = () => {
         finalData.leetcodeStats = leetcodeData;
       }
 
+      // Store recruiter preferences in session for PreviewPage
+      if (isRecruiter) {
+        sessionStorage.setItem("recruiterPrefs", JSON.stringify({
+          requiredTechStack,
+          experienceLevel,
+        }));
+      }
+
       if (resumeFile) {
         setStatus("AI is parsing your resume...");
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
