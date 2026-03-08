@@ -138,12 +138,12 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
         <div style="max-width:720px;margin:0 auto;padding:40px 24px">
           <div id="about" style="text-align:center;padding:60px 0 40px"><div style="width:120px;height:120px;border-radius:50%;margin:0 auto 20px;overflow:hidden"><img src="${d.avatar}" style="width:100%;height:100%"></div>
             <h1 style="font-size:2.5rem;font-weight:700;margin-bottom:8px">${d.name}</h1><p style="color:#666;font-size:1.1rem;margin-bottom:12px">${d.title}</p><p style="color:#888;max-width:500px;margin:0 auto">${d.bio}</p></div>
-          <section id="skills" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Skills</h2><div>${skillsHtml(d, '#f0f0f0', '#333')}</div></section>
-          <section id="experience" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Experience</h2>${expHtml(d, '#1a1a1a', '#666', '#666')}</section>
-          <section id="projects" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Projects</h2>${projectsHtml(d, '#fff', '#eee', '#1a1a1a', '#666', '#f5f5f5', '#888')}</section>
+          ${d.skills.length ? `<section id="skills" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Skills</h2><div>${skillsHtml(d, '#f0f0f0', '#333')}</div></section>` : ''}
+          ${d.experience.length ? `<section id="experience" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Experience</h2>${expHtml(d, '#1a1a1a', '#666', '#666')}</section>` : ''}
+          ${d.projects.length ? `<section id="projects" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Projects</h2>${projectsHtml(d, '#fff', '#eee', '#1a1a1a', '#666', '#f5f5f5', '#888')}</section>` : ''}
           ${githubActivityHtml(d, '#fff', '#eee', '#1a1a1a', '#666')}
           ${leetcodeHtml(d, '#fff', '#eee', '#1a1a1a', '#666')}
-          <section id="education" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Education</h2>${eduHtml(d, '#1a1a1a', '#666')}</section>
+          ${d.education.length ? `<section id="education" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Education</h2>${eduHtml(d, '#1a1a1a', '#666')}</section>` : ''}
           ${d.volunteering.length ? `<section id="volunteering" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Volunteering</h2>${volHtml(d, '#1a1a1a', '#666', '#666')}</section>` : ''}
           ${contactSection(d, '#fafafa', '#666', '#1a1a1a')}
         </div></div>`);
