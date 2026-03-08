@@ -287,14 +287,16 @@ const PreviewPage = () => {
               <button onClick={() => setViewMode("mobile")} className={`p-2 rounded-md transition-colors ${viewMode === "mobile" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}><Smartphone className="w-4 h-4" /></button>
               <button onClick={() => setViewMode("fullscreen")} className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"><Maximize className="w-4 h-4" /></button>
             </div>
-            {!inlineEditing && (
+            {!isRecruiter && !inlineEditing && (
               <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
                 <Pencil className="w-4 h-4 mr-1" /> {showEditor ? "Hide Editor" : "Edit Content"}
               </Button>
             )}
-            <Button variant={inlineEditing ? "default" : "outline"} size="sm" onClick={toggleInlineEditor}>
-              {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Editor</> : <><Edit3 className="w-4 h-4 mr-1" /> Open in Editor</>}
-            </Button>
+            {!isRecruiter && (
+              <Button variant={inlineEditing ? "default" : "outline"} size="sm" onClick={toggleInlineEditor}>
+                {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Editor</> : <><Edit3 className="w-4 h-4 mr-1" /> Open in Editor</>}
+              </Button>
+            )}
             {isRecruiter && (
               <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!analysis}>
                 <FileText className="w-4 h-4 mr-1" /> Download Report
