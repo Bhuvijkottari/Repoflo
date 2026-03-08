@@ -13,6 +13,23 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
 
+interface AtsScore {
+  overall: number;
+  keywordScore: number;
+  formatScore: number;
+  experienceScore: number;
+  educationScore: number;
+  skillsScore: number;
+  suggestions: string[];
+}
+
+interface LeetcodeInsights {
+  problemSolvingLevel: string;
+  difficultyBalance: string;
+  contestPerformance: string;
+  summary: string;
+}
+
 const PreviewPage = () => {
   const { themeId } = useParams<{ themeId: string }>();
   const { toast } = useToast();
