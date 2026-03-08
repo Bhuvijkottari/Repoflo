@@ -269,13 +269,8 @@ const PreviewPage = () => {
                     <button onClick={() => setViewMode("fullscreen")} className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"><Maximize className="w-4 h-4" /></button>
                   </div>
                 )}
-                {!isMobile && !inlineEditing && (
-                  <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
-                    <Pencil className="w-4 h-4 mr-1" /> {showEditor ? "Hide" : "Edit"}
-                  </Button>
-                )}
                 <Button variant={inlineEditing ? "default" : "outline"} size="sm" onClick={toggleInlineEditor}>
-                  {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit</> : <><Edit3 className="w-4 h-4 mr-1" /> Editor</>}
+                  {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Edit</> : <><Pencil className="w-4 h-4 mr-1" /> Edit</>}
                 </Button>
                 {!isMobile && (
                   <Button variant="outline" size="sm" onClick={handleDownloadCode}>
