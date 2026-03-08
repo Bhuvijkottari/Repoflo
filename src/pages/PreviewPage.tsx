@@ -18,10 +18,13 @@ const PreviewPage = () => {
   const { toast } = useToast();
   const [viewMode, setViewMode] = useState<"desktop" | "mobile" | "fullscreen">("desktop");
   const [showEditor, setShowEditor] = useState(false);
+  const [inlineEditing, setInlineEditing] = useState(false);
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [editableHtml, setEditableHtml] = useState("");
+  const [cleanHtml, setCleanHtml] = useState(""); // HTML without editor artifacts
   const [finalized, setFinalized] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Recruiter analysis state
   const [analysis, setAnalysis] = useState<CandidateAnalysis | null>(null);
