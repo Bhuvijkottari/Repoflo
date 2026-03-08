@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
 import RecruiterAnalysisPanel from "@/components/RecruiterAnalysisPanel";
+import TechStackInput from "@/components/TechStackInput";
 
 interface AtsScore {
   overall: number;
@@ -47,6 +48,7 @@ const PreviewPage = () => {
   // Recruiter analysis state
   const [analysis, setAnalysis] = useState<CandidateAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
 
   const isRecruiter = themeId === "recruiter";
 
@@ -88,7 +90,7 @@ const PreviewPage = () => {
     setIsAnalyzing(true);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-candidate", {
-        body: { portfolioData },
+        body: { portfolioData, requiredTechStack: requiredTechStack.length > 0 ? requiredTechStack : undefined },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -285,14 +287,16 @@ const PreviewPage = () => {
               <button onClick={() => setViewMode("mobile")} className={`p-2 rounded-md transition-colors ${viewMode === "mobile" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}><Smartphone className="w-4 h-4" /></button>
               <button onClick={() => setViewMode("fullscreen")} className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"><Maximize className="w-4 h-4" /></button>
             </div>
-            {!inlineEditing && (
+            {!isRecruiter && !inlineEditing && (
               <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
                 <Pencil className="w-4 h-4 mr-1" /> {showEditor ? "Hide Editor" : "Edit Content"}
               </Button>
             )}
-            <Button variant={inlineEditing ? "default" : "outline"} size="sm" onClick={toggleInlineEditor}>
-              {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Editor</> : <><Edit3 className="w-4 h-4 mr-1" /> Open in Editor</>}
-            </Button>
+            {!isRecruiter && (
+              <Button variant={inlineEditing ? "default" : "outline"} size="sm" onClick={toggleInlineEditor}>
+                {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Editor</> : <><Edit3 className="w-4 h-4 mr-1" /> Open in Editor</>}
+              </Button>
+            )}
             {isRecruiter && (
               <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!analysis}>
                 <FileText className="w-4 h-4 mr-1" /> Download Report
@@ -458,15 +462,31 @@ const PreviewPage = () => {
           </motion.div>
         </div>
 
-        {/* Recruiter Analysis Panel */}
+        {/* Recruiter Tech Stack Input & Analysis Panel */}
         {isRecruiter && portfolioData && (
-          <RecruiterAnalysisPanel
-            analysis={analysis}
-            isAnalyzing={isAnalyzing}
-            portfolioData={portfolioData}
-            onReanalyze={runAnalysis}
-            onDownloadReport={handleDownloadReport}
-          />
+          <>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6 bg-card rounded-2xl border border-border p-6">
+              <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Code className="w-3.5 h-3.5" /> Required Tech Stack (Optional)
+              </h4>
+              <p className="text-xs text-muted-foreground font-body mb-3">Add the tech stack your role requires. The analysis will show how well the candidate matches.</p>
+              <TechStackInput selected={requiredTechStack} onChange={setRequiredTechStack} />
+              {requiredTechStack.length > 0 && analysis && (
+                <Button variant="outline" size="sm" className="mt-3" onClick={runAnalysis} disabled={isAnalyzing}>
+                  {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                  Re-analyze with Tech Stack
+                </Button>
+              )}
+            </motion.div>
+            <RecruiterAnalysisPanel
+              analysis={analysis}
+              isAnalyzing={isAnalyzing}
+              portfolioData={portfolioData}
+              onReanalyze={runAnalysis}
+              onDownloadReport={handleDownloadReport}
+              requiredTechStack={requiredTechStack}
+            />
+          </>
         )}
 
         {/* Finalized banner */}

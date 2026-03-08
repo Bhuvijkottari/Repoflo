@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { portfolioData } = await req.json();
+    const { portfolioData, requiredTechStack } = await req.json();
     if (!portfolioData) {
       return new Response(JSON.stringify({ error: "No portfolio data provided" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -37,6 +37,7 @@ Analyze the candidate based on:
 6. Overall profile completeness
 7. LeetCode performance (if available): problem-solving skills, difficulty distribution, contest participation
 8. ATS Resume Analysis: evaluate the resume/profile content against typical ATS criteria including keyword density, section completeness, formatting, skills match, experience clarity
+${requiredTechStack?.length ? `9. Required Tech Stack Match: The hiring team requires these technologies: ${requiredTechStack.join(", ")}. Evaluate how well the candidate's skills, projects, and experience align with these requirements. Include a "techStackMatch" field in your response with matched/missing arrays and a brief assessment.` : ""}
 
 IMPORTANT for projects: If a project has "No description provided" as its description, infer what the project likely does based on its name, tech stack, and any other available context. Provide a brief inferred description.
 

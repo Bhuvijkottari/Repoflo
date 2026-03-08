@@ -11,6 +11,7 @@ interface Props {
   portfolioData: PortfolioData;
   onReanalyze: () => void;
   onDownloadReport: () => void;
+  requiredTechStack?: string[];
 }
 
 const fadeInUp = {
@@ -137,7 +138,7 @@ const recEmoji = (rec: string) => {
   }
 };
 
-const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanalyze, onDownloadReport }: Props) => {
+const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanalyze, onDownloadReport, requiredTechStack = [] }: Props) => {
   const d = portfolioData;
   const s = d.githubStats;
   const lc = d.leetcodeStats;
@@ -200,6 +201,57 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               </motion.div>
             )}
           </div>
+
+          {/* Tech Stack Match */}
+          {requiredTechStack.length > 0 && (
+            <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
+              <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                <Target className="w-3.5 h-3.5" /> Tech Stack Match
+              </h4>
+              {(() => {
+                const candidateSkills = d.skills.map(s => s.toLowerCase());
+                const candidateLangs = s?.topLanguages?.map(l => l.name.toLowerCase()) || [];
+                const projectTechs = d.projects.flatMap(p => p.tech.map(t => t.toLowerCase()));
+                const allCandidate = new Set([...candidateSkills, ...candidateLangs, ...projectTechs]);
+                const matched = requiredTechStack.filter(t => allCandidate.has(t.toLowerCase()));
+                const missing = requiredTechStack.filter(t => !allCandidate.has(t.toLowerCase()));
+                const matchPct = Math.round((matched.length / requiredTechStack.length) * 100);
+                const color = matchPct >= 75 ? "#22c55e" : matchPct >= 50 ? "#f59e0b" : "#ef4444";
+
+                return (
+                  <div>
+                    <div className="flex items-center gap-4 mb-4">
+                      <CircularGauge value={matchPct} size={90} strokeWidth={8} color={color} label="Match Rate" />
+                      <div className="flex-1">
+                        <p className="text-sm font-display font-bold text-foreground">{matched.length}/{requiredTechStack.length} technologies matched</p>
+                        <p className="text-xs text-muted-foreground font-body mt-1">
+                          {matchPct >= 75 ? "Strong match for this role's requirements." : matchPct >= 50 ? "Partial match — some gaps to discuss." : "Significant gaps in required technologies."}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-[10px] font-display font-semibold text-green-600 uppercase tracking-wider">Matched</span>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {matched.length > 0 ? matched.map(t => (
+                            <Badge key={t} className="text-[10px] bg-green-500/15 text-green-700 border-green-400/30 font-body">{t}</Badge>
+                          )) : <span className="text-xs text-muted-foreground font-body">None</span>}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-display font-semibold text-red-500 uppercase tracking-wider">Missing</span>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {missing.length > 0 ? missing.map(t => (
+                            <Badge key={t} variant="outline" className="text-[10px] border-red-400/30 text-red-600 bg-red-500/10 font-body">{t}</Badge>
+                          )) : <span className="text-xs text-muted-foreground font-body">None — full match!</span>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </motion.div>
+          )}
 
           {/* Executive Summary */}
           <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
