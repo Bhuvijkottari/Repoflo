@@ -28,7 +28,7 @@ const Navbar = () => {
   const links = [
     { label: "Home", path: "/", onClick: undefined },
     { label: "Themes", path: "/themes", onClick: undefined },
-    { label: "How It Works", path: "/#process", onClick: handleProcessClick },
+    { label: "Process", path: "/#process", onClick: handleProcessClick },
     { label: "Feedback", path: "/#feedback", onClick: handleFeedbackClick },
   ];
 
