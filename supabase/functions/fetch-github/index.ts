@@ -35,8 +35,15 @@ serve(async (req) => {
     ]);
 
     if (!profileRes.ok) {
-      return new Response(JSON.stringify({ error: `GitHub user not found: ${username}` }), {
-        status: 404,
+      const errorBody = await profileRes.text();
+      console.error(`GitHub API error for ${username}: ${profileRes.status} - ${errorBody}`);
+      const errorMsg = profileRes.status === 403 
+        ? "GitHub API rate limit exceeded. Please try again in a few minutes."
+        : profileRes.status === 404 
+          ? `GitHub user not found: ${username}`
+          : `GitHub API error: ${profileRes.status}`;
+      return new Response(JSON.stringify({ error: errorMsg }), {
+        status: profileRes.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
