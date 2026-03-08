@@ -24,6 +24,7 @@ export interface PortfolioData {
     daysOnGithub: number;
     recentCollaborations: string[];
     aiGeneratedContent: number;
+    aiDetectedRepos?: string[];
     topLanguages: { name: string; percentage: number }[];
     contributionStreak: number;
   } | null;
