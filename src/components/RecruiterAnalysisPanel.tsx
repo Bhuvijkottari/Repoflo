@@ -150,7 +150,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" />
-            <h3 className="font-display font-bold text-lg text-foreground">Nova Candidate Analysis</h3>
+            <h3 className="font-display font-bold text-lg text-foreground">AI Candidate Analysis</h3>
           </div>
           {analysis && (
             <Button variant="outline" size="sm" onClick={onReanalyze} disabled={isAnalyzing}>
