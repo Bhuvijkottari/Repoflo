@@ -41,9 +41,22 @@ const PreviewPage = () => {
 
   useEffect(() => {
     if (portfolioData) {
-      setEditableHtml(getThemeHtml(themeId || "minimal", portfolioData));
+      const html = getThemeHtml(themeId || "minimal", portfolioData);
+      setEditableHtml(html);
+      setCleanHtml(html);
     }
   }, [themeId, portfolioData]);
+
+  // Listen for postMessage from inline editor
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === '__editor_update') {
+        setCleanHtml(e.data.html);
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
 
   // Auto-trigger analysis for recruiter theme
   useEffect(() => {
