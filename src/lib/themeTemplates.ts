@@ -327,12 +327,12 @@ function generateGenericTheme(themeId: string, d: PortfolioData): string {
       <p style="color:${!isDark && headerIsGradient ? 'rgba(255,255,255,.7)' : descColor};margin-top:12px;max-width:500px;margin-left:auto;margin-right:auto">${d.bio}</p>
     </div>
     <div style="max-width:800px;margin:0 auto;padding:40px 24px">
-      <section id="skills" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Skills</h2><div>${skillsHtml(d, cfg.skillBg, cfg.skillColor, cfg.cardBorder)}</div></section>
-      <section id="experience" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Experience</h2>${expHtml(d, cfg.text, cfg.accent, descColor)}</section>
-      <section id="projects" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, cfg.cardBg, cfg.cardBorder, cfg.text, descColor, cfg.tagBg, cfg.tagColor)}</section>
+      ${d.skills.length ? `<section id="skills" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Skills</h2><div>${skillsHtml(d, cfg.skillBg, cfg.skillColor, cfg.cardBorder)}</div></section>` : ''}
+      ${d.experience.length ? `<section id="experience" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Experience</h2>${expHtml(d, cfg.text, cfg.accent, descColor)}</section>` : ''}
+      ${d.projects.length ? `<section id="projects" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, cfg.cardBg, cfg.cardBorder, cfg.text, descColor, cfg.tagBg, cfg.tagColor)}</section>` : ''}
       ${githubActivityHtml(d, cfg.cardBg, cfg.cardBorder, cfg.accent, descColor)}
       ${leetcodeHtml(d, cfg.cardBg, cfg.cardBorder, cfg.accent, descColor)}
-      <section id="education" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Education</h2>${eduHtml(d, cfg.text, cfg.accent)}</section>
+      ${d.education.length ? `<section id="education" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Education</h2>${eduHtml(d, cfg.text, cfg.accent)}</section>` : ''}
       ${contactSection(d, cfg.bg, descColor, cfg.accent)}
     </div></div>`);
 }
