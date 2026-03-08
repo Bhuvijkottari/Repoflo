@@ -1,15 +1,28 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github, Palette } from "lucide-react";
+import { ArrowRight, Github, Palette, Zap, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroShapes from "@/assets/hero-shapes.png";
 
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen gradient-hero overflow-hidden flex items-center pt-16">
-      {/* Background blobs */}
-      <div className="absolute top-20 right-0 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute bottom-20 left-0 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
+      {/* Animated background blobs */}
+      <motion.div
+        animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.1, 0.05] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-20 right-0 w-96 h-96 rounded-full bg-primary/5 blur-3xl"
+      />
+      <motion.div
+        animate={{ scale: [1, 1.3, 1], opacity: [0.05, 0.08, 0.05] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-20 left-0 w-80 h-80 rounded-full bg-accent/5 blur-3xl"
+      />
+      <motion.div
+        animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full bg-primary/3 blur-3xl"
+      />
 
       <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
         {/* Left content */}
@@ -19,32 +32,87 @@ const HeroSection = () => {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="space-y-6"
         >
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-display font-semibold">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-display font-semibold"
+          >
             <Palette className="w-4 h-4" /> 20+ Themes by ADITHYA & THARUN K SHETTY
-          </div>
-          <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-foreground">
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-foreground"
+          >
             Create a Stunning{" "}
             <span className="text-gradient">Portfolio</span>{" "}
             in Minutes
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-md font-body">
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-lg text-muted-foreground max-w-md font-body"
+          >
             No coding. No stress. Just results.
-          </p>
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button variant="cta" size="lg" className="rounded-full px-8 py-6 text-lg" asChild>
-              <Link to="/generate">
-                Generate Your Portfolio <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
-            </Button>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex flex-col sm:flex-row gap-4 pt-4"
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="cta" size="lg" className="rounded-full px-8 py-6 text-lg animate-pulse-glow" asChild>
+                <Link to="/generate">
+                  Generate Your Portfolio <ArrowRight className="ml-2 w-5 h-5" />
+                </Link>
+              </Button>
+            </motion.div>
+          </motion.div>
 
-          <div className="flex items-center gap-3 pt-4 text-muted-foreground font-body text-sm">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="flex items-center gap-3 pt-4 text-muted-foreground font-body text-sm"
+          >
             <Github className="w-5 h-5" />
             <span>GitHub + Resume</span>
             <ArrowRight className="w-4 h-4" />
             <span className="font-semibold text-foreground">Website</span>
-          </div>
+          </motion.div>
+
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="flex gap-8 pt-6"
+          >
+            {[
+              { icon: <Zap className="w-4 h-4 text-primary" />, value: "20+", label: "Themes" },
+              { icon: <Star className="w-4 h-4 text-primary" />, value: "AI", label: "Powered" },
+              { icon: <Github className="w-4 h-4 text-primary" />, value: "GitHub", label: "Integrated" },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 + i * 0.1 }}
+                className="flex items-center gap-2"
+              >
+                {stat.icon}
+                <div>
+                  <span className="font-display font-bold text-foreground text-sm">{stat.value}</span>
+                  <span className="text-muted-foreground text-xs ml-1">{stat.label}</span>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
         </motion.div>
 
         {/* Right visual */}
@@ -54,15 +122,10 @@ const HeroSection = () => {
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           className="relative hidden lg:block"
         >
-          <img
-            src={heroShapes}
-            alt="Portfolio preview shapes"
-            className="w-full animate-float"
-          />
+          <img src={heroShapes} alt="Portfolio preview shapes" className="w-full" />
 
-          {/* Floating cards */}
           <motion.div
-            animate={{ y: [0, -10, 0] }}
+            animate={{ y: [0, -10, 0], rotate: [0, 2, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             className="absolute top-1/4 right-0 bg-card rounded-xl shadow-card p-4 min-w-[140px]"
           >
@@ -75,7 +138,7 @@ const HeroSection = () => {
           </motion.div>
 
           <motion.div
-            animate={{ y: [0, -8, 0] }}
+            animate={{ y: [0, -8, 0], rotate: [0, -1, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
             className="absolute top-1/3 left-8 bg-card rounded-xl shadow-card p-4 min-w-[140px]"
           >
@@ -88,7 +151,7 @@ const HeroSection = () => {
           </motion.div>
 
           <motion.div
-            animate={{ y: [0, -12, 0] }}
+            animate={{ y: [0, -12, 0], rotate: [0, 1.5, 0] }}
             transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             className="absolute bottom-1/4 right-12 bg-card rounded-xl shadow-card p-4 min-w-[140px]"
           >

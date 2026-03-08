@@ -47,6 +47,24 @@ const githubActivityHtml = (d: PortfolioData, cardBg: string, cardBorder: string
   </section>`;
 };
 
+const leetcodeHtml = (d: PortfolioData, cardBg: string, cardBorder: string, accentColor: string, descColor: string) => {
+  const lc = d.leetcodeStats;
+  if (!lc) return '';
+  return `<section id="leetcode" style="margin:48px 0"><h2 style="color:${accentColor};font-size:1.4rem;font-weight:600;margin-bottom:20px">LeetCode Profile</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px">
+    ${[[lc.totalSolved,'Total Solved'],[lc.easySolved,'Easy'],[lc.mediumSolved,'Medium'],[lc.hardSolved,'Hard'],
+      [lc.ranking ? `#${lc.ranking.toLocaleString()}` : 'N/A','Ranking'],[lc.contestRating || 'N/A','Contest Rating']].map(([v,l]) =>
+      `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:${accentColor}">${v}</div><div style="font-size:.7rem;color:${descColor};text-transform:uppercase;letter-spacing:1px;margin-top:2px">${l}</div></div>`).join('')}
+  </div>
+  ${lc.totalSolved > 0 ? `<div style="display:flex;border-radius:8px;overflow:hidden;height:22px;margin-bottom:16px">
+    <div style="width:${Math.round((lc.easySolved/lc.totalSolved)*100)}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;background:#22c55e">Easy ${lc.easySolved}</div>
+    <div style="width:${Math.round((lc.mediumSolved/lc.totalSolved)*100)}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;background:#f59e0b">Med ${lc.mediumSolved}</div>
+    <div style="width:${Math.round((lc.hardSolved/lc.totalSolved)*100)}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;background:#ef4444">Hard ${lc.hardSolved}</div>
+  </div>` : ''}
+  ${lc.recentSubmissions?.length ? `<p style="font-size:.85rem;color:${descColor}">Recent: ${lc.recentSubmissions.slice(0,3).join(', ')}</p>` : ''}
+  </section>`;
+};
+
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
   `<section id="contact" style="padding:48px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:16px">Contact</h2>
   <p style="color:${textColor}">Email: ${d.email}</p><p style="color:${textColor}">Location: ${d.location}</p>
@@ -113,6 +131,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="experience" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Experience</h2>${expHtml(d, '#1a1a1a', '#666', '#666')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Projects</h2>${projectsHtml(d, '#fff', '#eee', '#1a1a1a', '#666', '#f5f5f5', '#888')}</section>
           ${githubActivityHtml(d, '#fff', '#eee', '#1a1a1a', '#666')}
+          ${leetcodeHtml(d, '#fff', '#eee', '#1a1a1a', '#666')}
           <section id="education" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Education</h2>${eduHtml(d, '#1a1a1a', '#666')}</section>
           ${d.volunteering.length ? `<section id="volunteering" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Volunteering</h2>${volHtml(d, '#1a1a1a', '#666', '#666')}</section>` : ''}
           ${contactSection(d, '#fafafa', '#666', '#1a1a1a')}
@@ -132,6 +151,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="experience" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Experience</h2>${expHtml(d, '#fff', '#a855f7', '#999')}</section>
           <section id="projects" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Projects</h2>${projectsHtml(d, 'rgba(255,255,255,.05)', 'rgba(255,255,255,.1)', '#fff', '#999', 'rgba(59,130,246,.15)', '#60a5fa')}</section>
           ${githubActivityHtml(d, 'rgba(255,255,255,.05)', 'rgba(255,255,255,.1)', '#a855f7', '#999')}
+          ${leetcodeHtml(d, 'rgba(255,255,255,.05)', 'rgba(255,255,255,.1)', '#a855f7', '#999')}
           <section id="education" style="margin:60px 0"><h2 style="font-size:1.8rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Education</h2>${eduHtml(d, '#fff', '#a855f7')}</section>
           ${contactSection(d, '#0a0a0a', '#999', '#a855f7')}
         </div></div>`);
@@ -300,6 +320,7 @@ function generateGenericTheme(themeId: string, d: PortfolioData): string {
       <section id="experience" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Experience</h2>${expHtml(d, cfg.text, cfg.accent, descColor)}</section>
       <section id="projects" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, cfg.cardBg, cfg.cardBorder, cfg.text, descColor, cfg.tagBg, cfg.tagColor)}</section>
       ${githubActivityHtml(d, cfg.cardBg, cfg.cardBorder, cfg.accent, descColor)}
+      ${leetcodeHtml(d, cfg.cardBg, cfg.cardBorder, cfg.accent, descColor)}
       <section id="education" style="margin:48px 0"><h2 style="color:${cfg.accent};font-size:1.3rem;margin-bottom:20px">Education</h2>${eduHtml(d, cfg.text, cfg.accent)}</section>
       ${contactSection(d, cfg.bg, descColor, cfg.accent)}
     </div></div>`);

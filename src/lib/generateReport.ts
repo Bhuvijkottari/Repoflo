@@ -19,6 +19,22 @@ export interface CandidateAnalysis {
     specializations: string[];
   };
   hiringNotes: string;
+  atsScore?: {
+    overall: number;
+    keywordScore: number;
+    formatScore: number;
+    experienceScore: number;
+    educationScore: number;
+    skillsScore: number;
+    suggestions: string[];
+  };
+  leetcodeInsights?: {
+    problemSolvingLevel: string;
+    difficultyBalance: string;
+    contestPerformance: string;
+    summary: string;
+  } | null;
+  inferredProjectDescriptions?: Record<string, string>;
 }
 
 const badgeColor = (rec: string) => {
