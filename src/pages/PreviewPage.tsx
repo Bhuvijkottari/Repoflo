@@ -90,7 +90,7 @@ const PreviewPage = () => {
     setIsAnalyzing(true);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-candidate", {
-        body: { portfolioData },
+        body: { portfolioData, requiredTechStack: requiredTechStack.length > 0 ? requiredTechStack : undefined },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
