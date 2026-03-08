@@ -138,9 +138,8 @@ const Index = () => {
       </section>
 
       {/* Themes Showcase */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-16 sm:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-secondary/20 via-primary/[0.03] to-background pointer-events-none" />
-        {/* Decorative orbs */}
         <motion.div
           animate={{ scale: [1, 1.15, 1], opacity: [0.03, 0.06, 0.03] }}
           transition={{ duration: 8, repeat: Infinity }}
@@ -152,12 +151,12 @@ const Index = () => {
           className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-accent blur-3xl pointer-events-none"
         />
 
-        <div className="container mx-auto px-4 relative">
+        <div className="container mx-auto px-4 sm:px-6 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-10 sm:mb-16"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -170,12 +169,12 @@ const Index = () => {
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
               Themes for Every <span className="text-gradient">Style</span>
             </h2>
-            <p className="text-muted-foreground font-body max-w-lg mx-auto text-base">
+            <p className="text-muted-foreground font-body max-w-lg mx-auto text-base px-2">
               From minimal to bold, terminal to luxury. Every theme is fully responsive with animations and smooth navigation.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 max-w-5xl mx-auto">
             {[
               { name: "Recruiter", image: "recruiter" },
               { name: "Minimal", image: "minimal" },
