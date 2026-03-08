@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Loader2, Bot, GitFork, Star, AlertTriangle, TrendingUp, Award, Brain, Target, Zap, Shield, BookOpen, Code2 } from "lucide-react";
+import { Download, Loader2, Bot, GitFork, Star, AlertTriangle, TrendingUp, Award, Brain, Target, Zap, Shield, BookOpen, Code2, Briefcase } from "lucide-react";
 import type { CandidateAnalysis } from "@/lib/generateReport";
 import type { PortfolioData } from "@/lib/mockData";
 
