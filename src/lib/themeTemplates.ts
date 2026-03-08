@@ -139,7 +139,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "developer":
       return wrapTheme('', "'Courier New',monospace", `
         <div style="background:#1e1e2e;color:#cdd6f4;min-height:100vh">
-        ${nav('rgba(30,30,46,.95)', '#a6adc8', '#cba6f7', ['About', 'Skills', 'Experience', 'Projects'])}
+        ${nav('rgba(30,30,46,.95)', '#a6adc8', '#cba6f7', d.name, ['About', 'Skills', 'Experience', 'Projects'])}
         <div style="max-width:800px;margin:0 auto;padding:40px 24px">
           <div id="about" style="background:#11111b;border:1px solid #313244;border-radius:12px;overflow:hidden;margin-bottom:32px">
             <div style="background:#181825;padding:8px 16px;display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:#f38ba8;display:inline-block"></span><span style="width:12px;height:12px;border-radius:50%;background:#f9e2af;display:inline-block"></span><span style="width:12px;height:12px;border-radius:50%;background:#a6e3a1;display:inline-block"></span><span style="color:#585b70;margin-left:8px;font-size:.8rem">portfolio.js</span></div>
