@@ -15,10 +15,10 @@ interface Props {
 }
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-40px" },
-  transition: { duration: 0.5 },
+  transition: { duration: 0.6, ease: "easeOut" as const },
 };
 
 const CircularGauge = ({ value, size = 100, strokeWidth = 8, color, label }: { value: number; size?: number; strokeWidth?: number; color: string; label: string }) => {
@@ -175,7 +175,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
       {analysis && (
         <>
           {/* Recommendation + Overall Scores Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <motion.div {...fadeInUp} transition={{ ...fadeInUp.transition, delay: 0.1 }}
               className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">
               <span className="text-3xl mb-2">{recEmoji(analysis.recommendation)}</span>
@@ -267,7 +267,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5" /> ATS Resume Score Breakdown
               </h4>
-              <div className="grid md:grid-cols-2 gap-x-8 gap-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                 <ScoreBar label="Keywords Match" value={analysis.atsScore.keywordScore} icon={Zap} />
                 <ScoreBar label="Format & Structure" value={analysis.atsScore.formatScore} icon={BookOpen} />
                 <ScoreBar label="Experience Relevance" value={analysis.atsScore.experienceScore} icon={TrendingUp} />
@@ -297,7 +297,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <Code2 className="w-3.5 h-3.5" /> LeetCode Performance Analysis
               </h4>
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {lc && lc.totalSolved > 0 && (
                   <LeetCodeDonut easy={lc.easySolved} medium={lc.mediumSolved} hard={lc.hardSolved} />
                 )}
@@ -319,7 +319,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                 )}
               </div>
               {analysis.leetcodeInsights && (
-                <div className="grid md:grid-cols-2 gap-3 mt-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
                   {Object.entries(analysis.leetcodeInsights).map(([key, val]) => (
                     <div key={key} className="bg-secondary/30 rounded-xl p-3 border border-border/50">
                       <span className="text-[10px] font-display font-semibold text-foreground uppercase tracking-wider">
@@ -337,7 +337,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
           )}
 
           {/* Strengths & Concerns */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <motion.div {...fadeInUp} className="bg-card rounded-2xl border border-border p-6">
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-green-600" /> Key Strengths
@@ -379,9 +379,9 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
             <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
               <GitFork className="w-3.5 h-3.5" /> GitHub Insights
             </h4>
-            <div className="grid md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {analysis.githubInsights && Object.entries(analysis.githubInsights).map(([key, val]) => (
-                <div key={key} className="bg-secondary/40 rounded-xl p-4 border border-border/50">
+                <div key={key} className="bg-secondary/40 rounded-xl p-4 border border-border/50 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                   <span className="text-[10px] font-display font-semibold text-foreground uppercase tracking-wider">
                     {key.replace(/([A-Z])/g, ' $1').trim()}
                   </span>
