@@ -30,7 +30,14 @@ serve(async (req) => {
 
     // Read file as bytes and convert to base64 for AI processing
     const fileBytes = new Uint8Array(await file.arrayBuffer());
-    const base64Content = btoa(String.fromCharCode(...fileBytes));
+    // Chunk the conversion to avoid stack overflow on large files
+    let binary = "";
+    const chunkSize = 8192;
+    for (let i = 0; i < fileBytes.length; i += chunkSize) {
+      const chunk = fileBytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode(...chunk);
+    }
+    const base64Content = btoa(binary);
     
     // Determine MIME type
     const fileName = file.name.toLowerCase();
