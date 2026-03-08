@@ -250,15 +250,6 @@ const PreviewPage = () => {
     updateField("skills", portfolioData.skills.filter((_, idx) => idx !== i));
   };
 
-  const badgeColor = (rec: string) => {
-    switch (rec) {
-      case "STRONG_HIRE": return "bg-green-600 text-white";
-      case "HIRE": return "bg-blue-600 text-white";
-      case "CONSIDER": return "bg-amber-500 text-white";
-      case "PASS": return "bg-red-600 text-white";
-      default: return "bg-muted text-foreground";
-    }
-  };
 
   if (viewMode === "fullscreen") {
     return (
