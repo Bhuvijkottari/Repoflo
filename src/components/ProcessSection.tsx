@@ -4,7 +4,7 @@ import { Upload, Github, Palette, Rocket } from "lucide-react";
 const steps = [
   { icon: Github, title: "Connect GitHub", desc: "Link your GitHub profile to auto-import projects" },
   { icon: Upload, title: "Upload Resume", desc: "AI reads your resume and extracts all sections" },
-  { icon: Palette, title: "Pick a Theme", desc: "Choose from 5 stunning themes or Recruiter mode" },
+  { icon: Palette, title: "Pick a Theme", desc: "Choose from 20+ stunning themes or Recruiter mode" },
   { icon: Rocket, title: "Generate & Deploy", desc: "Get a production-ready portfolio instantly" },
 ];
 
