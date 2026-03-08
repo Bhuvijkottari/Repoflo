@@ -422,6 +422,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
             <div className="space-y-3">
               {d.projects.map((p, i) => {
                 const isAiGenerated = analysis.inferredProjectDescriptions?.[p.name];
+                const isAiBuilt = (p as any).isAiGenerated || s?.aiDetectedRepos?.includes(p.name);
                 const noDesc = p.description === "No description provided" || !p.description;
                 const lowStars = p.stars <= 0;
                 const hasCommonTemplate = p.name.toLowerCase().includes("todo") || p.name.toLowerCase().includes("calculator") || p.name.toLowerCase().includes("weather");
@@ -433,27 +434,41 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                 return (
                   <motion.div key={i} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }} transition={{ delay: i * 0.04, duration: 0.3 }}
-                    className="bg-secondary/30 rounded-xl p-4 border border-border/50">
+                    className={`rounded-xl p-4 border transition-all ${
+                      isAiBuilt 
+                        ? "bg-red-500/10 border-red-500/40 ring-1 ring-red-500/30" 
+                        : "bg-secondary/30 border-border/50"
+                    }`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-display font-semibold text-sm text-foreground">{p.name}</span>
+                          <span className={`font-display font-semibold text-sm ${isAiBuilt ? "text-red-600" : "text-foreground"}`}>{p.name}</span>
                           {p.stars > 0 && (
                             <span className="flex items-center gap-0.5 text-xs text-amber-500 font-body">
                               <Star className="w-3 h-3" /> {p.stars}
                             </span>
                           )}
-                          {suspiciousFlags.length > 0 && (
+                          {isAiBuilt && (
+                            <Badge className="text-[10px] bg-red-600 text-white border-red-700 animate-pulse">
+                              <Bot className="w-2.5 h-2.5 mr-0.5" /> AI-Built Detected
+                            </Badge>
+                          )}
+                          {!isAiBuilt && suspiciousFlags.length > 0 && (
                             <Badge variant="outline" className="text-[10px] border-amber-400/50 text-amber-600 bg-amber-500/10">
                               <AlertTriangle className="w-2.5 h-2.5 mr-0.5" /> Review
                             </Badge>
                           )}
-                          {isAiGenerated && (
+                          {isAiGenerated && !isAiBuilt && (
                             <Badge variant="outline" className="text-[10px] border-blue-400/50 text-blue-600 bg-blue-500/10">
                               <Bot className="w-2.5 h-2.5 mr-0.5" /> AI Inferred Desc
                             </Badge>
                           )}
                         </div>
+                        {isAiBuilt && (
+                          <p className="text-xs text-red-500 font-semibold mt-1 font-body flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" /> This repository appears to be built using AI tools (Lovable, Bolt, Cursor, etc.)
+                          </p>
+                        )}
                         <p className="text-xs text-muted-foreground mt-1 font-body">
                           {isAiGenerated ? (isAiGenerated as string) : p.description}
                         </p>
@@ -462,7 +477,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                             <span key={t} className="text-[10px] bg-secondary px-2 py-0.5 rounded-md text-muted-foreground font-body">{t}</span>
                           ))}
                         </div>
-                        {suspiciousFlags.length > 0 && (
+                        {!isAiBuilt && suspiciousFlags.length > 0 && (
                           <div className="flex gap-1.5 mt-2">
                             {suspiciousFlags.map(f => (
                               <span key={f} className="text-[9px] bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded font-body">{f}</span>
