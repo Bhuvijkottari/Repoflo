@@ -5,7 +5,7 @@ import HeroSection from "@/components/HeroSection";
 import ProcessSection from "@/components/ProcessSection";
 import RecruiterSection from "@/components/RecruiterSection";
 import FeedbackSection from "@/components/FeedbackSection";
-import { Sparkles, Shield, ArrowRight, X, Target, Github, Heart } from "lucide-react";
+import { ArrowRight, X, Target, Sparkles, Layers, Wand2, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import themeBlue from "@/assets/theme-preview-blue.jpg";
@@ -47,6 +47,12 @@ const themeImageMap: Record<string, string> = {
 };
 
 const getThemeImage = (category: string) => themeImageMap[category] || themeBlue;
+
+const featureHighlights = [
+  { icon: Wand2, title: "Nova Powered", desc: "Smart content generation from your GitHub and resume data" },
+  { icon: Layers, title: "20+ Themes", desc: "Handcrafted, fully responsive designs with smooth animations" },
+  { icon: Globe, title: "One Click Deploy", desc: "Download production-ready HTML instantly, host anywhere" },
+];
 
 const Index = () => {
   const [showRecruiterPopup, setShowRecruiterPopup] = useState(false);
@@ -103,9 +109,49 @@ const Index = () => {
         )}
       </AnimatePresence>
 
+      {/* Feature Highlights - NEW section */}
+      <section className="py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.02] to-background pointer-events-none" />
+        <div className="container mx-auto px-4 relative">
+          <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {featureHighlights.map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className="relative group"
+              >
+                <div className="bg-card rounded-2xl p-6 border border-border shadow-card hover:shadow-card-hover transition-all duration-300 h-full">
+                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <f.icon className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <h3 className="font-display font-bold text-foreground text-base mb-1.5">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground font-body leading-relaxed">{f.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Themes Showcase */}
-      <section className="py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/20 to-background pointer-events-none" />
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-secondary/20 via-primary/[0.03] to-background pointer-events-none" />
+        {/* Decorative orbs */}
+        <motion.div
+          animate={{ scale: [1, 1.15, 1], opacity: [0.03, 0.06, 0.03] }}
+          transition={{ duration: 8, repeat: Infinity }}
+          className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-primary blur-3xl pointer-events-none"
+        />
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], opacity: [0.02, 0.05, 0.02] }}
+          transition={{ duration: 10, repeat: Infinity, delay: 2 }}
+          className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-accent blur-3xl pointer-events-none"
+        />
+
         <div className="container mx-auto px-4 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -113,10 +159,17 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
-              20+ Premium Themes
-            </div>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">Themes for Every Style</h2>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4"
+            >
+              <Sparkles className="w-4 h-4" /> 20+ Premium Themes
+            </motion.div>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Themes for Every <span className="text-gradient">Style</span>
+            </h2>
             <p className="text-muted-foreground font-body max-w-lg mx-auto text-base">
               From minimal to bold, terminal to luxury. Every theme is fully responsive with animations and smooth navigation.
             </p>
@@ -155,10 +208,10 @@ const Index = () => {
                 className="group cursor-pointer"
               >
                 <Link to="/themes">
-                  <div className="h-24 rounded-xl overflow-hidden mb-2 shadow-sm group-hover:shadow-card-hover transition-all duration-300 border border-transparent group-hover:border-primary/20">
+                  <div className="h-28 rounded-xl overflow-hidden mb-2 shadow-card group-hover:shadow-card-hover transition-all duration-300 border border-border/50 group-hover:border-primary/30">
                     <img src={getThemeImage(theme.image)} alt={theme.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   </div>
-                  <p className="text-xs font-display font-medium text-foreground text-center">{theme.name}</p>
+                  <p className="text-xs font-display font-medium text-foreground text-center group-hover:text-primary transition-colors">{theme.name}</p>
                 </Link>
               </motion.div>
             ))}
@@ -168,10 +221,10 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mt-12"
+            className="text-center mt-14"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-lg" asChild>
+              <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-lg shadow-glow" asChild>
                 <Link to="/themes">Start Building Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
               </Button>
             </motion.div>
@@ -183,29 +236,16 @@ const Index = () => {
       <RecruiterSection />
       <FeedbackSection />
 
-      {/* Footer */}
-      <footer className="py-16 border-t border-border bg-background relative">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+      {/* Footer — Clean & Minimal */}
+      <footer className="py-8 border-t border-border bg-background">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <span className="font-display font-bold text-foreground text-lg">Repoflow</span>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground font-body">
-              <Link to="/themes" className="hover:text-primary transition-colors story-link">Themes</Link>
-              <Link to="/generate" className="hover:text-primary transition-colors story-link">Recruiter View</Link>
-              <a href="#process" onClick={(e) => { e.preventDefault(); document.getElementById("process")?.scrollIntoView({ behavior: "smooth" }) }} className="hover:text-primary transition-colors story-link cursor-pointer">Process</a>
-              <a href="#feedback" onClick={(e) => { e.preventDefault(); document.getElementById("feedback")?.scrollIntoView({ behavior: "smooth" }) }} className="hover:text-primary transition-colors story-link cursor-pointer">Feedback</a>
-            </div>
-            <div className="text-center md:text-right">
-              <p className="text-sm text-muted-foreground font-body mb-1">
-                Powered by <span className="font-semibold text-foreground">CODEHEXA</span>
-              </p>
-              <p className="text-xs text-muted-foreground font-body flex items-center justify-center md:justify-end gap-1">
-                Made with <Heart className="w-3 h-3 text-destructive fill-destructive" /> © 2026 Repoflow
-              </p>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground font-body">
+              Powered by <span className="font-semibold text-foreground">CODEHEXA</span>
+            </p>
+            <p className="text-sm text-muted-foreground font-body">
+              © {new Date().getFullYear()} Repoflow. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
