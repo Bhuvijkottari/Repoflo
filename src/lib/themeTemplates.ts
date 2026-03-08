@@ -30,19 +30,19 @@ const nav = (bg: string, text: string, accent: string, personName: string, links
 
 // Shared sections generator
 const skillsHtml = (d: PortfolioData, bg: string, color: string, border?: string) =>
-  d.skills.map(s => `<span style="background:${bg};color:${color};padding:6px 14px;border-radius:20px;font-size:.85rem;display:inline-block;margin:3px${border ? `;border:1px solid ${border}` : ''}">${s}</span>`).join('');
+  d.skills.map(s => `<span class="skill-tag" style="background:${bg};color:${color};padding:8px 16px;border-radius:20px;font-size:.9rem;display:inline-block;margin:4px${border ? `;border:1px solid ${border}` : ''}">${s}</span>`).join('');
 
 const expHtml = (d: PortfolioData, roleColor: string, companyColor: string, descColor: string) =>
-  d.experience.length ? d.experience.map(e => `<div style="margin-bottom:24px"><div style="font-weight:600;font-size:1.05rem;color:${roleColor}">${e.role}</div><div style="color:${companyColor}">${e.company}</div><div style="color:#999;font-size:.85rem">${e.period}</div><p style="color:${descColor};font-size:.9rem;margin-top:4px">${e.description}</p></div>`).join('') : '';
+  d.experience.length ? d.experience.map(e => `<div class="reveal" style="margin-bottom:28px;padding:20px;border-radius:12px;background:rgba(128,128,128,.03)"><div style="font-weight:600;font-size:1.1rem;color:${roleColor}">${e.role}</div><div style="color:${companyColor};font-size:.95rem">${e.company}</div><div style="color:#999;font-size:.85rem;margin-top:2px">${e.period}</div><p style="color:${descColor};font-size:.95rem;margin-top:8px;line-height:1.7">${e.description}</p></div>`).join('') : '';
 
 const projectsHtml = (d: PortfolioData, cardBg: string, cardBorder: string, nameColor: string, descColor: string, tagBg: string, tagColor: string) =>
-  d.projects.map(p => `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:20px;margin-bottom:12px"><div style="font-weight:600;color:${nameColor};margin-bottom:4px">${p.link ? `<a href="${p.link}" target="_blank" style="color:${nameColor};text-decoration:none">${p.name}</a>` : p.name} ${p.stars ? `<span style="color:#f59e0b;font-size:.85rem">★ ${p.stars}</span>` : ''}</div><p style="color:${descColor};font-size:.9rem;margin-bottom:8px">${p.description}</p><div>${p.tech.map(t => `<span style="display:inline-block;background:${tagBg};color:${tagColor};padding:2px 8px;border-radius:4px;font-size:.75rem;margin:2px">${t}</span>`).join('')}</div>${p.link ? `<a href="${p.link}" target="_blank" style="display:inline-block;margin-top:8px;font-size:.8rem;color:${tagColor};text-decoration:none">View on GitHub →</a>` : ''}</div>`).join('');
+  d.projects.map(p => `<div class="project-card reveal" style="background:${cardBg};border:1px solid ${cardBorder};border-radius:16px;padding:24px;margin-bottom:16px"><div style="font-weight:700;font-size:1.05rem;color:${nameColor};margin-bottom:6px">${p.link ? `<a href="${p.link}" target="_blank" style="color:${nameColor};text-decoration:none">${p.name}</a>` : p.name} ${p.stars ? `<span style="color:#f59e0b;font-size:.9rem;margin-left:8px">★ ${p.stars}</span>` : ''}</div><p style="color:${descColor};font-size:.95rem;margin-bottom:12px;line-height:1.6">${p.description}</p><div>${p.tech.map(t => `<span class="skill-tag" style="display:inline-block;background:${tagBg};color:${tagColor};padding:4px 10px;border-radius:6px;font-size:.8rem;margin:3px">${t}</span>`).join('')}</div>${p.link ? `<a href="${p.link}" target="_blank" style="display:inline-block;margin-top:12px;font-size:.85rem;color:${tagColor};text-decoration:none;font-weight:500">View on GitHub →</a>` : ''}</div>`).join('');
 
 const eduHtml = (d: PortfolioData, roleColor: string, instColor: string) =>
-  d.education.length ? d.education.map(e => `<div style="margin-bottom:20px"><div style="font-weight:600;color:${roleColor}">${e.degree}</div><div style="color:${instColor}">${e.institution}</div><div style="color:#999;font-size:.85rem">${e.period}</div></div>`).join('') : '';
+  d.education.length ? d.education.map(e => `<div class="reveal" style="margin-bottom:24px;padding:16px;border-radius:12px;background:rgba(128,128,128,.03)"><div style="font-weight:600;font-size:1.05rem;color:${roleColor}">${e.degree}</div><div style="color:${instColor};font-size:.95rem">${e.institution}</div><div style="color:#999;font-size:.85rem">${e.period}</div></div>`).join('') : '';
 
 const volHtml = (d: PortfolioData, roleColor: string, orgColor: string, descColor: string) =>
-  d.volunteering.length ? d.volunteering.map(v => `<div style="margin-bottom:20px"><div style="font-weight:600;color:${roleColor}">${v.role}</div><div style="color:${orgColor}">${v.org}</div><div style="color:#999;font-size:.85rem">${v.period}</div><p style="color:${descColor};font-size:.9rem;margin-top:4px">${v.description}</p></div>`).join('') : '';
+  d.volunteering.length ? d.volunteering.map(v => `<div class="reveal" style="margin-bottom:24px;padding:16px;border-radius:12px;background:rgba(128,128,128,.03)"><div style="font-weight:600;font-size:1.05rem;color:${roleColor}">${v.role}</div><div style="color:${orgColor};font-size:.95rem">${v.org}</div><div style="color:#999;font-size:.85rem">${v.period}</div><p style="color:${descColor};font-size:.95rem;margin-top:6px;line-height:1.7">${v.description}</p></div>`).join('') : '';
 
 const githubActivityHtml = (d: PortfolioData, cardBg: string, cardBorder: string, accentColor: string, descColor: string) => {
   const s = d.githubStats;
@@ -77,18 +77,32 @@ const leetcodeHtml = (d: PortfolioData, cardBg: string, cardBorder: string, acce
 };
 
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
-  `<section id="contact" style="padding:48px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:16px">Contact</h2>
-  <p style="color:${textColor}">Email: ${d.email}</p><p style="color:${textColor}">Location: ${d.location}</p>
-  <div style="margin-top:16px;display:flex;gap:12px;justify-content:center">
-    ${d.github ? `<a href="${d.github}" style="color:${accentColor};text-decoration:none" target="_blank">GitHub</a>` : ''}
-    ${d.linkedin ? `<a href="${d.linkedin}" style="color:${accentColor};text-decoration:none" target="_blank">LinkedIn</a>` : ''}
-    ${d.website ? `<a href="${d.website}" style="color:${accentColor};text-decoration:none" target="_blank">Website</a>` : ''}
+  `<section id="contact" class="reveal" style="padding:60px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:20px;font-size:1.4rem">Get In Touch</h2>
+  <p style="color:${textColor};font-size:1rem">Email: <a href="mailto:${d.email}" style="color:${accentColor};text-decoration:none;font-weight:500">${d.email}</a></p><p style="color:${textColor};font-size:1rem;margin-top:4px">Location: ${d.location}</p>
+  <div style="margin-top:20px;display:flex;gap:16px;justify-content:center">
+    ${d.github ? `<a href="${d.github}" style="color:#fff;background:${accentColor};text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:500;font-size:.9rem;transition:transform .2s" target="_blank" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">GitHub</a>` : ''}
+    ${d.linkedin ? `<a href="${d.linkedin}" style="color:${accentColor};text-decoration:none;padding:10px 24px;border-radius:8px;border:1px solid ${accentColor};font-weight:500;font-size:.9rem;transition:transform .2s" target="_blank" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">LinkedIn</a>` : ''}
+    ${d.website ? `<a href="${d.website}" style="color:${accentColor};text-decoration:none;padding:10px 24px;border-radius:8px;border:1px solid ${accentColor};font-weight:500;font-size:.9rem;transition:transform .2s" target="_blank" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">Website</a>` : ''}
   </div></section>`;
 
-const baseStyle = `*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}img{max-width:100%}a{transition:opacity .2s}a:hover{opacity:.8}`;
+const baseStyle = `*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}img{max-width:100%}a{transition:all .3s ease}a:hover{opacity:.85}
+/* Scroll animations */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}.reveal.visible{opacity:1;transform:translateY(0)}
+/* Skill hover */
+.skill-tag{transition:transform .2s,box-shadow .2s;cursor:default}.skill-tag:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+/* Card hover */
+.project-card{transition:transform .3s,box-shadow .3s}.project-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+/* Animated skill bar */
+.skill-bar{height:6px;border-radius:3px;overflow:hidden;background:rgba(128,128,128,.15)}.skill-bar-fill{height:100%;border-radius:3px;transition:width 1.2s ease}
+/* Avatar pulse */
+.avatar-ring{animation:pulse-ring 2s ease-in-out infinite}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.3)}50%{box-shadow:0 0 0 12px rgba(99,102,241,0)}}
+`;
+
+const scrollScript = `<script>document.addEventListener('DOMContentLoaded',()=>{const r=document.querySelectorAll('.reveal');const o=new IntersectionObserver((e)=>{e.forEach(i=>{if(i.isIntersecting){i.target.classList.add('visible');o.unobserve(i.target)}})},{threshold:.15});r.forEach(el=>o.observe(el))})</script>`;
 
 const wrapTheme = (fontImport: string, fontFamily: string, body: string) =>
-  `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.6}</style></head><body>${body}</body></html>`;
+  `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.7;font-size:16px}</style></head><body>${body}${scrollScript}</body></html>`;
 
 export const getThemeHtml = (themeId: string, customData?: PortfolioData): string => {
   const d = customData || getPortfolioData();

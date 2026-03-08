@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Star, Send, MessageSquare, Loader2 } from "lucide-react";
-import { fetchFeedbacks, submitFeedback } from "@/lib/firebase";
+import { subscribeFeedbacks, submitFeedback } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 interface Feedback {
@@ -24,35 +24,21 @@ const FeedbackSection = () => {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Real-time listener — auto-syncs adds and deletes from Firebase
   useEffect(() => {
-    loadFeedbacks();
-  }, []);
-
-  const loadFeedbacks = async () => {
-    try {
-      const data = await fetchFeedbacks(20);
+    const unsubscribe = subscribeFeedbacks(20, (data) => {
       setFeedbacks(data);
-    } catch (e) {
-      console.error("Failed to fetch feedbacks:", e);
-    } finally {
       setLoading(false);
-    }
-  };
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rating || !name.trim() || !message.trim()) return;
     setSubmitting(true);
     try {
-      const docRef = await submitFeedback(name.trim(), rating, message.trim());
-      const newFeedback: Feedback = {
-        id: docRef.id,
-        name: name.trim(),
-        rating,
-        message: message.trim(),
-        created_at: new Date().toISOString(),
-      };
-      setFeedbacks((prev) => [newFeedback, ...prev]);
+      await submitFeedback(name.trim(), rating, message.trim());
       setShowForm(false);
       setRating(0);
       setName("");
@@ -67,7 +53,7 @@ const FeedbackSection = () => {
 
   const renderStars = (count: number) =>
     Array.from({ length: 5 }, (_, i) => (
-      <Star key={i} className={`w-4 h-4 ${i < count ? "fill-primary text-primary" : "text-muted-foreground/30"}`} />
+      <Star key={i} className={`w-5 h-5 ${i < count ? "fill-primary text-primary" : "text-muted-foreground/30"}`} />
     ));
 
   return (
@@ -80,7 +66,7 @@ const FeedbackSection = () => {
           className="text-center mb-12"
         >
           <h2 className="font-display text-4xl font-bold text-foreground mb-4">What Users Say</h2>
-          <p className="text-muted-foreground font-body max-w-lg mx-auto">Real feedback from real developers</p>
+          <p className="text-muted-foreground font-body max-w-lg mx-auto text-base">Real feedback from real developers</p>
         </motion.div>
 
         {loading ? (
@@ -89,7 +75,7 @@ const FeedbackSection = () => {
           </div>
         ) : feedbacks.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-            <p className="text-muted-foreground font-body mb-4">No feedback yet. Be the first to share your experience!</p>
+            <p className="text-muted-foreground font-body mb-4 text-base">No feedback yet. Be the first to share your experience!</p>
           </motion.div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
@@ -103,7 +89,7 @@ const FeedbackSection = () => {
                 className="bg-card rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-shadow duration-300"
               >
                 <div className="flex items-center gap-1 mb-3">{renderStars(fb.rating)}</div>
-                <p className="text-sm text-muted-foreground font-body mb-4">"{fb.message}"</p>
+                <p className="text-sm text-muted-foreground font-body mb-4 leading-relaxed">"{fb.message}"</p>
                 <div className="flex items-center justify-between">
                   <span className="font-display font-semibold text-sm text-foreground">{fb.name}</span>
                   <span className="text-xs text-muted-foreground">{new Date(fb.created_at).toLocaleDateString()}</span>
@@ -139,11 +125,11 @@ const FeedbackSection = () => {
               </div>
               <div>
                 <label className="font-display font-semibold text-sm text-foreground block mb-2">Your Name</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} required className="w-full h-11 rounded-lg border border-input bg-background px-3 font-body text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder="John Doe" />
+                <input value={name} onChange={(e) => setName(e.target.value)} required className="w-full h-11 rounded-lg border border-input bg-background px-3 font-body text-base focus:outline-none focus:ring-2 focus:ring-ring" placeholder="John Doe" />
               </div>
               <div>
                 <label className="font-display font-semibold text-sm text-foreground block mb-2">Your Feedback</label>
-                <textarea value={message} onChange={(e) => setMessage(e.target.value)} required rows={3} className="w-full rounded-lg border border-input bg-background px-3 py-2 font-body text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none" placeholder="Tell us about your experience..." />
+                <textarea value={message} onChange={(e) => setMessage(e.target.value)} required rows={3} className="w-full rounded-lg border border-input bg-background px-3 py-2 font-body text-base focus:outline-none focus:ring-2 focus:ring-ring resize-none" placeholder="Tell us about your experience..." />
               </div>
               <div className="flex gap-3">
                 <Button type="submit" variant="cta" className="flex-1 rounded-lg" disabled={!rating || submitting}>
