@@ -71,6 +71,7 @@ export const mockPortfolioData: PortfolioData = {
     pullRequests: 312, pushes: 1560, daysOnGithub: 1825,
     recentCollaborations: ["open-source/react-toolkit", "team/enterprise-dashboard", "contrib/design-system"],
     aiGeneratedContent: 3,
+    aiDetectedRepos: ["portfolio-clone", "todo-app", "ai-dashboard"],
     topLanguages: [{ name: "TypeScript", percentage: 45 }, { name: "Python", percentage: 25 }, { name: "JavaScript", percentage: 20 }, { name: "Go", percentage: 10 }],
     contributionStreak: 47,
   },
