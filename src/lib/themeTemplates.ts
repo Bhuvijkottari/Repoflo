@@ -47,6 +47,23 @@ const githubActivityHtml = (d: PortfolioData, cardBg: string, cardBorder: string
   </section>`;
 };
 
+const leetcodeHtml = (d: PortfolioData, cardBg: string, cardBorder: string, accentColor: string, descColor: string) => {
+  const lc = d.leetcodeStats;
+  if (!lc) return '';
+  return `<section id="leetcode" style="margin:48px 0"><h2 style="color:${accentColor};font-size:1.4rem;font-weight:600;margin-bottom:20px">LeetCode Profile</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px">
+    ${[[lc.totalSolved,'Total Solved'],[lc.easySolved,'Easy'],[lc.mediumSolved,'Medium'],[lc.hardSolved,'Hard'],
+      [lc.ranking ? `#${lc.ranking.toLocaleString()}` : 'N/A','Ranking'],[lc.contestRating || 'N/A','Contest Rating']].map(([v,l]) =>
+      `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:${accentColor}">${v}</div><div style="font-size:.7rem;color:${descColor};text-transform:uppercase;letter-spacing:1px;margin-top:2px">${l}</div></div>`).join('')}
+  </div>
+  ${lc.totalSolved > 0 ? `<div style="display:flex;border-radius:8px;overflow:hidden;height:22px;margin-bottom:16px">
+    <div style="width:${Math.round((lc.easySolved/lc.totalSolved)*100)}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;background:#22c55e">Easy ${lc.easySolved}</div>
+    <div style="width:${Math.round((lc.mediumSolved/lc.totalSolved)*100)}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;background:#f59e0b">Med ${lc.mediumSolved}</div>
+    <div style="width:${Math.round((lc.hardSolved/lc.totalSolved)*100)}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;background:#ef4444">Hard ${lc.hardSolved}</div>
+  </div>` : ''}
+  ${lc.recentSubmissions?.length ? `<p style="font-size:.85rem;color:${descColor}">Recent: ${lc.recentSubmissions.slice(0,3).join(', ')}</p>` : ''}
+  </section>`;
+
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
   `<section id="contact" style="padding:48px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:16px">Contact</h2>
   <p style="color:${textColor}">Email: ${d.email}</p><p style="color:${textColor}">Location: ${d.location}</p>
