@@ -58,6 +58,13 @@ const PreviewPage = () => {
     try {
       const stored = sessionStorage.getItem("portfolioData");
       if (stored) setPortfolioData(JSON.parse(stored));
+      // Load recruiter preferences
+      const prefs = sessionStorage.getItem("recruiterPrefs");
+      if (prefs) {
+        const parsed = JSON.parse(prefs);
+        if (parsed.requiredTechStack?.length) setRequiredTechStack(parsed.requiredTechStack);
+        if (parsed.experienceLevel) setExperienceLevel(parsed.experienceLevel);
+      }
     } catch {}
   }, []);
 
