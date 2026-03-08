@@ -267,7 +267,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5" /> ATS Resume Score Breakdown
               </h4>
-              <div className="grid md:grid-cols-2 gap-x-8 gap-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                 <ScoreBar label="Keywords Match" value={analysis.atsScore.keywordScore} icon={Zap} />
                 <ScoreBar label="Format & Structure" value={analysis.atsScore.formatScore} icon={BookOpen} />
                 <ScoreBar label="Experience Relevance" value={analysis.atsScore.experienceScore} icon={TrendingUp} />
