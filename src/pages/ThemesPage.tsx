@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { Eye, Check, Briefcase, ArrowRight } from "lucide-react";
 import { getThemeHtml } from "@/lib/themeTemplates";
+import { dummyPreviewData } from "@/lib/mockData";
 import themeBlue from "@/assets/theme-preview-blue.jpg";
 import themeWarm from "@/assets/theme-preview-warm.jpg";
 import themeDark from "@/assets/theme-preview-dark.jpg";
