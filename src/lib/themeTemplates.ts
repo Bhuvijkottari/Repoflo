@@ -157,7 +157,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "elegant":
       return wrapTheme('', "'Garamond','Georgia',serif", `
         <div style="background:#0c0c0c;color:#e8e4df;min-height:100vh">
-        ${nav('rgba(12,12,12,.9)', '#8a8078', '#d4a574')}
+        ${nav('rgba(12,12,12,.9)', '#8a8078', '#d4a574', d.name)}
         <div id="about" style="min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(180deg,#0c0c0c 0%,#1a1714 100%);border-bottom:1px solid #2a2520;padding:40px">
           <div><div style="width:140px;height:140px;border-radius:50%;border:2px solid #d4a574;overflow:hidden;margin:0 auto 28px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
             <h1 style="font-size:3.5rem;font-weight:400;letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;color:#d4a574">${d.name}</h1>
