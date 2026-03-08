@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github, Palette, Zap, Star, Users } from "lucide-react";
+import { ArrowRight, Github, Palette, Zap, Star, Users, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroShapes from "@/assets/hero-shapes.png";
 import { getVisitorCount, incrementVisitorCount } from "@/lib/firebase";
@@ -52,7 +52,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-foreground"
+            className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-foreground"
           >
             Create a Stunning{" "}
             <span className="text-gradient">Portfolio</span>{" "}
@@ -71,7 +71,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45 }}
-            className="flex justify-center lg:justify-start"
+            className="flex flex-col sm:flex-row gap-4"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-xl shadow-glow" asChild>
@@ -80,8 +80,14 @@ const HeroSection = () => {
                 </Link>
               </Button>
             </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button variant="outline" size="lg" className="rounded-full px-8 py-6 text-lg border-2" asChild>
+                <a href="#process" onClick={(e) => { e.preventDefault(); document.getElementById("process")?.scrollIntoView({ behavior: "smooth" }) }}>
+                  How it Works <ChevronDown className="ml-1 w-4 h-4" />
+                </a>
+              </Button>
+            </motion.div>
           </motion.div>
-
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -100,7 +106,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="flex gap-8 pt-6"
+            className="flex gap-8 pt-6 flex-wrap"
           >
             {[
               { icon: <Zap className="w-4 h-4 text-primary" />, value: "20+", label: "Themes" },
@@ -136,7 +142,7 @@ const HeroSection = () => {
           <motion.div
             animate={{ y: [0, -10, 0], rotate: [0, 2, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 right-0 bg-card rounded-xl shadow-card p-4 min-w-[140px]"
+            className="absolute top-1/4 right-0 glass-card rounded-xl shadow-card p-4 min-w-[140px]"
           >
             <p className="font-display font-semibold text-sm text-foreground">Skills</p>
             <div className="mt-2 space-y-1.5">
@@ -149,7 +155,7 @@ const HeroSection = () => {
           <motion.div
             animate={{ y: [0, -8, 0], rotate: [0, -1, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            className="absolute top-1/3 left-8 bg-card rounded-xl shadow-card p-4 min-w-[140px]"
+            className="absolute top-1/3 left-8 glass-card rounded-xl shadow-card p-4 min-w-[140px]"
           >
             <p className="font-display font-semibold text-sm text-foreground">20+ Themes</p>
             <div className="flex gap-1.5 mt-2">
@@ -162,7 +168,7 @@ const HeroSection = () => {
           <motion.div
             animate={{ y: [0, -12, 0], rotate: [0, 1.5, 0] }}
             transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-1/4 right-12 bg-card rounded-xl shadow-card p-4 min-w-[140px]"
+            className="absolute bottom-1/4 right-12 glass-card rounded-xl shadow-card p-4 min-w-[140px]"
           >
             <p className="font-display font-semibold text-sm text-foreground">Experience</p>
             <div className="flex gap-1 mt-2">
@@ -173,6 +179,22 @@ const HeroSection = () => {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2"
+      >
+        <span className="text-xs text-muted-foreground font-body">Scroll to explore</span>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

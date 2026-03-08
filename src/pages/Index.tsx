@@ -5,7 +5,7 @@ import HeroSection from "@/components/HeroSection";
 import ProcessSection from "@/components/ProcessSection";
 import RecruiterSection from "@/components/RecruiterSection";
 import FeedbackSection from "@/components/FeedbackSection";
-import { Sparkles, Shield, ArrowRight, X, Target } from "lucide-react";
+import { Sparkles, Shield, ArrowRight, X, Target, Github, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import themeBlue from "@/assets/theme-preview-blue.jpg";
@@ -77,7 +77,7 @@ const Index = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-6 right-6 z-50 bg-card border border-border rounded-2xl shadow-card-hover p-5 max-w-xs"
+            className="fixed bottom-6 right-6 z-50 glass-card rounded-2xl shadow-card-hover p-5 max-w-xs"
           >
             <button onClick={dismissPopup} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors">
               <X className="w-4 h-4" />
@@ -87,7 +87,7 @@ const Index = () => {
               <span className="font-display font-bold text-foreground text-sm">Are you a Recruiter?</span>
             </div>
             <p className="text-xs text-muted-foreground font-body mb-3">
-              Try our Recruiter View — get AI-powered candidate assessments, GitHub analytics, and downloadable evaluation reports.
+              Try our Recruiter View for AI-powered candidate assessments, GitHub analytics, and evaluation reports.
             </p>
             <div className="flex gap-2">
               <Button variant="cta" size="sm" className="rounded-full text-xs px-4" asChild>
@@ -104,24 +104,25 @@ const Index = () => {
       </AnimatePresence>
 
       {/* Themes Showcase */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
+      <section className="py-24 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/20 to-background pointer-events-none" />
+        <div className="container mx-auto px-4 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
               20+ Premium Themes
             </div>
-            <h2 className="font-display text-4xl font-bold text-foreground mb-4">Themes for Every Style</h2>
-            <p className="text-muted-foreground font-body max-w-lg mx-auto">
-              From minimal to bold, terminal to luxury — every theme is fully responsive with animations and clickable navigation.
+            <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">Themes for Every Style</h2>
+            <p className="text-muted-foreground font-body max-w-lg mx-auto text-base">
+              From minimal to bold, terminal to luxury. Every theme is fully responsive with animations and smooth navigation.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
             {[
               { name: "Recruiter", image: "recruiter" },
               { name: "Minimal", image: "minimal" },
@@ -153,10 +154,12 @@ const Index = () => {
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
                 className="group cursor-pointer"
               >
-                <div className="h-24 rounded-xl overflow-hidden mb-2 shadow-sm group-hover:shadow-card-hover transition-all duration-300">
-                  <img src={getThemeImage(theme.image)} alt={theme.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                </div>
-                <p className="text-xs font-display font-medium text-foreground text-center">{theme.name}</p>
+                <Link to="/themes">
+                  <div className="h-24 rounded-xl overflow-hidden mb-2 shadow-sm group-hover:shadow-card-hover transition-all duration-300 border border-transparent group-hover:border-primary/20">
+                    <img src={getThemeImage(theme.image)} alt={theme.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  </div>
+                  <p className="text-xs font-display font-medium text-foreground text-center">{theme.name}</p>
+                </Link>
               </motion.div>
             ))}
           </div>
@@ -181,18 +184,29 @@ const Index = () => {
       <FeedbackSection />
 
       {/* Footer */}
-      <footer className="py-12 border-t border-border bg-background">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="font-display font-bold text-foreground">Repoflow</span>
+      <footer className="py-16 border-t border-border bg-background relative">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="font-display font-bold text-foreground text-lg">Repoflow</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground font-body">
+              <Link to="/themes" className="hover:text-primary transition-colors story-link">Themes</Link>
+              <Link to="/generate" className="hover:text-primary transition-colors story-link">Recruiter View</Link>
+              <a href="#process" onClick={(e) => { e.preventDefault(); document.getElementById("process")?.scrollIntoView({ behavior: "smooth" }) }} className="hover:text-primary transition-colors story-link cursor-pointer">Process</a>
+              <a href="#feedback" onClick={(e) => { e.preventDefault(); document.getElementById("feedback")?.scrollIntoView({ behavior: "smooth" }) }} className="hover:text-primary transition-colors story-link cursor-pointer">Feedback</a>
+            </div>
+            <div className="text-center md:text-right">
+              <p className="text-sm text-muted-foreground font-body mb-1">
+                Powered by <span className="font-semibold text-foreground">CODEHEXA</span>
+              </p>
+              <p className="text-xs text-muted-foreground font-body flex items-center justify-center md:justify-end gap-1">
+                Made with <Heart className="w-3 h-3 text-destructive fill-destructive" /> © 2026 Repoflow
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground font-body mb-2">
-            Powered by <span className="font-semibold text-foreground">CODEHEXA</span>
-          </p>
-          <p className="text-xs text-muted-foreground font-body flex items-center justify-center gap-1">
-            <Shield className="w-3 h-3" /> 2026 Repoflow. All Rights Reserved.
-          </p>
         </div>
       </footer>
     </div>
