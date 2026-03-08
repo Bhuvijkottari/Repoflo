@@ -179,11 +179,10 @@ const PreviewPage = () => {
   const toggleInlineEditor = () => {
     if (!inlineEditing) {
       setInlineEditing(true);
-      setShowEditor(false);
     } else {
       setEditableHtml(cleanHtml);
       setInlineEditing(false);
-      toast({ title: "Edits Applied", description: "Your inline changes have been saved to the preview." });
+      toast({ title: "Edits Applied", description: "Your changes have been saved to the preview." });
     }
   };
 
