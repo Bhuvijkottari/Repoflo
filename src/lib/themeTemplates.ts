@@ -174,7 +174,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "neon":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">', "'Rajdhani',sans-serif", `
         <div style="background:#0a0a1a;color:#e0e0ff;min-height:100vh">
-        ${nav('rgba(10,10,26,.95)', '#888', '#0ff')}
+        ${nav('rgba(10,10,26,.95)', '#888', '#0ff', d.name)}
         <div id="about" style="text-align:center;padding:100px 24px;background:radial-gradient(ellipse at center,rgba(0,255,255,.05) 0%,transparent 70%)">
           <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;margin:0 auto 24px;border:3px solid #0ff;box-shadow:0 0 30px rgba(0,255,255,.3)"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-family:'Orbitron',sans-serif;font-size:3rem;font-weight:900;color:#0ff;text-shadow:0 0 20px rgba(0,255,255,.5);margin-bottom:8px">${d.name}</h1>
