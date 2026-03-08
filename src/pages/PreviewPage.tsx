@@ -48,6 +48,7 @@ const PreviewPage = () => {
   // Recruiter analysis state
   const [analysis, setAnalysis] = useState<CandidateAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
 
   const isRecruiter = themeId === "recruiter";
 
