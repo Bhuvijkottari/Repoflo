@@ -462,15 +462,31 @@ const PreviewPage = () => {
           </motion.div>
         </div>
 
-        {/* Recruiter Analysis Panel */}
+        {/* Recruiter Tech Stack Input & Analysis Panel */}
         {isRecruiter && portfolioData && (
-          <RecruiterAnalysisPanel
-            analysis={analysis}
-            isAnalyzing={isAnalyzing}
-            portfolioData={portfolioData}
-            onReanalyze={runAnalysis}
-            onDownloadReport={handleDownloadReport}
-          />
+          <>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6 bg-card rounded-2xl border border-border p-6">
+              <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Code className="w-3.5 h-3.5" /> Required Tech Stack (Optional)
+              </h4>
+              <p className="text-xs text-muted-foreground font-body mb-3">Add the tech stack your role requires. The analysis will show how well the candidate matches.</p>
+              <TechStackInput selected={requiredTechStack} onChange={setRequiredTechStack} />
+              {requiredTechStack.length > 0 && analysis && (
+                <Button variant="outline" size="sm" className="mt-3" onClick={runAnalysis} disabled={isAnalyzing}>
+                  {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                  Re-analyze with Tech Stack
+                </Button>
+              )}
+            </motion.div>
+            <RecruiterAnalysisPanel
+              analysis={analysis}
+              isAnalyzing={isAnalyzing}
+              portfolioData={portfolioData}
+              onReanalyze={runAnalysis}
+              onDownloadReport={handleDownloadReport}
+              requiredTechStack={requiredTechStack}
+            />
+          </>
         )}
 
         {/* Finalized banner */}
