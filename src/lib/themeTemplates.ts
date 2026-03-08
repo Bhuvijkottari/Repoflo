@@ -10,11 +10,11 @@ const getPortfolioData = (): PortfolioData => {
   return mockPortfolioData;
 };
 
-// Shared navbar generator for all themes
-const nav = (bg: string, text: string, accent: string, links: string[] = ["About", "Skills", "Experience", "Projects", "Education", "Contact"]) =>
+// Shared navbar generator for all themes - with functional smooth scroll JS
+const nav = (bg: string, text: string, accent: string, personName: string, links: string[] = ["About", "Skills", "Experience", "Projects", "Education", "Contact"]) =>
   `<nav style="position:sticky;top:0;z-index:100;background:${bg};padding:12px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px)">
-    <span style="font-weight:700;font-size:1.1rem;color:${accent}">${getPortfolioData().name.split(' ')[0]}</span>
-    <div style="display:flex;gap:16px">${links.map(l => `<a href="#${l.toLowerCase()}" style="color:${text};text-decoration:none;font-size:.85rem;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
+    <a href="#about" style="font-weight:700;font-size:1.1rem;color:${accent};text-decoration:none;cursor:pointer">${personName.split(' ')[0]}</a>
+    <div style="display:flex;gap:16px">${links.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.85rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
   </nav>`;
 
 // Shared sections generator
@@ -55,7 +55,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
       const s = d.githubStats || { totalCommits: 0, publicRepos: 0, privateRepos: 0, followers: 0, following: 0, pullRequests: 0, pushes: 0, daysOnGithub: 0, recentCollaborations: [], aiGeneratedContent: 0, topLanguages: [], contributionStreak: 0 };
       return wrapTheme('', "'Segoe UI',system-ui,sans-serif", `
         <div style="background:#f8fafc;color:#1e293b;min-height:100vh">
-        ${nav('rgba(255,255,255,.9)', '#475569', '#6366f1', ['Overview', 'Languages', 'Experience', 'Projects', 'Skills'])}
+        ${nav('rgba(255,255,255,.9)', '#475569', '#6366f1', d.name, ['Overview', 'Languages', 'Experience', 'Projects', 'Skills'])}
         <div style="background:#fff;border-bottom:1px solid #e2e8f0;padding:24px"><div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:20px">
           <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <div><h1 style="font-size:1.5rem;font-weight:700">${d.name}</h1><p style="color:#64748b">${d.title} · ${d.location}</p></div></div></div>
@@ -91,7 +91,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "minimal":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">', "'Inter',sans-serif", `
         <div style="background:#fafafa;color:#1a1a1a;min-height:100vh">
-        ${nav('rgba(250,250,250,.9)', '#666', '#1a1a1a')}
+        ${nav('rgba(250,250,250,.9)', '#666', '#1a1a1a', d.name)}
         <div style="max-width:720px;margin:0 auto;padding:40px 24px">
           <div id="about" style="text-align:center;padding:60px 0 40px"><div style="width:120px;height:120px;border-radius:50%;margin:0 auto 20px;overflow:hidden"><img src="${d.avatar}" style="width:100%;height:100%"></div>
             <h1 style="font-size:2.5rem;font-weight:700;margin-bottom:8px">${d.name}</h1><p style="color:#666;font-size:1.1rem;margin-bottom:12px">${d.title}</p><p style="color:#888;max-width:500px;margin:0 auto">${d.bio}</p></div>
@@ -106,7 +106,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "bold":
       return wrapTheme('', "'Segoe UI',system-ui,sans-serif", `
         <div style="background:#0a0a0a;color:#fff;min-height:100vh">
-        ${nav('rgba(10,10,10,.9)', '#999', '#a855f7')}
+        ${nav('rgba(10,10,10,.9)', '#999', '#a855f7', d.name)}
         <div id="about" style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#0a0a0a 0%,#1a0a2e 50%,#0a1628 100%);padding:40px 24px">
           <div><div style="width:130px;height:130px;border-radius:50%;overflow:hidden;margin:0 auto 24px;border:3px solid #a855f7"><img src="${d.avatar}" style="width:100%;height:100%"></div>
             <h1 style="font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px">${d.name}</h1>
@@ -123,7 +123,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "creative":
       return wrapTheme('', "Georgia,'Times New Roman',serif", `
         <div style="background:#fef7ed;color:#2d1b00;min-height:100vh">
-        ${nav('rgba(254,247,237,.9)', '#92400e', '#f97316')}
+        ${nav('rgba(254,247,237,.9)', '#92400e', '#f97316', d.name)}
         <div id="about" style="background:linear-gradient(135deg,#fbbf24,#f97316);padding:80px 24px;text-align:center;color:#fff">
           <div style="width:110px;height:110px;border-radius:50%;border:4px solid #fff;overflow:hidden;margin:0 auto 20px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-size:3rem;font-weight:700;margin-bottom:8px">${d.name}</h1><p style="opacity:.9;font-size:1.1rem">${d.title}</p></div>
@@ -139,7 +139,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "developer":
       return wrapTheme('', "'Courier New',monospace", `
         <div style="background:#1e1e2e;color:#cdd6f4;min-height:100vh">
-        ${nav('rgba(30,30,46,.95)', '#a6adc8', '#cba6f7', ['About', 'Skills', 'Experience', 'Projects'])}
+        ${nav('rgba(30,30,46,.95)', '#a6adc8', '#cba6f7', d.name, ['About', 'Skills', 'Experience', 'Projects'])}
         <div style="max-width:800px;margin:0 auto;padding:40px 24px">
           <div id="about" style="background:#11111b;border:1px solid #313244;border-radius:12px;overflow:hidden;margin-bottom:32px">
             <div style="background:#181825;padding:8px 16px;display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:#f38ba8;display:inline-block"></span><span style="width:12px;height:12px;border-radius:50%;background:#f9e2af;display:inline-block"></span><span style="width:12px;height:12px;border-radius:50%;background:#a6e3a1;display:inline-block"></span><span style="color:#585b70;margin-left:8px;font-size:.8rem">portfolio.js</span></div>
@@ -157,7 +157,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "elegant":
       return wrapTheme('', "'Garamond','Georgia',serif", `
         <div style="background:#0c0c0c;color:#e8e4df;min-height:100vh">
-        ${nav('rgba(12,12,12,.9)', '#8a8078', '#d4a574')}
+        ${nav('rgba(12,12,12,.9)', '#8a8078', '#d4a574', d.name)}
         <div id="about" style="min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(180deg,#0c0c0c 0%,#1a1714 100%);border-bottom:1px solid #2a2520;padding:40px">
           <div><div style="width:140px;height:140px;border-radius:50%;border:2px solid #d4a574;overflow:hidden;margin:0 auto 28px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
             <h1 style="font-size:3.5rem;font-weight:400;letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;color:#d4a574">${d.name}</h1>
@@ -174,7 +174,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "neon":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">', "'Rajdhani',sans-serif", `
         <div style="background:#0a0a1a;color:#e0e0ff;min-height:100vh">
-        ${nav('rgba(10,10,26,.95)', '#888', '#0ff')}
+        ${nav('rgba(10,10,26,.95)', '#888', '#0ff', d.name)}
         <div id="about" style="text-align:center;padding:100px 24px;background:radial-gradient(ellipse at center,rgba(0,255,255,.05) 0%,transparent 70%)">
           <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;margin:0 auto 24px;border:3px solid #0ff;box-shadow:0 0 30px rgba(0,255,255,.3)"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-family:'Orbitron',sans-serif;font-size:3rem;font-weight:900;color:#0ff;text-shadow:0 0 20px rgba(0,255,255,.5);margin-bottom:8px">${d.name}</h1>
@@ -190,7 +190,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "ocean":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">', "'Nunito',sans-serif", `
         <div style="background:#f0f9ff;color:#0c4a6e;min-height:100vh">
-        ${nav('rgba(240,249,255,.9)', '#0369a1', '#0284c7')}
+        ${nav('rgba(240,249,255,.9)', '#0369a1', '#0284c7', d.name)}
         <div id="about" style="background:linear-gradient(135deg,#0284c7,#14b8a6);padding:80px 24px;text-align:center;color:#fff">
           <div style="width:120px;height:120px;border-radius:50%;border:4px solid #fff;overflow:hidden;margin:0 auto 20px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-size:2.8rem;font-weight:800;margin-bottom:8px">${d.name}</h1><p style="opacity:.9;font-size:1.1rem">${d.title}</p><p style="opacity:.8;margin-top:8px;max-width:400px;margin-left:auto;margin-right:auto">${d.bio}</p></div>
@@ -205,7 +205,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "sunset":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Prata&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">', "'Work Sans',sans-serif", `
         <div style="background:#fff5f5;color:#1a1a2e;min-height:100vh">
-        ${nav('rgba(255,245,245,.9)', '#9f1239', '#e11d48')}
+        ${nav('rgba(255,245,245,.9)', '#9f1239', '#e11d48', d.name)}
         <div id="about" style="background:linear-gradient(135deg,#fb923c,#f43f5e);padding:80px 24px;text-align:center;color:#fff">
           <div style="width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,.5);overflow:hidden;margin:0 auto 20px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-family:'Prata',serif;font-size:3rem;font-weight:400;margin-bottom:8px">${d.name}</h1><p style="opacity:.9">${d.title}</p></div>
@@ -221,7 +221,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "forest":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">', "'Lora',serif", `
         <div style="background:#f0fdf4;color:#14532d;min-height:100vh">
-        ${nav('rgba(240,253,244,.9)', '#166534', '#16a34a')}
+        ${nav('rgba(240,253,244,.9)', '#166534', '#16a34a', d.name)}
         <div id="about" style="background:linear-gradient(135deg,#16a34a,#065f46);padding:80px 24px;text-align:center;color:#fff">
           <div style="width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,.4);overflow:hidden;margin:0 auto 20px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-size:2.8rem;font-weight:700;margin-bottom:8px">${d.name}</h1><p style="opacity:.9">${d.title}</p></div>
@@ -265,7 +265,7 @@ function generateGenericTheme(themeId: string, d: PortfolioData): string {
 
   return wrapTheme(cfg.fontImport, cfg.font, `
     <div style="background:${cfg.bg};color:${cfg.text};min-height:100vh${themeId === 'rocket' ? ";background-image:radial-gradient(1px 1px at 20px 30px,#334155,transparent),radial-gradient(1px 1px at 40px 70px,#475569,transparent),radial-gradient(1px 1px at 80px 40px,#334155,transparent);background-size:300px 150px" : ''}">
-    ${nav(isDark ? `rgba(${hexToRgb(cfg.bg)},.95)` : `rgba(${hexToRgb(cfg.bg)},.9)`, isDark ? '#888' : cfg.text, cfg.accent)}
+    ${nav(isDark ? `rgba(${hexToRgb(cfg.bg)},.95)` : `rgba(${hexToRgb(cfg.bg)},.9)`, isDark ? '#888' : cfg.text, cfg.accent, d.name)}
     <div id="about" style="text-align:center;padding:100px 24px;${headerIsGradient ? `background:${cfg.headerGrad}` : ''}${!isDark && headerIsGradient ? ';color:#fff' : ''}">
       <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;margin:0 auto 24px;border:3px solid ${cfg.accent}${isDark ? `;box-shadow:0 0 30px ${cfg.accent}33` : ''}"><img src="${d.avatar}" style="width:100%;height:100%"></div>
       <h1 style="font-size:2.8rem;font-weight:700;color:${!isDark && headerIsGradient ? '#fff' : cfg.accent};margin-bottom:8px">${d.name}</h1>
