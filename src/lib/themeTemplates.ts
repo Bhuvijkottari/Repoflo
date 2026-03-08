@@ -252,6 +252,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:48px 0"><h2 style="color:#16a34a;font-size:1.4rem;margin-bottom:20px">Skills</h2><div>${skillsHtml(d, '#dcfce7', '#166534')}</div></section>
           <section id="experience" style="margin:48px 0"><h2 style="color:#16a34a;font-size:1.4rem;margin-bottom:20px">Experience</h2>${expHtml(d, '#14532d', '#16a34a', '#666')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="color:#16a34a;font-size:1.4rem;margin-bottom:20px">Projects</h2>${projectsHtml(d, '#fff', '#dcfce7', '#14532d', '#666', '#f0fdf4', '#166534')}</section>
+          ${githubActivityHtml(d, '#fff', '#dcfce7', '#16a34a', '#666')}
           <section id="education" style="margin:48px 0"><h2 style="color:#16a34a;font-size:1.4rem;margin-bottom:20px">Education</h2>${eduHtml(d, '#14532d', '#16a34a')}</section>
           ${contactSection(d, '#f0fdf4', '#666', '#16a34a')}
         </div></div>`);
