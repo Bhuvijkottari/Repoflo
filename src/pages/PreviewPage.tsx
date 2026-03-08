@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { getThemeHtml } from "@/lib/themeTemplates";
 import { injectEditor, stripEditor } from "@/lib/editorInjection";
-import { Download, ArrowLeft, Smartphone, Monitor, Maximize, ImagePlus, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye, Edit3 } from "lucide-react";
+import { Download, ArrowLeft, Smartphone, Monitor, Maximize, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye } from "lucide-react";
 import type { PortfolioData } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
