@@ -35,7 +35,7 @@ const volHtml = (d: PortfolioData, roleColor: string, orgColor: string, descColo
 
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
   `<section id="contact" style="padding:48px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:16px">Contact</h2>
-  <p style="color:${textColor}">📧 ${d.email}</p><p style="color:${textColor}">📍 ${d.location}</p>
+  <p style="color:${textColor}">Email: ${d.email}</p><p style="color:${textColor}">Location: ${d.location}</p>
   <div style="margin-top:16px;display:flex;gap:12px;justify-content:center">
     ${d.github ? `<a href="${d.github}" style="color:${accentColor};text-decoration:none" target="_blank">GitHub</a>` : ''}
     ${d.linkedin ? `<a href="${d.linkedin}" style="color:${accentColor};text-decoration:none" target="_blank">LinkedIn</a>` : ''}
