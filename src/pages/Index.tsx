@@ -1,12 +1,27 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
+import ProcessSection from "@/components/ProcessSection";
+import { Sparkles } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <HeroSection />
+      <ProcessSection />
+
+      {/* Footer */}
+      <footer className="py-12 border-t border-border">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Sparkles className="w-5 h-5 text-primary" />
+            <span className="font-display font-bold text-foreground">PortfolioForge</span>
+          </div>
+          <p className="text-sm text-muted-foreground font-body">
+            © 2026 PortfolioForge. Build your digital presence.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
