@@ -82,20 +82,6 @@ const HeroSection = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4 pt-4"
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="cta" size="lg" className="rounded-full px-8 py-6 text-lg animate-pulse-glow" asChild>
-                <Link to="/themes">
-                  Get Started <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </Button>
-            </motion.div>
-          </motion.div>
 
           <motion.div
             initial={{ opacity: 0 }}
