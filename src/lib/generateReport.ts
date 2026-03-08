@@ -91,8 +91,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;background:#fff;l
         <p>Generated: ${date}</p>
       </div>
       <div style="text-align:right">
-        <span class="badge" style="background:${badgeColor(analysis.recommendation)}">${analysis.recommendation.replace("_", " ")}</span>
-        <div style="margin-top:8px;font-size:.85rem;color:#64748b">Confidence: ${analysis.confidence}%</div>
+        <span class="badge" style="background:${verdictColor(analysis.overallScore)}">${analysis.verdict}</span>
+        <div style="margin-top:8px;font-size:.85rem;color:#64748b">Score: ${analysis.overallScore}/100</div>
       </div>
     </div>
   </div>
