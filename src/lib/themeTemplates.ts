@@ -63,6 +63,7 @@ const leetcodeHtml = (d: PortfolioData, cardBg: string, cardBorder: string, acce
   </div>` : ''}
   ${lc.recentSubmissions?.length ? `<p style="font-size:.85rem;color:${descColor}">Recent: ${lc.recentSubmissions.slice(0,3).join(', ')}</p>` : ''}
   </section>`;
+};
 
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
   `<section id="contact" style="padding:48px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:16px">Contact</h2>
