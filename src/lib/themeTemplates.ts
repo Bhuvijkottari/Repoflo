@@ -130,6 +130,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="experience" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Experience</h2>${expHtml(d, '#1a1a1a', '#666', '#666')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Projects</h2>${projectsHtml(d, '#fff', '#eee', '#1a1a1a', '#666', '#f5f5f5', '#888')}</section>
           ${githubActivityHtml(d, '#fff', '#eee', '#1a1a1a', '#666')}
+          ${leetcodeHtml(d, '#fff', '#eee', '#1a1a1a', '#666')}
           <section id="education" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Education</h2>${eduHtml(d, '#1a1a1a', '#666')}</section>
           ${d.volunteering.length ? `<section id="volunteering" style="margin:48px 0"><h2 style="font-size:1.4rem;font-weight:600;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #eee">Volunteering</h2>${volHtml(d, '#1a1a1a', '#666', '#666')}</section>` : ''}
           ${contactSection(d, '#fafafa', '#666', '#1a1a1a')}
