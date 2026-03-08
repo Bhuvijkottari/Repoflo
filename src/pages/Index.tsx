@@ -1,11 +1,12 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ProcessSection from "@/components/ProcessSection";
 import RecruiterSection from "@/components/RecruiterSection";
 import FeedbackSection from "@/components/FeedbackSection";
-import { Sparkles, Shield, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { Sparkles, Shield, ArrowRight, X, Target } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import themeBlue from "@/assets/theme-preview-blue.jpg";
 import themeWarm from "@/assets/theme-preview-warm.jpg";
