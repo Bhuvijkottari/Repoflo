@@ -125,7 +125,8 @@ const PreviewPage = () => {
   const sanitizedName = personName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
 
   const handleDownload = () => {
-    const blob = new Blob([editableHtml], { type: "text/html" });
+    const html = inlineEditing ? cleanHtml : editableHtml;
+    const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -134,21 +135,60 @@ const PreviewPage = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleFinalize = () => {
-    setFinalized(true);
-    handleDownload();
+  const handleDownloadCode = () => {
+    const html = inlineEditing ? cleanHtml : editableHtml;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${sanitizedName}-source.html`;
+    a.click();
+    URL.revokeObjectURL(url);
     toast({
-      title: "Portfolio Finalized",
-      description: `${sanitizedName}.html has been downloaded. Open it in VS Code or any browser.`,
+      title: "Source Code Downloaded",
+      description: `Open "${sanitizedName}-source.html" in any code editor to customize further.`,
     });
   };
 
-  const handleOpenInVSCode = () => {
-    handleDownload();
+  const handleFinalize = () => {
+    if (inlineEditing) {
+      // Apply inline edits back to the main HTML
+      setEditableHtml(cleanHtml);
+      setInlineEditing(false);
+    }
+    setFinalized(true);
+    const html = inlineEditing ? cleanHtml : editableHtml;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${sanitizedName}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
     toast({
-      title: "File Downloaded",
-      description: `Open VS Code and drag "${sanitizedName}.html" into it, or run: code ${sanitizedName}.html`,
+      title: "Portfolio Finalized",
+      description: `Your edits have been saved and "${sanitizedName}.html" has been downloaded.`,
     });
+  };
+
+  const toggleInlineEditor = () => {
+    if (!inlineEditing) {
+      // Enter inline editing mode
+      setInlineEditing(true);
+      setShowEditor(false); // hide panel editor
+    } else {
+      // Exit inline editing, apply changes
+      setEditableHtml(cleanHtml);
+      setInlineEditing(false);
+      toast({
+        title: "Edits Applied",
+        description: "Your inline changes have been saved to the preview.",
+      });
+    }
+  };
+
+  const handleOpenInVSCode = () => {
+    handleDownloadCode();
   };
 
   const addExperience = () => {
