@@ -265,7 +265,7 @@ function generateGenericTheme(themeId: string, d: PortfolioData): string {
 
   return wrapTheme(cfg.fontImport, cfg.font, `
     <div style="background:${cfg.bg};color:${cfg.text};min-height:100vh${themeId === 'rocket' ? ";background-image:radial-gradient(1px 1px at 20px 30px,#334155,transparent),radial-gradient(1px 1px at 40px 70px,#475569,transparent),radial-gradient(1px 1px at 80px 40px,#334155,transparent);background-size:300px 150px" : ''}">
-    ${nav(isDark ? `rgba(${hexToRgb(cfg.bg)},.95)` : `rgba(${hexToRgb(cfg.bg)},.9)`, isDark ? '#888' : cfg.text, cfg.accent)}
+    ${nav(isDark ? `rgba(${hexToRgb(cfg.bg)},.95)` : `rgba(${hexToRgb(cfg.bg)},.9)`, isDark ? '#888' : cfg.text, cfg.accent, d.name)}
     <div id="about" style="text-align:center;padding:100px 24px;${headerIsGradient ? `background:${cfg.headerGrad}` : ''}${!isDark && headerIsGradient ? ';color:#fff' : ''}">
       <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;margin:0 auto 24px;border:3px solid ${cfg.accent}${isDark ? `;box-shadow:0 0 30px ${cfg.accent}33` : ''}"><img src="${d.avatar}" style="width:100%;height:100%"></div>
       <h1 style="font-size:2.8rem;font-weight:700;color:${!isDark && headerIsGradient ? '#fff' : cfg.accent};margin-bottom:8px">${d.name}</h1>
