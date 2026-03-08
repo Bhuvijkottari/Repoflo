@@ -9,7 +9,7 @@ const Navbar = () => {
     { label: "Home", path: "/" },
     { label: "Themes", path: "/themes" },
     { label: "Process", path: "/#process" },
-    { label: "Pricing", path: "/#pricing" },
+    { label: "Feedback", path: "/#feedback" },
   ];
 
   return (
@@ -39,8 +39,8 @@ const Navbar = () => {
           ))}
         </div>
 
-        <Button variant="nav" size="sm" asChild>
-          <Link to="/generate">Login</Link>
+        <Button variant="cta" size="sm" className="rounded-full" asChild>
+          <Link to="/generate">Generate Your Portfolio</Link>
         </Button>
       </div>
     </motion.nav>

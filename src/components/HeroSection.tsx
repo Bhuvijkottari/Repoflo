@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github } from "lucide-react";
+import { ArrowRight, Github, Palette } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroShapes from "@/assets/hero-shapes.png";
 
@@ -19,6 +19,9 @@ const HeroSection = () => {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="space-y-6"
         >
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-display font-semibold">
+            <Palette className="w-4 h-4" /> 20+ Themes by ADITHYA & THARUN K SHETTY
+          </div>
           <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-foreground">
             Create a Stunning{" "}
             <span className="text-gradient">Portfolio</span>{" "}
@@ -76,7 +79,7 @@ const HeroSection = () => {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
             className="absolute top-1/3 left-8 bg-card rounded-xl shadow-card p-4 min-w-[140px]"
           >
-            <p className="font-display font-semibold text-sm text-foreground">Projects</p>
+            <p className="font-display font-semibold text-sm text-foreground">20+ Themes</p>
             <div className="flex gap-1.5 mt-2">
               <div className="w-8 h-8 rounded-lg bg-primary/20" />
               <div className="w-8 h-8 rounded-lg bg-accent/20" />
