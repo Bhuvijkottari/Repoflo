@@ -435,11 +435,12 @@ const PreviewPage = () => {
                   <div className="w-3 h-3 rounded-full bg-primary/40" />
                 </div>
                 <div className="flex-1 text-center text-xs text-muted-foreground font-body">
-                  {sanitizedName}.html
+                  {sanitizedName}.html {inlineEditing && <span className="text-primary font-semibold ml-1">- Editing Mode</span>}
                 </div>
               </div>
               <iframe
-                srcDoc={editableHtml}
+                ref={iframeRef}
+                srcDoc={inlineEditing ? injectEditor(editableHtml) : editableHtml}
                 className="w-full border-0"
                 style={{ height: "calc(100% - 36px)" }}
                 title="Portfolio Preview"
