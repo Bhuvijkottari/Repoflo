@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { Upload, Github, Palette, Rocket } from "lucide-react";
+import { Palette, Github, Upload, Rocket } from "lucide-react";
 
 const steps = [
+  { icon: Palette, title: "Pick a Theme", desc: "Choose from 20+ stunning themes or Recruiter mode" },
   { icon: Github, title: "Connect GitHub", desc: "Link your GitHub profile to auto-import projects" },
   { icon: Upload, title: "Upload Resume", desc: "AI reads your resume and extracts all sections" },
-  { icon: Palette, title: "Pick a Theme", desc: "Choose from 20+ stunning themes or Recruiter mode" },
   { icon: Rocket, title: "Generate & Deploy", desc: "Get a production-ready portfolio instantly" },
 ];
 
@@ -37,6 +37,7 @@ const ProcessSection = () => {
               <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-4">
                 <step.icon className="w-7 h-7 text-primary-foreground" />
               </div>
+              <div className="font-display font-bold text-primary text-xs mb-2">Step {i + 1}</div>
               <h3 className="font-display font-semibold text-lg text-foreground mb-2">{step.title}</h3>
               <p className="text-sm text-muted-foreground font-body">{step.desc}</p>
             </motion.div>

@@ -41,7 +41,7 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
               20+ Premium Themes
             </div>
             <h2 className="font-display text-4xl font-bold text-foreground mb-4">Themes for Every Style</h2>
@@ -98,7 +98,7 @@ const Index = () => {
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-lg" asChild>
-                <Link to="/generate">Start Building Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
+                <Link to="/themes">Start Building Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
               </Button>
             </motion.div>
           </motion.div>
@@ -114,14 +114,14 @@ const Index = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-primary" />
-            <span className="font-display font-bold text-foreground">PortfolioForge</span>
+            <span className="font-display font-bold text-foreground">Repoflow</span>
           </div>
           <p className="text-sm text-muted-foreground font-body mb-2">
             20+ Themes Developed by <span className="font-semibold text-foreground">ADITHYA</span> and{" "}
             <span className="font-semibold text-foreground">THARUN K SHETTY</span>
           </p>
           <p className="text-xs text-muted-foreground font-body flex items-center justify-center gap-1">
-            <Shield className="w-3 h-3" /> 2026 PortfolioForge. All Rights Reserved.
+            <Shield className="w-3 h-3" /> 2026 Repoflow. All Rights Reserved.
           </p>
         </div>
       </footer>

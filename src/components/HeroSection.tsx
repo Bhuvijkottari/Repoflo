@@ -1,10 +1,18 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github, Palette, Zap, Star } from "lucide-react";
+import { ArrowRight, Github, Palette, Zap, Star, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroShapes from "@/assets/hero-shapes.png";
+import { getVisitorCount, incrementVisitorCount } from "@/lib/firebase";
 
 const HeroSection = () => {
+  const [visitorCount, setVisitorCount] = useState(0);
+
+  useEffect(() => {
+    incrementVisitorCount().then(setVisitorCount).catch(() => {});
+  }, []);
+
   return (
     <section className="relative min-h-screen gradient-hero overflow-hidden flex items-center pt-16">
       {/* Animated background blobs */}
@@ -67,8 +75,8 @@ const HeroSection = () => {
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button variant="cta" size="lg" className="rounded-full px-8 py-6 text-lg animate-pulse-glow" asChild>
-                <Link to="/generate">
-                  Generate Your Portfolio <ArrowRight className="ml-2 w-5 h-5" />
+                <Link to="/themes">
+                  Get Started <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
             </motion.div>
@@ -96,7 +104,7 @@ const HeroSection = () => {
             {[
               { icon: <Zap className="w-4 h-4 text-primary" />, value: "20+", label: "Themes" },
               { icon: <Star className="w-4 h-4 text-primary" />, value: "AI", label: "Powered" },
-              { icon: <Github className="w-4 h-4 text-primary" />, value: "GitHub", label: "Integrated" },
+              { icon: <Users className="w-4 h-4 text-primary" />, value: visitorCount > 0 ? visitorCount.toLocaleString() : "—", label: "Visitors" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
