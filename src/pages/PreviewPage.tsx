@@ -12,6 +12,7 @@ import type { PortfolioData } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
+import RecruiterAnalysisPanel from "@/components/RecruiterAnalysisPanel";
 
 interface AtsScore {
   overall: number;
@@ -249,15 +250,6 @@ const PreviewPage = () => {
     updateField("skills", portfolioData.skills.filter((_, idx) => idx !== i));
   };
 
-  const badgeColor = (rec: string) => {
-    switch (rec) {
-      case "STRONG_HIRE": return "bg-green-600 text-white";
-      case "HIRE": return "bg-blue-600 text-white";
-      case "CONSIDER": return "bg-amber-500 text-white";
-      case "PASS": return "bg-red-600 text-white";
-      default: return "bg-muted text-foreground";
-    }
-  };
 
   if (viewMode === "fullscreen") {
     return (
@@ -467,174 +459,14 @@ const PreviewPage = () => {
         </div>
 
         {/* Recruiter Analysis Panel */}
-        {isRecruiter && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-6 bg-card rounded-2xl border border-border p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display font-bold text-lg text-foreground">AI Candidate Analysis</h3>
-              {analysis && (
-                <Button variant="outline" size="sm" onClick={runAnalysis} disabled={isAnalyzing}>
-                  {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-                  Re-analyze
-                </Button>
-              )}
-            </div>
-
-            {isAnalyzing && !analysis && (
-              <div className="flex items-center justify-center py-12 gap-3 text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin" />
-                <span className="font-body">Analyzing candidate profile with AI...</span>
-              </div>
-            )}
-
-            {analysis && (
-              <div className="space-y-6">
-                {/* Top row: recommendation + score */}
-                <div className="flex flex-wrap gap-6 items-start">
-                  <div>
-                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Recommendation</span>
-                    <div className="mt-1">
-                      <span className={`inline-block px-4 py-2 rounded-lg font-display font-bold text-sm ${badgeColor(analysis.recommendation)}`}>
-                        {analysis.recommendation.replace("_", " ")}
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Confidence</span>
-                    <div className="mt-1 font-display text-2xl font-bold text-foreground">{analysis.confidence}%</div>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Overall Score</span>
-                    <div className="mt-1 font-display text-2xl font-bold text-foreground">{analysis.overallScore}/100</div>
-                  </div>
-                </div>
-
-                {/* Summary */}
-                <div>
-                  <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Executive Summary</span>
-                  <p className="mt-1 text-sm text-foreground font-body leading-relaxed">{analysis.summary}</p>
-                </div>
-
-                {/* Strengths & Concerns */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Key Strengths</span>
-                    <ul className="mt-2 space-y-1.5">
-                      {analysis.strengths?.map((s, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm font-body text-foreground">
-                          <span className="text-green-600 mt-0.5 font-bold">+</span> {s}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Concerns</span>
-                    <ul className="mt-2 space-y-1.5">
-                      {analysis.concerns?.map((c, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm font-body text-foreground">
-                          <span className="text-red-600 mt-0.5 font-bold">-</span> {c}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                {/* GitHub Insights */}
-                <div>
-                  <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">GitHub Insights</span>
-                  <div className="grid md:grid-cols-2 gap-3 mt-2">
-                    {analysis.githubInsights && Object.entries(analysis.githubInsights).map(([key, val]) => (
-                      <div key={key} className="bg-secondary/50 rounded-lg p-3">
-                        <span className="text-xs font-display font-semibold text-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
-                        <p className="text-xs text-muted-foreground mt-1 font-body">{val}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* ATS Score */}
-                {analysis.atsScore && (
-                  <div>
-                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">ATS Resume Score</span>
-                    <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {[
-                        ["Overall", analysis.atsScore.overall],
-                        ["Keywords", analysis.atsScore.keywordScore],
-                        ["Format", analysis.atsScore.formatScore],
-                        ["Experience", analysis.atsScore.experienceScore],
-                        ["Education", analysis.atsScore.educationScore],
-                        ["Skills", analysis.atsScore.skillsScore],
-                      ].map(([label, score]) => (
-                        <div key={label as string} className="bg-secondary/50 rounded-lg p-3 text-center">
-                          <div className={`font-display text-xl font-bold ${(score as number) >= 70 ? "text-green-600" : (score as number) >= 50 ? "text-amber-500" : "text-red-500"}`}>
-                            {score as number}/100
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">{label as string}</div>
-                        </div>
-                      ))}
-                    </div>
-                    {analysis.atsScore.suggestions?.length > 0 && (
-                      <div className="mt-3 bg-accent/10 rounded-lg p-3">
-                        <span className="text-xs font-display font-semibold text-foreground">ATS Improvement Tips:</span>
-                        <ul className="mt-1 space-y-1">
-                          {analysis.atsScore.suggestions.map((s: string, i: number) => (
-                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1">
-                              <span className="text-accent mt-0.5">•</span> {s}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* LeetCode Insights */}
-                {analysis.leetcodeInsights && (
-                  <div>
-                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">LeetCode Insights</span>
-                    <div className="grid md:grid-cols-2 gap-3 mt-2">
-                      {Object.entries(analysis.leetcodeInsights).map(([key, val]) => (
-                        <div key={key} className="bg-secondary/50 rounded-lg p-3">
-                          <span className="text-xs font-display font-semibold text-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
-                          <p className="text-xs text-muted-foreground mt-1 font-body">{val as string}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Inferred Project Descriptions */}
-                {analysis.inferredProjectDescriptions && Object.keys(analysis.inferredProjectDescriptions).length > 0 && (
-                  <div>
-                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">AI-Inferred Project Descriptions</span>
-                    <div className="mt-2 space-y-2">
-                      {Object.entries(analysis.inferredProjectDescriptions).map(([name, desc]) => (
-                        <div key={name} className="bg-accent/10 rounded-lg p-3">
-                          <span className="text-xs font-display font-semibold text-foreground">{name}</span>
-                          <p className="text-xs text-muted-foreground mt-1">{desc as string}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Hiring Notes */}
-                <div>
-                  <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Hiring Manager Notes</span>
-                  <p className="mt-1 text-sm text-foreground font-body leading-relaxed bg-secondary/30 rounded-lg p-4">{analysis.hiringNotes}</p>
-                </div>
-
-                <div className="pt-2">
-                  <Button variant="cta" onClick={handleDownloadReport}>
-                    <Download className="w-4 h-4 mr-2" /> Download Full Report
-                  </Button>
-                </div>
-              </div>
-            )}
-          </motion.div>
+        {isRecruiter && portfolioData && (
+          <RecruiterAnalysisPanel
+            analysis={analysis}
+            isAnalyzing={isAnalyzing}
+            portfolioData={portfolioData}
+            onReanalyze={runAnalysis}
+            onDownloadReport={handleDownloadReport}
+          />
         )}
 
         {/* Finalized banner */}
