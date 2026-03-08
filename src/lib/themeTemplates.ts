@@ -106,7 +106,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "bold":
       return wrapTheme('', "'Segoe UI',system-ui,sans-serif", `
         <div style="background:#0a0a0a;color:#fff;min-height:100vh">
-        ${nav('rgba(10,10,10,.9)', '#999', '#a855f7')}
+        ${nav('rgba(10,10,10,.9)', '#999', '#a855f7', d.name)}
         <div id="about" style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#0a0a0a 0%,#1a0a2e 50%,#0a1628 100%);padding:40px 24px">
           <div><div style="width:130px;height:130px;border-radius:50%;overflow:hidden;margin:0 auto 24px;border:3px solid #a855f7"><img src="${d.avatar}" style="width:100%;height:100%"></div>
             <h1 style="font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px">${d.name}</h1>
