@@ -10,12 +10,23 @@ const getPortfolioData = (): PortfolioData => {
   return mockPortfolioData;
 };
 
-// Shared navbar generator for all themes - with functional smooth scroll JS
-const nav = (bg: string, text: string, accent: string, personName: string, links: string[] = ["About", "Skills", "Experience", "Projects", "Education", "Contact"]) =>
-  `<nav style="position:sticky;top:0;z-index:100;background:${bg};padding:12px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px)">
+// Shared navbar generator - dynamically builds links based on available data
+const nav = (bg: string, text: string, accent: string, personName: string, links?: string[], data?: PortfolioData) => {
+  // If data provided, auto-generate links based on available sections
+  const autoLinks = data ? [
+    "About",
+    data.skills.length > 0 ? "Skills" : null,
+    data.experience.length > 0 ? "Experience" : null,
+    data.projects.length > 0 ? "Projects" : null,
+    data.education.length > 0 ? "Education" : null,
+    "Contact",
+  ].filter(Boolean) as string[] : (links || ["About", "Skills", "Experience", "Projects", "Education", "Contact"]);
+
+  return `<nav style="position:sticky;top:0;z-index:100;background:${bg};padding:12px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px)">
     <a href="#about" style="font-weight:700;font-size:1.1rem;color:${accent};text-decoration:none;cursor:pointer">${personName.split(' ')[0]}</a>
-    <div style="display:flex;gap:16px">${links.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.85rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
+    <div style="display:flex;gap:16px">${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.85rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
   </nav>`;
+};
 
 // Shared sections generator
 const skillsHtml = (d: PortfolioData, bg: string, color: string, border?: string) =>
