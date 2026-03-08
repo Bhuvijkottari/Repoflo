@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Star, Send, MessageSquare, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchFeedbacks, submitFeedback } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 interface Feedback {
@@ -25,18 +25,13 @@ const FeedbackSection = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchFeedbacks();
+    loadFeedbacks();
   }, []);
 
-  const fetchFeedbacks = async () => {
+  const loadFeedbacks = async () => {
     try {
-      const { data, error } = await supabase
-        .from("feedbacks")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (error) throw error;
-      setFeedbacks(data || []);
+      const data = await fetchFeedbacks(20);
+      setFeedbacks(data);
     } catch (e) {
       console.error("Failed to fetch feedbacks:", e);
     } finally {
@@ -49,13 +44,15 @@ const FeedbackSection = () => {
     if (!rating || !name.trim() || !message.trim()) return;
     setSubmitting(true);
     try {
-      const { data, error } = await supabase
-        .from("feedbacks")
-        .insert({ name: name.trim(), rating, message: message.trim() })
-        .select()
-        .single();
-      if (error) throw error;
-      setFeedbacks((prev) => [data, ...prev]);
+      const docRef = await submitFeedback(name.trim(), rating, message.trim());
+      const newFeedback: Feedback = {
+        id: docRef.id,
+        name: name.trim(),
+        rating,
+        message: message.trim(),
+        created_at: new Date().toISOString(),
+      };
+      setFeedbacks((prev) => [newFeedback, ...prev]);
       setShowForm(false);
       setRating(0);
       setName("");

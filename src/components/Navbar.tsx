@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { GitBranch } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Navbar = () => {
@@ -41,8 +41,8 @@ const Navbar = () => {
     >
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         <Link to="/" className="flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-primary" />
-          <span className="font-display font-bold text-xl text-foreground">PortfolioForge</span>
+          <GitBranch className="w-6 h-6 text-primary" />
+          <span className="font-display font-bold text-xl text-foreground">Repoflow</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
@@ -62,7 +62,7 @@ const Navbar = () => {
 
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Button variant="cta" size="sm" className="rounded-full" asChild>
-            <Link to="/generate">Generate Your Portfolio</Link>
+            <Link to="/themes">Get Started</Link>
           </Button>
         </motion.div>
       </div>

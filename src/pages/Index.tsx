@@ -114,14 +114,14 @@ const Index = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-primary" />
-            <span className="font-display font-bold text-foreground">PortfolioForge</span>
+            <span className="font-display font-bold text-foreground">Repoflow</span>
           </div>
           <p className="text-sm text-muted-foreground font-body mb-2">
             20+ Themes Developed by <span className="font-semibold text-foreground">ADITHYA</span> and{" "}
             <span className="font-semibold text-foreground">THARUN K SHETTY</span>
           </p>
           <p className="text-xs text-muted-foreground font-body flex items-center justify-center gap-1">
-            <Shield className="w-3 h-3" /> 2026 PortfolioForge. All Rights Reserved.
+            <Shield className="w-3 h-3" /> 2026 Repoflow. All Rights Reserved.
           </p>
         </div>
       </footer>
