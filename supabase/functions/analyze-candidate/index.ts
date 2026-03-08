@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { portfolioData, requiredTechStack } = await req.json();
+    const { portfolioData, requiredTechStack, experienceLevel } = await req.json();
     if (!portfolioData) {
       return new Response(JSON.stringify({ error: "No portfolio data provided" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
