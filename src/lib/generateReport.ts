@@ -1,9 +1,8 @@
 import type { PortfolioData } from "./mockData";
 
 export interface CandidateAnalysis {
-  recommendation: "STRONG_HIRE" | "HIRE" | "CONSIDER" | "PASS";
-  confidence: number;
   overallScore: number;
+  verdict: string;
   summary: string;
   strengths: string[];
   concerns: string[];

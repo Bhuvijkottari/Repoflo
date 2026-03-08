@@ -42,11 +42,28 @@ ${experienceLevel ? `10. Experience Level Requirement: The recruiter is looking 
 
 IMPORTANT for projects: If a project has "No description provided" as its description, infer what the project likely does based on its name, tech stack, and any other available context. Provide a brief inferred description.
 
+SCORING SYSTEM (CRITICAL):
+Calculate a single "overallScore" from 0 to 100 that holistically weighs ALL available data:
+- GitHub activity, repos, contributions, languages, collaboration (weighted heavily)
+- ATS resume analysis (keywords, format, experience clarity, education, skills)
+- LeetCode performance (if available): total solved, difficulty distribution, contest rating
+- Tech stack match against recruiter requirements (if provided)
+- Experience level match against recruiter requirements (if provided)
+- Project quality, originality, and impact
+- Education and work experience
+
+The verdict is derived STRICTLY from the overallScore:
+- Below 50: "DO NOT CONSIDER" — weak candidate
+- 50-60: "MILD CHANCE" — some potential but significant gaps
+- 60-70: "MODERATE" — decent but not standout
+- 70-80: "AVERAGE" — solid candidate worth interviewing  
+- 80-90: "GOOD" — strong candidate, recommended
+- 90-100: "EXCEPTIONAL" — outstanding, prioritize hiring
+
 Return a JSON object with these EXACT fields:
 {
-  "recommendation": "STRONG_HIRE" or "HIRE" or "CONSIDER" or "PASS",
-  "confidence": number 0-100,
-  "overallScore": number 0-100,
+  "overallScore": number 0-100 (this is THE key metric),
+  "verdict": one of "DO NOT CONSIDER" | "MILD CHANCE" | "MODERATE" | "AVERAGE" | "GOOD" | "EXCEPTIONAL" (must match the score thresholds above),
   "atsScore": {
     "overall": number 0-100,
     "keywordScore": number 0-100,
