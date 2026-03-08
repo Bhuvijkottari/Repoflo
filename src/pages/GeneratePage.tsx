@@ -150,7 +150,7 @@ const GeneratePage = () => {
           </div>
           <h1 className="font-display text-4xl font-bold text-foreground mb-3">Add Your Info</h1>
           <p className="text-muted-foreground font-body">
-            Provide your GitHub profile{isRecruiter ? ", LeetCode username," : ""} and resume — AI does the rest.
+            Provide your GitHub profile{isRecruiter ? ", LeetCode username," : ""} and resume — Nova does the rest.
           </p>
         </motion.div>
 
