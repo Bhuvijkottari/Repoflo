@@ -456,9 +456,9 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               <div className="mt-4 bg-amber-500/10 border border-amber-400/30 rounded-xl p-4 flex items-start gap-3">
                 <Bot className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-xs font-display font-semibold text-amber-700">AI-Generated Content Detected</span>
+                  <span className="text-xs font-display font-semibold text-amber-700">Nova Detected Generated Content</span>
                   <p className="text-xs text-amber-600/80 mt-0.5 font-body">
-                    {s.aiGeneratedContent} {s.aiGeneratedContent === 1 ? "repository contains" : "repositories contain"} potential AI-generated code patterns. Consider verifying originality during technical interviews.
+                    {s.aiGeneratedContent} {s.aiGeneratedContent === 1 ? "repository contains" : "repositories contain"} potential auto-generated code patterns. Consider verifying originality during technical interviews.
                   </p>
                 </div>
               </div>

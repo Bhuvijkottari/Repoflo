@@ -37,7 +37,7 @@ const RecruiterSection = () => {
             },
             {
               icon: FileCheck,
-              title: "AI-Powered Assessment",
+              title: "Nova Powered Assessment",
               desc: "Get a hire/no-hire recommendation with confidence score, strengths analysis, and actionable hiring notes.",
             },
             {

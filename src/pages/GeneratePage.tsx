@@ -107,7 +107,7 @@ const GeneratePage = () => {
       }
 
       if (resumeFile) {
-        setStatus("Parsing resume with AI...");
+        setStatus("Nova is parsing your resume...");
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         const formData = new FormData();

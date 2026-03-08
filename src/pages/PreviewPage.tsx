@@ -296,7 +296,7 @@ const PreviewPage = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className={showEditor && !isMobile ? "flex-1 min-w-0" : "w-full max-w-5xl"}
+            className="w-full max-w-5xl"
           >
             <div className={`bg-card rounded-2xl shadow-card-hover overflow-hidden transition-all duration-500 ${
               viewMode === "mobile" && !isMobile ? "w-[390px] h-[844px] mx-auto" : "w-full h-[80vh]"

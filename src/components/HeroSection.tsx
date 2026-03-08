@@ -110,7 +110,7 @@ const HeroSection = () => {
           >
             {[
               { icon: <Zap className="w-4 h-4 text-primary" />, value: "20+", label: "Themes" },
-              { icon: <Star className="w-4 h-4 text-primary" />, value: "AI", label: "Powered" },
+              { icon: <Star className="w-4 h-4 text-primary" />, value: "Nova", label: "Powered" },
               { icon: <Users className="w-4 h-4 text-primary" />, value: visitorCount > 0 ? visitorCount.toLocaleString() : "—", label: "Visitors" },
             ].map((stat, i) => (
               <motion.div
