@@ -555,6 +555,72 @@ const PreviewPage = () => {
                   </div>
                 </div>
 
+                {/* ATS Score */}
+                {analysis.atsScore && (
+                  <div>
+                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">ATS Resume Score</span>
+                    <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {[
+                        ["Overall", analysis.atsScore.overall],
+                        ["Keywords", analysis.atsScore.keywordScore],
+                        ["Format", analysis.atsScore.formatScore],
+                        ["Experience", analysis.atsScore.experienceScore],
+                        ["Education", analysis.atsScore.educationScore],
+                        ["Skills", analysis.atsScore.skillsScore],
+                      ].map(([label, score]) => (
+                        <div key={label as string} className="bg-secondary/50 rounded-lg p-3 text-center">
+                          <div className={`font-display text-xl font-bold ${(score as number) >= 70 ? "text-green-600" : (score as number) >= 50 ? "text-amber-500" : "text-red-500"}`}>
+                            {score as number}/100
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">{label as string}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {analysis.atsScore.suggestions?.length > 0 && (
+                      <div className="mt-3 bg-accent/10 rounded-lg p-3">
+                        <span className="text-xs font-display font-semibold text-foreground">ATS Improvement Tips:</span>
+                        <ul className="mt-1 space-y-1">
+                          {analysis.atsScore.suggestions.map((s: string, i: number) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1">
+                              <span className="text-accent mt-0.5">•</span> {s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* LeetCode Insights */}
+                {analysis.leetcodeInsights && (
+                  <div>
+                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">LeetCode Insights</span>
+                    <div className="grid md:grid-cols-2 gap-3 mt-2">
+                      {Object.entries(analysis.leetcodeInsights).map(([key, val]) => (
+                        <div key={key} className="bg-secondary/50 rounded-lg p-3">
+                          <span className="text-xs font-display font-semibold text-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+                          <p className="text-xs text-muted-foreground mt-1 font-body">{val as string}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Inferred Project Descriptions */}
+                {analysis.inferredProjectDescriptions && Object.keys(analysis.inferredProjectDescriptions).length > 0 && (
+                  <div>
+                    <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">AI-Inferred Project Descriptions</span>
+                    <div className="mt-2 space-y-2">
+                      {Object.entries(analysis.inferredProjectDescriptions).map(([name, desc]) => (
+                        <div key={name} className="bg-accent/10 rounded-lg p-3">
+                          <span className="text-xs font-display font-semibold text-foreground">{name}</span>
+                          <p className="text-xs text-muted-foreground mt-1">{desc as string}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Hiring Notes */}
                 <div>
                   <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Hiring Manager Notes</span>
