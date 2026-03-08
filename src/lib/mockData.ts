@@ -75,3 +75,37 @@ export const mockPortfolioData: PortfolioData = {
   },
   leetcodeStats: null,
 };
+
+// Dummy lorem ipsum data for theme previews
+export const dummyPreviewData: PortfolioData = {
+  name: "Jane Doe",
+  title: "Software Engineer",
+  bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Preview",
+  email: "jane@example.com",
+  location: "New York, NY",
+  github: "https://github.com/janedoe",
+  linkedin: "https://linkedin.com/in/janedoe",
+  website: "https://janedoe.dev",
+  skills: ["JavaScript", "React", "Python", "Node.js", "CSS", "Git", "Docker", "SQL"],
+  experience: [
+    { company: "Acme Corp", role: "Lead Engineer", period: "2022 - Present", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam." },
+    { company: "Lorem Labs", role: "Developer", period: "2020 - 2022", description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore." },
+  ],
+  education: [{ institution: "MIT", degree: "B.S. Computer Science", period: "2016 - 2020" }],
+  projects: [
+    { name: "ProjectAlpha", description: "Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit.", tech: ["React", "TypeScript", "Node.js"], stars: 142, link: "#" },
+    { name: "BetaApp", description: "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.", tech: ["Python", "FastAPI", "PostgreSQL"], stars: 87, link: "#" },
+    { name: "GammaKit", description: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.", tech: ["Go", "Docker", "Redis"], stars: 56, link: "#" },
+  ],
+  volunteering: [{ org: "Open Source Foundation", role: "Contributor", period: "2021 - Present", description: "Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse." }],
+  githubStats: {
+    totalCommits: 1523, publicRepos: 28, privateRepos: 8, followers: 650, following: 120,
+    pullRequests: 189, pushes: 920, daysOnGithub: 1200,
+    recentCollaborations: ["org/open-lib", "team/dashboard"],
+    aiGeneratedContent: 0,
+    topLanguages: [{ name: "JavaScript", percentage: 40 }, { name: "Python", percentage: 30 }, { name: "TypeScript", percentage: 20 }, { name: "Go", percentage: 10 }],
+    contributionStreak: 32,
+  },
+  leetcodeStats: null,
+};
