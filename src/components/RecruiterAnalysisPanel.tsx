@@ -173,14 +173,14 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
       {analysis && (
         <>
           {/* Recommendation + Overall Scores Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <motion.div {...fadeInUp} transition={{ ...fadeInUp.transition, delay: 0.1 }}
               className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">
-              <span className="text-3xl mb-2">{recEmoji(analysis.recommendation)}</span>
-              <span className={`inline-block px-5 py-2.5 rounded-xl font-display font-bold text-base ${badgeColor(analysis.recommendation)}`}>
-                {analysis.recommendation.replace("_", " ")}
+              <span className="text-3xl mb-2">{verdictEmoji(analysis.overallScore)}</span>
+              <span className={`inline-block px-5 py-2.5 rounded-xl font-display font-bold text-base ${verdictColor(analysis.overallScore)}`}>
+                {analysis.verdict}
               </span>
-              <span className="text-xs text-muted-foreground mt-3 font-body">Confidence: <strong className="text-foreground">{analysis.confidence}%</strong></span>
+              <span className="text-xs text-muted-foreground mt-3 font-body">Score: <strong className="text-foreground">{analysis.overallScore}/100</strong></span>
             </motion.div>
 
             <motion.div {...fadeInUp} transition={{ ...fadeInUp.transition, delay: 0.15 }}
