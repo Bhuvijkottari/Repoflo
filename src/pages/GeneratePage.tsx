@@ -27,6 +27,8 @@ const GeneratePage = () => {
   const [leetcodeFetching, setLeetcodeFetching] = useState(false);
   const [leetcodeData, setLeetcodeData] = useState<any>(null);
   const [leetcodeError, setLeetcodeError] = useState("");
+  const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
+  const [experienceLevel, setExperienceLevel] = useState<string>("");
 
   const isRecruiter = selectedTheme === "recruiter";
 
