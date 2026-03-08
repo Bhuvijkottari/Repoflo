@@ -291,35 +291,6 @@ const PreviewPage = () => {
         </motion.div>
 
         <div className="flex gap-4 justify-center">
-                {portfolioData.experience.map((exp, i) => (
-                  <div key={i} className="bg-secondary/50 rounded-lg p-3 space-y-2 relative">
-                    <button onClick={() => removeExperience(i)} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><Trash2 className="w-3 h-3" /></button>
-                    <Input value={exp.role} onChange={(e) => updateExperience(i, "role", e.target.value)} placeholder="Role" className="h-8 text-xs" />
-                    <Input value={exp.company} onChange={(e) => updateExperience(i, "company", e.target.value)} placeholder="Company" className="h-8 text-xs" />
-                    <Input value={exp.period} onChange={(e) => updateExperience(i, "period", e.target.value)} placeholder="2020 - 2024" className="h-8 text-xs" />
-                    <textarea value={exp.description} onChange={(e) => updateExperience(i, "description", e.target.value)} placeholder="Description" className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs resize-none h-14 focus:outline-none focus:ring-1 focus:ring-ring" />
-                  </div>
-                ))}
-              </div>
-
-              {/* Education */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="font-display font-semibold text-sm text-foreground">Education</Label>
-                  <Button variant="ghost" size="sm" onClick={addEducation} className="h-7 text-xs"><Plus className="w-3 h-3 mr-1" /> Add</Button>
-                </div>
-                {portfolioData.education.map((edu, i) => (
-                  <div key={i} className="bg-secondary/50 rounded-lg p-3 space-y-2 relative">
-                    <button onClick={() => removeEducation(i)} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><Trash2 className="w-3 h-3" /></button>
-                    <Input value={edu.degree} onChange={(e) => updateEducation(i, "degree", e.target.value)} placeholder="Degree" className="h-8 text-xs" />
-                    <Input value={edu.institution} onChange={(e) => updateEducation(i, "institution", e.target.value)} placeholder="Institution" className="h-8 text-xs" />
-                    <Input value={edu.period} onChange={(e) => updateEducation(i, "period", e.target.value)} placeholder="2016 - 2020" className="h-8 text-xs" />
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
           {/* Preview Panel */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
