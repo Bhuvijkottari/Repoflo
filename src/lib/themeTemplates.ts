@@ -55,7 +55,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
       const s = d.githubStats || { totalCommits: 0, publicRepos: 0, privateRepos: 0, followers: 0, following: 0, pullRequests: 0, pushes: 0, daysOnGithub: 0, recentCollaborations: [], aiGeneratedContent: 0, topLanguages: [], contributionStreak: 0 };
       return wrapTheme('', "'Segoe UI',system-ui,sans-serif", `
         <div style="background:#f8fafc;color:#1e293b;min-height:100vh">
-        ${nav('rgba(255,255,255,.9)', '#475569', '#6366f1', ['Overview', 'Languages', 'Experience', 'Projects', 'Skills'])}
+        ${nav('rgba(255,255,255,.9)', '#475569', '#6366f1', d.name, ['Overview', 'Languages', 'Experience', 'Projects', 'Skills'])}
         <div style="background:#fff;border-bottom:1px solid #e2e8f0;padding:24px"><div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:20px">
           <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <div><h1 style="font-size:1.5rem;font-weight:700">${d.name}</h1><p style="color:#64748b">${d.title} · ${d.location}</p></div></div></div>
