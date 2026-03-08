@@ -159,7 +159,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
             </Button>
           )}
         </div>
-        <p className="text-xs text-muted-foreground font-body">Powered by AI — comprehensive evaluation with graphical insights</p>
+        <p className="text-xs text-muted-foreground font-body">Powered by Nova — comprehensive evaluation with graphical insights</p>
       </motion.div>
 
       {isAnalyzing && !analysis && (
