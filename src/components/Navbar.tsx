@@ -28,6 +28,7 @@ const Navbar = () => {
   const links = [
     { label: "Home", path: "/", onClick: undefined },
     { label: "Themes", path: "/themes", onClick: undefined },
+    { label: "Recruiter View", path: "/generate", onClick: undefined },
     { label: "Process", path: "/#process", onClick: handleProcessClick },
     { label: "Feedback", path: "/#feedback", onClick: handleFeedbackClick },
   ];
