@@ -24,7 +24,7 @@ const RecruiterSection = () => {
           </h2>
           <p className="text-muted-foreground font-body max-w-2xl mx-auto text-lg">
             A dedicated analytics dashboard designed for technical recruiters and hiring managers. 
-            Get AI-powered candidate assessments, GitHub activity insights, and downloadable evaluation reports.
+            Get Nova powered candidate assessments, GitHub activity insights, and downloadable evaluation reports.
           </p>
         </motion.div>
 
