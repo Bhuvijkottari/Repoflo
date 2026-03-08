@@ -138,7 +138,7 @@ const recEmoji = (rec: string) => {
   }
 };
 
-const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanalyze, onDownloadReport }: Props) => {
+const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanalyze, onDownloadReport, requiredTechStack = [] }: Props) => {
   const d = portfolioData;
   const s = d.githubStats;
   const lc = d.leetcodeStats;
