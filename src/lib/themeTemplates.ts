@@ -60,7 +60,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <div><h1 style="font-size:1.5rem;font-weight:700">${d.name}</h1><p style="color:#64748b">${d.title} · ${d.location}</p></div></div></div>
         <div style="max-width:900px;margin:0 auto;padding:24px">
-          <h2 id="overview" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">📊 GitHub Overview</h2>
+          <h2 id="overview" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">GitHub Overview</h2>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px">
             ${[
               [s.totalCommits.toLocaleString(), 'Total Commits'],
