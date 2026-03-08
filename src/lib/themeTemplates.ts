@@ -202,6 +202,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="skills" style="margin:48px 0"><h2 style="font-family:'Orbitron',sans-serif;color:#0ff;font-size:1.3rem;margin-bottom:20px;text-shadow:0 0 10px rgba(0,255,255,.3)">SKILLS</h2><div>${skillsHtml(d, 'rgba(0,255,255,.1)', '#0ff', 'rgba(0,255,255,.3)')}</div></section>
           <section id="experience" style="margin:48px 0"><h2 style="font-family:'Orbitron',sans-serif;color:#0ff;font-size:1.3rem;margin-bottom:20px">EXPERIENCE</h2>${expHtml(d, '#e0e0ff', '#f0f', '#888')}</section>
           <section id="projects" style="margin:48px 0"><h2 style="font-family:'Orbitron',sans-serif;color:#0ff;font-size:1.3rem;margin-bottom:20px">PROJECTS</h2>${projectsHtml(d, 'rgba(0,255,255,.05)', 'rgba(0,255,255,.15)', '#0ff', '#888', 'rgba(255,0,255,.1)', '#f0f')}</section>
+          ${githubActivityHtml(d, 'rgba(0,255,255,.05)', 'rgba(0,255,255,.15)', '#0ff', '#888')}
           <section id="education" style="margin:48px 0"><h2 style="font-family:'Orbitron',sans-serif;color:#0ff;font-size:1.3rem;margin-bottom:20px">EDUCATION</h2>${eduHtml(d, '#e0e0ff', '#f0f')}</section>
           ${contactSection(d, '#0a0a1a', '#888', '#0ff')}
         </div></div>`);
