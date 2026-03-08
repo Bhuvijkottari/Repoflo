@@ -74,7 +74,7 @@ const HeroSection = () => {
             className="flex justify-center lg:justify-start"
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-xl animate-pulse-glow" asChild>
+              <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-xl shadow-glow" asChild>
                 <Link to="/themes">
                   Get Started <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
