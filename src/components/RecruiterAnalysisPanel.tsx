@@ -422,6 +422,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
             <div className="space-y-3">
               {d.projects.map((p, i) => {
                 const isAiGenerated = analysis.inferredProjectDescriptions?.[p.name];
+                const isAiBuilt = (p as any).isAiGenerated || s?.aiDetectedRepos?.includes(p.name);
                 const noDesc = p.description === "No description provided" || !p.description;
                 const lowStars = p.stars <= 0;
                 const hasCommonTemplate = p.name.toLowerCase().includes("todo") || p.name.toLowerCase().includes("calculator") || p.name.toLowerCase().includes("weather");
@@ -433,27 +434,41 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                 return (
                   <motion.div key={i} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }} transition={{ delay: i * 0.04, duration: 0.3 }}
-                    className="bg-secondary/30 rounded-xl p-4 border border-border/50">
+                    className={`rounded-xl p-4 border transition-all ${
+                      isAiBuilt 
+                        ? "bg-red-500/10 border-red-500/40 ring-1 ring-red-500/30" 
+                        : "bg-secondary/30 border-border/50"
+                    }`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-display font-semibold text-sm text-foreground">{p.name}</span>
+                          <span className={`font-display font-semibold text-sm ${isAiBuilt ? "text-red-600" : "text-foreground"}`}>{p.name}</span>
                           {p.stars > 0 && (
                             <span className="flex items-center gap-0.5 text-xs text-amber-500 font-body">
                               <Star className="w-3 h-3" /> {p.stars}
                             </span>
                           )}
-                          {suspiciousFlags.length > 0 && (
+                          {isAiBuilt && (
+                            <Badge className="text-[10px] bg-red-600 text-white border-red-700 animate-pulse">
+                              <Bot className="w-2.5 h-2.5 mr-0.5" /> AI-Built Detected
+                            </Badge>
+                          )}
+                          {!isAiBuilt && suspiciousFlags.length > 0 && (
                             <Badge variant="outline" className="text-[10px] border-amber-400/50 text-amber-600 bg-amber-500/10">
                               <AlertTriangle className="w-2.5 h-2.5 mr-0.5" /> Review
                             </Badge>
                           )}
-                          {isAiGenerated && (
+                          {isAiGenerated && !isAiBuilt && (
                             <Badge variant="outline" className="text-[10px] border-blue-400/50 text-blue-600 bg-blue-500/10">
                               <Bot className="w-2.5 h-2.5 mr-0.5" /> AI Inferred Desc
                             </Badge>
                           )}
                         </div>
+                        {isAiBuilt && (
+                          <p className="text-xs text-red-500 font-semibold mt-1 font-body flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" /> This repository appears to be built using AI tools (Lovable, Bolt, Cursor, etc.)
+                          </p>
+                        )}
                         <p className="text-xs text-muted-foreground mt-1 font-body">
                           {isAiGenerated ? (isAiGenerated as string) : p.description}
                         </p>
@@ -462,7 +477,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
                             <span key={t} className="text-[10px] bg-secondary px-2 py-0.5 rounded-md text-muted-foreground font-body">{t}</span>
                           ))}
                         </div>
-                        {suspiciousFlags.length > 0 && (
+                        {!isAiBuilt && suspiciousFlags.length > 0 && (
                           <div className="flex gap-1.5 mt-2">
                             {suspiciousFlags.map(f => (
                               <span key={f} className="text-[9px] bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded font-body">{f}</span>
@@ -476,13 +491,23 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
               })}
             </div>
             {s && s.aiGeneratedContent > 0 && (
-              <div className="mt-4 bg-amber-500/10 border border-amber-400/30 rounded-xl p-4 flex items-start gap-3">
-                <Bot className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="mt-4 bg-red-500/15 border border-red-500/40 rounded-xl p-4 flex items-start gap-3">
+                <Bot className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-xs font-display font-semibold text-amber-700">AI Detected Generated Content</span>
-                  <p className="text-xs text-amber-600/80 mt-0.5 font-body">
-                    {s.aiGeneratedContent} {s.aiGeneratedContent === 1 ? "repository contains" : "repositories contain"} potential auto-generated code patterns. Consider verifying originality during technical interviews.
+                  <span className="text-sm font-display font-bold text-red-600 flex items-center gap-1.5">
+                    ⚠️ AI-Built Repositories Detected
+                  </span>
+                  <p className="text-xs text-red-600/90 mt-1 font-body leading-relaxed">
+                    <strong>{s.aiGeneratedContent} {s.aiGeneratedContent === 1 ? "repository" : "repositories"}</strong> appear to be built using AI coding tools (Lovable, Bolt, Cursor, Replit, etc.). 
+                    These projects may not reflect the candidate's actual coding abilities. <strong>Verify originality during technical interviews.</strong>
                   </p>
+                  {s.aiDetectedRepos && s.aiDetectedRepos.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {s.aiDetectedRepos.map((repo: string) => (
+                        <Badge key={repo} className="text-[10px] bg-red-600 text-white">{repo}</Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -24,6 +24,7 @@ export interface PortfolioData {
     daysOnGithub: number;
     recentCollaborations: string[];
     aiGeneratedContent: number;
+    aiDetectedRepos?: string[];
     topLanguages: { name: string; percentage: number }[];
     contributionStreak: number;
   } | null;
@@ -70,6 +71,7 @@ export const mockPortfolioData: PortfolioData = {
     pullRequests: 312, pushes: 1560, daysOnGithub: 1825,
     recentCollaborations: ["open-source/react-toolkit", "team/enterprise-dashboard", "contrib/design-system"],
     aiGeneratedContent: 3,
+    aiDetectedRepos: ["portfolio-clone", "todo-app", "ai-dashboard"],
     topLanguages: [{ name: "TypeScript", percentage: 45 }, { name: "Python", percentage: 25 }, { name: "JavaScript", percentage: 20 }, { name: "Go", percentage: 10 }],
     contributionStreak: 47,
   },
@@ -104,6 +106,7 @@ export const dummyPreviewData: PortfolioData = {
     pullRequests: 189, pushes: 920, daysOnGithub: 1200,
     recentCollaborations: ["org/open-lib", "team/dashboard"],
     aiGeneratedContent: 0,
+    aiDetectedRepos: [],
     topLanguages: [{ name: "JavaScript", percentage: 40 }, { name: "Python", percentage: 30 }, { name: "TypeScript", percentage: 20 }, { name: "Go", percentage: 10 }],
     contributionStreak: 32,
   },
