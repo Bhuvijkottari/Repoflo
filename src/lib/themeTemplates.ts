@@ -77,12 +77,12 @@ const leetcodeHtml = (d: PortfolioData, cardBg: string, cardBorder: string, acce
 };
 
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
-  `<section id="contact" style="padding:48px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:16px">Contact</h2>
-  <p style="color:${textColor}">Email: ${d.email}</p><p style="color:${textColor}">Location: ${d.location}</p>
-  <div style="margin-top:16px;display:flex;gap:12px;justify-content:center">
-    ${d.github ? `<a href="${d.github}" style="color:${accentColor};text-decoration:none" target="_blank">GitHub</a>` : ''}
-    ${d.linkedin ? `<a href="${d.linkedin}" style="color:${accentColor};text-decoration:none" target="_blank">LinkedIn</a>` : ''}
-    ${d.website ? `<a href="${d.website}" style="color:${accentColor};text-decoration:none" target="_blank">Website</a>` : ''}
+  `<section id="contact" class="reveal" style="padding:60px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:20px;font-size:1.4rem">Get In Touch</h2>
+  <p style="color:${textColor};font-size:1rem">Email: <a href="mailto:${d.email}" style="color:${accentColor};text-decoration:none;font-weight:500">${d.email}</a></p><p style="color:${textColor};font-size:1rem;margin-top:4px">Location: ${d.location}</p>
+  <div style="margin-top:20px;display:flex;gap:16px;justify-content:center">
+    ${d.github ? `<a href="${d.github}" style="color:#fff;background:${accentColor};text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:500;font-size:.9rem;transition:transform .2s" target="_blank" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">GitHub</a>` : ''}
+    ${d.linkedin ? `<a href="${d.linkedin}" style="color:${accentColor};text-decoration:none;padding:10px 24px;border-radius:8px;border:1px solid ${accentColor};font-weight:500;font-size:.9rem;transition:transform .2s" target="_blank" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">LinkedIn</a>` : ''}
+    ${d.website ? `<a href="${d.website}" style="color:${accentColor};text-decoration:none;padding:10px 24px;border-radius:8px;border:1px solid ${accentColor};font-weight:500;font-size:.9rem;transition:transform .2s" target="_blank" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">Website</a>` : ''}
   </div></section>`;
 
 const baseStyle = `*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}img{max-width:100%}a{transition:all .3s ease}a:hover{opacity:.85}
