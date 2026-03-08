@@ -1,11 +1,12 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ProcessSection from "@/components/ProcessSection";
 import RecruiterSection from "@/components/RecruiterSection";
 import FeedbackSection from "@/components/FeedbackSection";
-import { Sparkles, Shield, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { Sparkles, Shield, ArrowRight, X, Target } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import themeBlue from "@/assets/theme-preview-blue.jpg";
 import themeWarm from "@/assets/theme-preview-warm.jpg";
@@ -27,10 +28,59 @@ const themeImageMap: Record<string, string> = {
 const getThemeImage = (category: string) => themeImageMap[category] || themeBlue;
 
 const Index = () => {
+  const [showRecruiterPopup, setShowRecruiterPopup] = useState(false);
+
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem("recruiterPopupDismissed");
+    if (!dismissed) {
+      const timer = setTimeout(() => setShowRecruiterPopup(true), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const dismissPopup = () => {
+    setShowRecruiterPopup(false);
+    sessionStorage.setItem("recruiterPopupDismissed", "true");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
+
+      {/* Recruiter Popup */}
+      <AnimatePresence>
+        {showRecruiterPopup && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="fixed bottom-6 right-6 z-50 bg-card border border-border rounded-2xl shadow-card-hover p-5 max-w-xs"
+          >
+            <button onClick={dismissPopup} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-5 h-5 text-primary" />
+              <span className="font-display font-bold text-foreground text-sm">Are you a Recruiter?</span>
+            </div>
+            <p className="text-xs text-muted-foreground font-body mb-3">
+              Try our Recruiter View — get AI-powered candidate assessments, GitHub analytics, and downloadable evaluation reports.
+            </p>
+            <div className="flex gap-2">
+              <Button variant="cta" size="sm" className="rounded-full text-xs px-4" asChild>
+                <Link to="/themes" onClick={dismissPopup}>
+                  Try Recruiter View <ArrowRight className="ml-1 w-3.5 h-3.5" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" className="text-xs" onClick={dismissPopup}>
+                Dismiss
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Themes Showcase */}
       <section className="py-24">
