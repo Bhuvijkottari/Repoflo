@@ -10,9 +10,8 @@ const getPortfolioData = (): PortfolioData => {
   return mockPortfolioData;
 };
 
-// Shared navbar generator - dynamically builds links based on available data
+// Shared navbar generator with mobile hamburger menu
 const nav = (bg: string, text: string, accent: string, personName: string, links?: string[], data?: PortfolioData) => {
-  // If data provided, auto-generate links based on available sections
   const autoLinks = data ? [
     "About",
     data.skills.length > 0 ? "Skills" : null,
@@ -24,7 +23,12 @@ const nav = (bg: string, text: string, accent: string, personName: string, links
 
   return `<nav style="position:sticky;top:0;z-index:100;background:${bg};padding:12px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px)">
     <a href="#about" style="font-weight:700;font-size:1.1rem;color:${accent};text-decoration:none;cursor:pointer">${personName.split(' ')[0]}</a>
-    <div style="display:flex;gap:16px">${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.85rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
+    <div class="nav-links" style="display:flex;gap:16px">${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.85rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
+    <button class="nav-hamburger" onclick="document.querySelector('.nav-mobile-menu').classList.toggle('nav-mobile-open')" style="display:none;background:none;border:none;color:${text};font-size:1.5rem;cursor:pointer;padding:4px">&#9776;</button>
+    <div class="nav-mobile-menu" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:${bg};z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:24px;backdrop-filter:blur(20px)">
+      <button onclick="this.parentElement.classList.remove('nav-mobile-open')" style="position:absolute;top:16px;right:20px;background:none;border:none;color:${text};font-size:1.8rem;cursor:pointer">&times;</button>
+      ${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();this.closest('.nav-mobile-menu').classList.remove('nav-mobile-open');document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:1.2rem;font-weight:600;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}
+    </div>
   </nav>`;
 };
 
@@ -36,7 +40,7 @@ const expHtml = (d: PortfolioData, roleColor: string, companyColor: string, desc
   d.experience.length ? d.experience.map(e => `<div class="reveal" style="margin-bottom:28px;padding:20px;border-radius:12px;background:rgba(128,128,128,.03)"><div style="font-weight:600;font-size:1.1rem;color:${roleColor}">${e.role}</div><div style="color:${companyColor};font-size:.95rem">${e.company}</div><div style="color:#999;font-size:.85rem;margin-top:2px">${e.period}</div><p style="color:${descColor};font-size:.95rem;margin-top:8px;line-height:1.7">${e.description}</p></div>`).join('') : '';
 
 const projectsHtml = (d: PortfolioData, cardBg: string, cardBorder: string, nameColor: string, descColor: string, tagBg: string, tagColor: string) =>
-  d.projects.map(p => `<div class="project-card reveal" style="background:${cardBg};border:1px solid ${cardBorder};border-radius:16px;padding:24px;margin-bottom:16px"><div style="font-weight:700;font-size:1.05rem;color:${nameColor};margin-bottom:6px">${p.link ? `<a href="${p.link}" target="_blank" style="color:${nameColor};text-decoration:none">${p.name}</a>` : p.name} ${p.stars ? `<span style="color:#f59e0b;font-size:.9rem;margin-left:8px">★ ${p.stars}</span>` : ''}</div><p style="color:${descColor};font-size:.95rem;margin-bottom:12px;line-height:1.6">${p.description}</p><div>${p.tech.map(t => `<span class="skill-tag" style="display:inline-block;background:${tagBg};color:${tagColor};padding:4px 10px;border-radius:6px;font-size:.8rem;margin:3px">${t}</span>`).join('')}</div>${p.link ? `<a href="${p.link}" target="_blank" style="display:inline-block;margin-top:12px;font-size:.85rem;color:${tagColor};text-decoration:none;font-weight:500">View on GitHub →</a>` : ''}</div>`).join('');
+  d.projects.map(p => `<div class="project-card reveal" style="background:${cardBg};border:1px solid ${cardBorder};border-radius:16px;padding:24px;margin-bottom:16px"><div style="font-weight:700;font-size:1.05rem;color:${nameColor};margin-bottom:6px">${p.link ? `<a href="${p.link}" target="_blank" style="color:${nameColor};text-decoration:none">${p.name}</a>` : p.name} ${p.stars ? `<span style="color:#f59e0b;font-size:.9rem;margin-left:8px">★ ${p.stars}</span>` : ''}</div><p style="color:${descColor};font-size:.95rem;margin-bottom:12px;line-height:1.6">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:4px">${p.tech.map(t => `<span class="skill-tag" style="display:inline-block;background:${tagBg};color:${tagColor};padding:4px 10px;border-radius:6px;font-size:.8rem">${t}</span>`).join('')}</div>${p.link ? `<a href="${p.link}" target="_blank" style="display:inline-block;margin-top:12px;font-size:.85rem;color:${tagColor};text-decoration:none;font-weight:500">View on GitHub →</a>` : ''}</div>`).join('');
 
 const eduHtml = (d: PortfolioData, roleColor: string, instColor: string) =>
   d.education.length ? d.education.map(e => `<div class="reveal" style="margin-bottom:24px;padding:16px;border-radius:12px;background:rgba(128,128,128,.03)"><div style="font-weight:600;font-size:1.05rem;color:${roleColor}">${e.degree}</div><div style="color:${instColor};font-size:.95rem">${e.institution}</div><div style="color:#999;font-size:.85rem">${e.period}</div></div>`).join('') : '';
@@ -48,7 +52,7 @@ const githubActivityHtml = (d: PortfolioData, cardBg: string, cardBorder: string
   const s = d.githubStats;
   if (!s) return '';
   return `<section id="github" style="margin:48px 0"><h2 style="color:${accentColor};font-size:1.4rem;font-weight:600;margin-bottom:20px">GitHub Activity</h2>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+  <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px">
     ${[[s.totalCommits.toLocaleString(),'Commits'],[s.publicRepos,'Repos'],[s.followers.toLocaleString(),'Followers'],[s.pullRequests,'PRs'],
       [`${Math.floor(s.daysOnGithub/365)}y ${s.daysOnGithub%365}d`,'On GitHub']].map(([v,l]) =>
       `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:${accentColor}">${v}</div><div style="font-size:.7rem;color:${descColor};text-transform:uppercase;letter-spacing:1px;margin-top:2px">${l}</div></div>`).join('')}
@@ -62,7 +66,7 @@ const leetcodeHtml = (d: PortfolioData, cardBg: string, cardBorder: string, acce
   const lc = d.leetcodeStats;
   if (!lc) return '';
   return `<section id="leetcode" style="margin:48px 0"><h2 style="color:${accentColor};font-size:1.4rem;font-weight:600;margin-bottom:20px">LeetCode Profile</h2>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px">
+  <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;margin-bottom:20px">
     ${[[lc.totalSolved,'Total Solved'],[lc.easySolved,'Easy'],[lc.mediumSolved,'Medium'],[lc.hardSolved,'Hard'],
       [lc.ranking ? `#${lc.ranking.toLocaleString()}` : 'N/A','Ranking'],[lc.contestRating || 'N/A','Contest Rating']].map(([v,l]) =>
       `<div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:${accentColor}">${v}</div><div style="font-size:.7rem;color:${descColor};text-transform:uppercase;letter-spacing:1px;margin-top:2px">${l}</div></div>`).join('')}
@@ -79,11 +83,26 @@ const leetcodeHtml = (d: PortfolioData, cardBg: string, cardBorder: string, acce
 const contactSection = (d: PortfolioData, bg: string, textColor: string, accentColor: string) =>
   `<section id="contact" class="reveal" style="padding:60px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:20px;font-size:1.4rem">Get In Touch</h2>
   <p style="color:${textColor};font-size:1rem">Email: <a href="mailto:${d.email}" style="color:${accentColor};text-decoration:none;font-weight:500">${d.email}</a></p><p style="color:${textColor};font-size:1rem;margin-top:4px">Location: ${d.location}</p>
-  <div style="margin-top:20px;display:flex;gap:16px;justify-content:center">
+  <div style="margin-top:20px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
     ${d.github ? `<a href="${d.github}" style="color:#fff;background:${accentColor};text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:500;font-size:.9rem;transition:transform .2s" target="_blank" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">GitHub</a>` : ''}
     ${d.linkedin ? `<a href="${d.linkedin}" style="color:${accentColor};text-decoration:none;padding:10px 24px;border-radius:8px;border:1px solid ${accentColor};font-weight:500;font-size:.9rem;transition:transform .2s" target="_blank" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">LinkedIn</a>` : ''}
     ${d.website ? `<a href="${d.website}" style="color:${accentColor};text-decoration:none;padding:10px 24px;border-radius:8px;border:1px solid ${accentColor};font-weight:500;font-size:.9rem;transition:transform .2s" target="_blank" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">Website</a>` : ''}
   </div></section>`;
+
+const responsiveStyles = `
+/* Responsive nav */
+@media(max-width:768px){
+  .nav-links{display:none !important}
+  .nav-hamburger{display:block !important}
+  .nav-mobile-open{display:flex !important}
+  h1{font-size:2rem !important}
+  h2{font-size:1.2rem !important}
+  .stats-grid{grid-template-columns:repeat(2,1fr) !important}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr !important}
+}
+`;
 
 const baseStyle = `*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}img{max-width:100%}a{transition:all .3s ease}a:hover{opacity:.85}
 /* Scroll animations */
@@ -97,6 +116,7 @@ const baseStyle = `*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:sm
 /* Avatar pulse */
 .avatar-ring{animation:pulse-ring 2s ease-in-out infinite}
 @keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.3)}50%{box-shadow:0 0 0 12px rgba(99,102,241,0)}}
+${responsiveStyles}
 `;
 
 const scrollScript = `<script>document.addEventListener('DOMContentLoaded',()=>{const r=document.querySelectorAll('.reveal');const o=new IntersectionObserver((e)=>{e.forEach(i=>{if(i.isIntersecting){i.target.classList.add('visible');o.unobserve(i.target)}})},{threshold:.15});r.forEach(el=>o.observe(el))})</script>`;
@@ -113,12 +133,12 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
       return wrapTheme('', "'Segoe UI',system-ui,sans-serif", `
         <div style="background:#f8fafc;color:#1e293b;min-height:100vh">
         ${nav('rgba(255,255,255,.9)', '#475569', '#6366f1', d.name, ['Overview', 'Languages', 'Experience', 'Projects', 'Skills'])}
-        <div style="background:#fff;border-bottom:1px solid #e2e8f0;padding:24px"><div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:20px">
+        <div style="background:#fff;border-bottom:1px solid #e2e8f0;padding:24px"><div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
           <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <div><h1 style="font-size:1.5rem;font-weight:700">${d.name}</h1><p style="color:#64748b">${d.title} · ${d.location}</p></div></div></div>
         <div style="max-width:900px;margin:0 auto;padding:24px">
           <h2 id="overview" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">GitHub Overview</h2>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px">
+          <div class="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px">
             ${[
               [s.totalCommits.toLocaleString(), 'Total Commits'],
               [s.publicRepos, 'Public Repos'],
@@ -132,16 +152,16 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           </div>
           <h2 id="languages" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Top Languages</h2>
           ${s.topLanguages.length ? `<div style="display:flex;border-radius:8px;overflow:hidden;height:24px;margin:8px 0">${s.topLanguages.map((l:any,i:number) => `<div style="width:${l.percentage}%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600;color:#fff;background:${['#6366f1','#f59e0b','#10b981','#ef4444'][i]}">${l.name} ${l.percentage}%</div>`).join('')}</div>` : '<p style="color:#64748b">No language data</p>'}
-          ${s.aiGeneratedContent > 0 ? `<div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:.9rem;color:#92400e"><strong>AI-Generated Content Detected:</strong> ${s.aiGeneratedContent} repositories contain potential AI-generated code patterns.</div>` : ''}
+          ${s.aiGeneratedContent > 0 ? `<div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:.9rem;color:#92400e"><strong>AI Generated Content Detected:</strong> ${s.aiGeneratedContent} repositories contain potential AI generated code patterns.</div>` : ''}
           ${s.recentCollaborations.length ? `<h2 style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Recent Collaborations</h2>${s.recentCollaborations.map((c:string) => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin:6px 0;font-size:.9rem">${c}</div>`).join('')}` : ''}
           <h2 id="experience" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Experience</h2>
           ${d.experience.map(e => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-weight:600">${e.role}</div><div style="color:#6366f1">${e.company}</div><div style="color:#94a3b8;font-size:.85rem">${e.period}</div><p style="color:#64748b;font-size:.9rem;margin-top:4px">${e.description}</p></div>`).join('') || '<p style="color:#64748b">No experience data. Upload a resume to add this.</p>'}
           <h2 style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Education</h2>
           ${d.education.map(e => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-weight:600">${e.degree}</div><div style="color:#6366f1">${e.institution}</div><div style="color:#94a3b8;font-size:.85rem">${e.period}</div></div>`).join('') || '<p style="color:#64748b">No education data.</p>'}
           <h2 id="projects" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Projects</h2>
-          ${d.projects.map(p => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-weight:600">${p.name} ${p.stars ? `<span style="color:#f59e0b">★ ${p.stars}</span>` : ''}</div><p style="color:#64748b;font-size:.85rem">${p.description}</p><div style="margin-top:8px">${p.tech.map(t => `<span style="display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 10px;border-radius:6px;font-size:.8rem;margin:2px;color:#475569">${t}</span>`).join('')}</div></div>`).join('')}
+          ${d.projects.map(p => `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-weight:600">${p.name} ${p.stars ? `<span style="color:#f59e0b">★ ${p.stars}</span>` : ''}</div><p style="color:#64748b;font-size:.85rem">${p.description}</p><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${p.tech.map(t => `<span style="display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 10px;border-radius:6px;font-size:.8rem;color:#475569">${t}</span>`).join('')}</div></div>`).join('')}
           <h2 id="skills" style="font-size:1.2rem;font-weight:700;margin:28px 0 12px">Skills</h2>
-          <div style="margin-bottom:24px">${d.skills.map(s => `<span style="display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 10px;border-radius:6px;font-size:.8rem;margin:2px;color:#475569">${s}</span>`).join('')}</div>
+          <div style="margin-bottom:24px;display:flex;flex-wrap:wrap;gap:4px">${d.skills.map(s => `<span style="display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 10px;border-radius:6px;font-size:.8rem;color:#475569">${s}</span>`).join('')}</div>
         </div></div>`);
     }
 
@@ -190,11 +210,11 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <h1 style="font-size:3rem;font-weight:700;margin-bottom:8px">${d.name}</h1><p style="opacity:.9;font-size:1.1rem">${d.title}</p></div>
         <div style="max-width:760px;margin:0 auto;padding:40px 24px">
           <p style="font-size:1.1rem;text-align:center;color:#666;margin:32px 0">${d.bio}</p>
-          <section id="skills" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">~ Skills ~</h2><div>${skillsHtml(d, '#fde68a', '#92400e')}</div></section>
-          <section id="experience" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">~ Experience ~</h2>${expHtml(d, '#2d1b00', '#d97706', '#666')}</section>
-          <section id="projects" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">~ Projects ~</h2>${projectsHtml(d, '#fff', '#fed7aa', '#2d1b00', '#666', '#fff7ed', '#ea580c')}</section>
+          <section id="skills" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">Skills</h2><div>${skillsHtml(d, '#fde68a', '#92400e')}</div></section>
+          <section id="experience" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">Experience</h2>${expHtml(d, '#2d1b00', '#d97706', '#666')}</section>
+          <section id="projects" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">Projects</h2>${projectsHtml(d, '#fff', '#fed7aa', '#2d1b00', '#666', '#fff7ed', '#ea580c')}</section>
           ${githubActivityHtml(d, '#fff', '#fed7aa', '#92400e', '#666')}
-          <section id="education" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">~ Education ~</h2>${eduHtml(d, '#2d1b00', '#d97706')}</section>
+          <section id="education" style="margin:48px 0"><h2 style="font-size:1.6rem;font-weight:700;color:#92400e;margin-bottom:20px;font-style:italic">Education</h2>${eduHtml(d, '#2d1b00', '#d97706')}</section>
           ${contactSection(d, '#fef7ed', '#666', '#f97316')}
         </div></div>`);
 
@@ -205,7 +225,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
         <div style="max-width:800px;margin:0 auto;padding:40px 24px">
           <div id="about" style="background:#11111b;border:1px solid #313244;border-radius:12px;overflow:hidden;margin-bottom:32px">
             <div style="background:#181825;padding:8px 16px;display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:#f38ba8;display:inline-block"></span><span style="width:12px;height:12px;border-radius:50%;background:#f9e2af;display:inline-block"></span><span style="width:12px;height:12px;border-radius:50%;background:#a6e3a1;display:inline-block"></span><span style="color:#585b70;margin-left:8px;font-size:.8rem">portfolio.js</span></div>
-            <div style="padding:24px"><p><span style="color:#585b70">// Welcome to my portfolio</span></p><p><span style="color:#cba6f7">const</span> <span style="color:#f9e2af">developer</span> = {</p><p>&nbsp;&nbsp;name: <span style="color:#a6e3a1">"${d.name}"</span>,</p><p>&nbsp;&nbsp;role: <span style="color:#a6e3a1">"${d.title}"</span>,</p><p>&nbsp;&nbsp;location: <span style="color:#a6e3a1">"${d.location}"</span></p><p>};</p></div>
+            <div style="padding:24px;overflow-x:auto"><p><span style="color:#585b70">// Welcome to my portfolio</span></p><p><span style="color:#cba6f7">const</span> <span style="color:#f9e2af">developer</span> = {</p><p>&nbsp;&nbsp;name: <span style="color:#a6e3a1">"${d.name}"</span>,</p><p>&nbsp;&nbsp;role: <span style="color:#a6e3a1">"${d.title}"</span>,</p><p>&nbsp;&nbsp;location: <span style="color:#a6e3a1">"${d.location}"</span></p><p>};</p></div>
           </div>
           <div style="text-align:center;margin:32px 0"><div style="width:100px;height:100px;border-radius:50%;overflow:hidden;margin:0 auto;border:2px solid #cba6f7"><img src="${d.avatar}" style="width:100%;height:100%"></div></div>
           <p style="text-align:center;color:#a6adc8;margin-bottom:32px">${d.bio}</p>
@@ -221,7 +241,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
       return wrapTheme('', "'Garamond','Georgia',serif", `
         <div style="background:#0c0c0c;color:#e8e4df;min-height:100vh">
         ${nav('rgba(12,12,12,.9)', '#8a8078', '#d4a574', d.name)}
-        <div id="about" style="min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(180deg,#0c0c0c 0%,#1a1714 100%);border-bottom:1px solid #2a2520;padding:40px">
+        <div id="about" style="min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(180deg,#0c0c0c 0%,#1a1714 100%);border-bottom:1px solid #2a2520;padding:40px 24px">
           <div><div style="width:140px;height:140px;border-radius:50%;border:2px solid #d4a574;overflow:hidden;margin:0 auto 28px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
             <h1 style="font-size:3.5rem;font-weight:400;letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;color:#d4a574">${d.name}</h1>
             <p style="color:#8a8078;font-size:1.1rem;letter-spacing:2px">${d.title}</p><p style="margin-top:16px;color:#5a554e;max-width:400px;margin-left:auto;margin-right:auto">${d.bio}</p></div>
