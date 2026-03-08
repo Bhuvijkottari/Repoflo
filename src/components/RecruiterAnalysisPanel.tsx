@@ -175,7 +175,7 @@ const RecruiterAnalysisPanel = ({ analysis, isAnalyzing, portfolioData, onReanal
       {analysis && (
         <>
           {/* Recommendation + Overall Scores Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <motion.div {...fadeInUp} transition={{ ...fadeInUp.transition, delay: 0.1 }}
               className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">
               <span className="text-3xl mb-2">{recEmoji(analysis.recommendation)}</span>
