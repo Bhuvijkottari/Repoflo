@@ -123,7 +123,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "creative":
       return wrapTheme('', "Georgia,'Times New Roman',serif", `
         <div style="background:#fef7ed;color:#2d1b00;min-height:100vh">
-        ${nav('rgba(254,247,237,.9)', '#92400e', '#f97316')}
+        ${nav('rgba(254,247,237,.9)', '#92400e', '#f97316', d.name)}
         <div id="about" style="background:linear-gradient(135deg,#fbbf24,#f97316);padding:80px 24px;text-align:center;color:#fff">
           <div style="width:110px;height:110px;border-radius:50%;border:4px solid #fff;overflow:hidden;margin:0 auto 20px"><img src="${d.avatar}" style="width:100%;height:100%"></div>
           <h1 style="font-size:3rem;font-weight:700;margin-bottom:8px">${d.name}</h1><p style="opacity:.9;font-size:1.1rem">${d.title}</p></div>
