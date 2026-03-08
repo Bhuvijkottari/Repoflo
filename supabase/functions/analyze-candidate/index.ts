@@ -12,23 +12,21 @@ serve(async (req) => {
     const { portfolioData } = await req.json();
     if (!portfolioData) {
       return new Response(JSON.stringify({ error: "No portfolio data provided" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "AI service not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const prompt = `You are an expert technical recruiter and hiring manager. Analyze this candidate's profile thoroughly and provide a hiring recommendation.
+    const prompt = `You are an expert technical recruiter, hiring manager, and ATS (Applicant Tracking System) analyst. Analyze this candidate's profile thoroughly and provide a hiring recommendation along with an ATS score.
 
 CANDIDATE DATA:
-${JSON.stringify(portfolioData, null, 2).substring(0, 8000)}
+${JSON.stringify(portfolioData, null, 2).substring(0, 10000)}
 
 Analyze the candidate based on:
 1. GitHub activity (commits, repos, languages, contribution patterns, collaboration)
@@ -37,12 +35,25 @@ Analyze the candidate based on:
 4. Education background
 5. Project quality and impact (stars, descriptions, technologies used)
 6. Overall profile completeness
+7. LeetCode performance (if available): problem-solving skills, difficulty distribution, contest participation
+8. ATS Resume Analysis: evaluate the resume/profile content against typical ATS criteria including keyword density, section completeness, formatting, skills match, experience clarity
+
+IMPORTANT for projects: If a project has "No description provided" as its description, infer what the project likely does based on its name, tech stack, and any other available context. Provide a brief inferred description.
 
 Return a JSON object with these EXACT fields:
 {
   "recommendation": "STRONG_HIRE" or "HIRE" or "CONSIDER" or "PASS",
   "confidence": number 0-100,
   "overallScore": number 0-100,
+  "atsScore": {
+    "overall": number 0-100,
+    "keywordScore": number 0-100,
+    "formatScore": number 0-100,
+    "experienceScore": number 0-100,
+    "educationScore": number 0-100,
+    "skillsScore": number 0-100,
+    "suggestions": ["improvement1", "improvement2", "improvement3"]
+  },
   "summary": "2-3 sentence executive summary of the candidate",
   "strengths": ["strength1", "strength2", "strength3", "strength4"],
   "concerns": ["concern1", "concern2"],
@@ -52,15 +63,24 @@ Return a JSON object with these EXACT fields:
     "consistency": "Assessment of contribution patterns",
     "collaboration": "Assessment of collaboration indicators"
   },
+  "leetcodeInsights": {
+    "problemSolvingLevel": "Strong/Moderate/Beginner based on solve count and difficulty distribution",
+    "difficultyBalance": "Assessment of easy/medium/hard ratio",
+    "contestPerformance": "Assessment if contest data available",
+    "summary": "One-line summary of competitive programming ability"
+  },
   "technicalAssessment": {
     "primaryStack": "Their main technology stack",
     "experienceLevel": "Junior/Mid/Senior/Staff based on evidence",
     "specializations": ["area1", "area2"]
   },
+  "inferredProjectDescriptions": {
+    "projectName": "inferred description for projects with no description"
+  },
   "hiringNotes": "Detailed paragraph for the hiring manager with actionable insights"
 }
 
-IMPORTANT: Return ONLY valid JSON. No markdown. No explanation. Be objective and evidence-based in your assessment.`;
+IMPORTANT: Return ONLY valid JSON. No markdown. No explanation. Be objective and evidence-based. If LeetCode data is not available, set leetcodeInsights to null.`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

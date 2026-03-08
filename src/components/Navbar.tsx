@@ -1,15 +1,35 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleFeedbackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.pathname === "/") {
+      document.getElementById("feedback")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/#feedback");
+    }
+  };
+
+  const handleProcessClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.pathname === "/") {
+      document.getElementById("process")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/#process");
+    }
+  };
+
   const links = [
-    { label: "Home", path: "/" },
-    { label: "Themes", path: "/themes" },
-    { label: "Process", path: "/#process" },
-    { label: "Feedback", path: "/#feedback" },
+    { label: "Home", path: "/", onClick: undefined },
+    { label: "Themes", path: "/themes", onClick: undefined },
+    { label: "Process", path: "/#process", onClick: handleProcessClick },
+    { label: "Feedback", path: "/#feedback", onClick: handleFeedbackClick },
   ];
 
   return (
@@ -27,21 +47,24 @@ const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-8">
           {links.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`font-body text-sm font-medium transition-colors hover:text-primary ${
+            <a
+              key={link.label}
+              href={link.path}
+              onClick={link.onClick || (link.path.startsWith("/#") ? undefined : (e) => { e.preventDefault(); navigate(link.path); })}
+              className={`font-body text-sm font-medium transition-colors hover:text-primary cursor-pointer ${
                 location.pathname === link.path ? "text-primary" : "text-muted-foreground"
               }`}
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </div>
 
-        <Button variant="cta" size="sm" className="rounded-full" asChild>
-          <Link to="/generate">Generate Your Portfolio</Link>
-        </Button>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button variant="cta" size="sm" className="rounded-full" asChild>
+            <Link to="/generate">Generate Your Portfolio</Link>
+          </Button>
+        </motion.div>
       </div>
     </motion.nav>
   );

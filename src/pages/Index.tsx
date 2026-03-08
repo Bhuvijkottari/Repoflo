@@ -1,22 +1,27 @@
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ProcessSection from "@/components/ProcessSection";
 import RecruiterSection from "@/components/RecruiterSection";
 import FeedbackSection from "@/components/FeedbackSection";
-import { Sparkles, Shield } from "lucide-react";
+import { Sparkles, Shield, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 import themeBlue from "@/assets/theme-preview-blue.jpg";
 import themeWarm from "@/assets/theme-preview-warm.jpg";
 import themeDark from "@/assets/theme-preview-dark.jpg";
 import themeGreen from "@/assets/theme-preview-green.jpg";
 import themePink from "@/assets/theme-preview-pink.jpg";
+import themePurple from "@/assets/theme-preview-purple.jpg";
+import themeCoral from "@/assets/theme-preview-coral.jpg";
+import themeCyan from "@/assets/theme-preview-cyan.jpg";
+import themeMocha from "@/assets/theme-preview-mocha.jpg";
+import themeMidnight from "@/assets/theme-preview-midnight.jpg";
+import themeSteel from "@/assets/theme-preview-steel.jpg";
 
 const themeImageMap: Record<string, string> = {
-  blue: themeBlue,
-  warm: themeWarm,
-  dark: themeDark,
-  green: themeGreen,
-  pink: themePink,
+  blue: themeBlue, warm: themeWarm, dark: themeDark, green: themeGreen, pink: themePink,
+  purple: themePurple, coral: themeCoral, cyan: themeCyan, mocha: themeMocha, midnight: themeMidnight, steel: themeSteel,
 };
 
 const getThemeImage = (category: string) => themeImageMap[category] || themeBlue;
@@ -39,9 +44,7 @@ const Index = () => {
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
               20+ Premium Themes
             </div>
-            <h2 className="font-display text-4xl font-bold text-foreground mb-4">
-              Themes for Every Style
-            </h2>
+            <h2 className="font-display text-4xl font-bold text-foreground mb-4">Themes for Every Style</h2>
             <p className="text-muted-foreground font-body max-w-lg mx-auto">
               From minimal to bold, terminal to luxury — every theme is fully responsive with animations and clickable navigation.
             </p>
@@ -51,24 +54,24 @@ const Index = () => {
             {[
               { name: "Recruiter", image: "blue" },
               { name: "Minimal", image: "blue" },
-              { name: "Bold Dark", image: "dark" },
+              { name: "Bold Dark", image: "purple" },
               { name: "Creative", image: "warm" },
               { name: "Terminal", image: "green" },
-              { name: "Elegant", image: "warm" },
-              { name: "Neon Cyber", image: "dark" },
+              { name: "Elegant", image: "mocha" },
+              { name: "Neon Cyber", image: "cyan" },
               { name: "Ocean", image: "blue" },
-              { name: "Sunset", image: "warm" },
+              { name: "Sunset", image: "coral" },
               { name: "Forest", image: "green" },
               { name: "Cherry", image: "pink" },
-              { name: "Lavender", image: "pink" },
-              { name: "Midnight", image: "dark" },
-              { name: "Coral", image: "warm" },
-              { name: "Arctic", image: "blue" },
-              { name: "Mocha", image: "warm" },
+              { name: "Lavender", image: "purple" },
+              { name: "Midnight", image: "midnight" },
+              { name: "Coral", image: "coral" },
+              { name: "Arctic", image: "cyan" },
+              { name: "Mocha", image: "mocha" },
               { name: "Sakura", image: "pink" },
-              { name: "Graphite", image: "dark" },
+              { name: "Graphite", image: "steel" },
               { name: "Emerald", image: "green" },
-              { name: "Royal", image: "dark" },
+              { name: "Royal", image: "purple" },
             ].map((theme, i) => (
               <motion.div
                 key={theme.name}
@@ -76,15 +79,29 @@ const Index = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.03 }}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
                 className="group cursor-pointer"
               >
-                <div className="h-24 rounded-xl overflow-hidden mb-2 group-hover:scale-105 transition-transform duration-300 shadow-sm">
-                  <img src={getThemeImage(theme.image)} alt={theme.name} className="w-full h-full object-cover" />
+                <div className="h-24 rounded-xl overflow-hidden mb-2 shadow-sm group-hover:shadow-card-hover transition-all duration-300">
+                  <img src={getThemeImage(theme.image)} alt={theme.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                 </div>
                 <p className="text-xs font-display font-medium text-foreground text-center">{theme.name}</p>
               </motion.div>
             ))}
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-lg" asChild>
+                <Link to="/generate">Start Building Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 

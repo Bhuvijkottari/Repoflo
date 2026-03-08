@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
-import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, Code2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { PortfolioData } from "@/lib/mockData";
@@ -14,12 +14,16 @@ const GeneratePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [githubUrl, setGithubUrl] = useState("");
+  const [leetcodeUsername, setLeetcodeUsername] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState("");
   const [githubData, setGithubData] = useState<PortfolioData | null>(null);
   const [githubFetching, setGithubFetching] = useState(false);
   const [githubError, setGithubError] = useState("");
+  const [leetcodeFetching, setLeetcodeFetching] = useState(false);
+  const [leetcodeData, setLeetcodeData] = useState<any>(null);
+  const [leetcodeError, setLeetcodeError] = useState("");
 
   // Auto-fetch GitHub data when URL changes
   useEffect(() => {
@@ -29,14 +33,11 @@ const GeneratePage = () => {
       setGithubError("");
       return;
     }
-
     const timer = setTimeout(async () => {
       setGithubFetching(true);
       setGithubError("");
       try {
-        const { data, error } = await supabase.functions.invoke("fetch-github", {
-          body: { githubUrl },
-        });
+        const { data, error } = await supabase.functions.invoke("fetch-github", { body: { githubUrl } });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
         setGithubData(data as PortfolioData);
@@ -47,62 +48,73 @@ const GeneratePage = () => {
         setGithubFetching(false);
       }
     }, 800);
-
     return () => clearTimeout(timer);
   }, [githubUrl]);
+
+  // Auto-fetch LeetCode data when username changes
+  useEffect(() => {
+    const username = leetcodeUsername.trim();
+    if (!username) {
+      setLeetcodeData(null);
+      setLeetcodeError("");
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setLeetcodeFetching(true);
+      setLeetcodeError("");
+      try {
+        const { data, error } = await supabase.functions.invoke("fetch-leetcode", { body: { username } });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        setLeetcodeData(data);
+      } catch (e: any) {
+        setLeetcodeError(e.message || "Failed to fetch LeetCode data");
+        setLeetcodeData(null);
+      } finally {
+        setLeetcodeFetching(false);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [leetcodeUsername]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!githubData) return;
     setIsProcessing(true);
-
     try {
-      let finalData = { ...githubData };
+      let finalData: PortfolioData = { ...githubData };
+
+      // Attach LeetCode stats if available
+      if (leetcodeData) {
+        finalData.leetcodeStats = leetcodeData;
+      }
 
       if (resumeFile) {
         setStatus("Parsing resume with AI...");
-        
-        // Use raw fetch with FormData (supabase.functions.invoke doesn't handle FormData properly)
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        
         const formData = new FormData();
         formData.append("resume", resumeFile);
         formData.append("githubData", JSON.stringify(githubData));
-
         const response = await fetch(`${supabaseUrl}/functions/v1/parse-resume`, {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${supabaseKey}`,
-          },
+          headers: { "Authorization": `Bearer ${supabaseKey}` },
           body: formData,
         });
-        
         if (!response.ok) {
           const errData = await response.json().catch(() => ({ error: "Failed to parse resume" }));
           throw new Error(errData.error || `Resume parsing failed (${response.status})`);
         }
-        
         const data = await response.json();
         if (data?.error) throw new Error(data.error);
-        
-        finalData = { 
-          ...finalData, 
-          ...data, 
-          avatar: data.avatar || githubData.avatar, 
-          githubStats: githubData.githubStats 
-        };
+        finalData = { ...finalData, ...data, avatar: data.avatar || githubData.avatar, githubStats: githubData.githubStats, leetcodeStats: finalData.leetcodeStats };
       }
 
       setStatus("Data ready! Selecting theme...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
       navigate("/themes");
     } catch (e: any) {
-      toast({
-        title: "Error processing data",
-        description: e.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Error processing data", description: e.message || "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
       setIsProcessing(false);
       setStatus("");
@@ -128,33 +140,17 @@ const GeneratePage = () => {
           {/* GitHub URL */}
           <div className="space-y-3">
             <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
-              <Github className="w-5 h-5 text-primary" />
-              GitHub Profile URL
+              <Github className="w-5 h-5 text-primary" /> GitHub Profile URL
             </Label>
-            <Input
-              type="url"
-              placeholder="https://github.com/yourusername"
-              value={githubUrl}
-              onChange={(e) => setGithubUrl(e.target.value)}
-              required
-              className="h-12 text-base"
-            />
+            <Input type="url" placeholder="https://github.com/yourusername" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} required className="h-12 text-base" />
             {githubFetching && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="w-4 h-4 animate-spin" /> Fetching GitHub profile...
-              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Fetching GitHub profile...</div>
             )}
             {githubError && (
-              <div className="flex items-center gap-2 text-sm text-destructive">
-                <AlertCircle className="w-4 h-4" /> {githubError}
-              </div>
+              <div className="flex items-center gap-2 text-sm text-destructive"><AlertCircle className="w-4 h-4" /> {githubError}</div>
             )}
             {githubData && !githubFetching && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-3 p-3 bg-secondary/50 rounded-xl"
-              >
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 p-3 bg-secondary/50 rounded-xl">
                 <img src={githubData.avatar} alt={githubData.name} className="w-12 h-12 rounded-full" />
                 <div>
                   <p className="font-display font-semibold text-sm text-foreground">{githubData.name}</p>
@@ -165,11 +161,39 @@ const GeneratePage = () => {
             )}
           </div>
 
+          {/* LeetCode Username */}
+          <div className="space-y-3">
+            <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
+              <Code2 className="w-5 h-5 text-accent" /> LeetCode Username
+              <span className="text-muted-foreground font-normal text-xs ml-1">(optional)</span>
+            </Label>
+            <Input type="text" placeholder="your_leetcode_username" value={leetcodeUsername} onChange={(e) => setLeetcodeUsername(e.target.value)} className="h-12 text-base" />
+            {leetcodeFetching && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Fetching LeetCode profile...</div>
+            )}
+            {leetcodeError && (
+              <div className="flex items-center gap-2 text-sm text-destructive"><AlertCircle className="w-4 h-4" /> {leetcodeError}</div>
+            )}
+            {leetcodeData && !leetcodeFetching && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 p-3 bg-accent/10 rounded-xl">
+                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                  <Code2 className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <p className="font-display font-semibold text-sm text-foreground">{leetcodeData.username}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {leetcodeData.totalSolved} solved · Easy {leetcodeData.easySolved} · Med {leetcodeData.mediumSolved} · Hard {leetcodeData.hardSolved}
+                  </p>
+                </div>
+                <CheckCircle2 className="w-5 h-5 text-accent ml-auto" />
+              </motion.div>
+            )}
+          </div>
+
           {/* Resume Upload */}
           <div className="space-y-3">
             <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
-              <FileText className="w-5 h-5 text-primary" />
-              Upload Resume — <span className="text-muted-foreground font-normal text-xs">enriches experience & education</span>
+              <FileText className="w-5 h-5 text-primary" /> Upload Resume — <span className="text-muted-foreground font-normal text-xs">enriches experience & education</span>
             </Label>
             <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 hover:bg-secondary/30 transition-colors">
               {resumeFile ? (
@@ -184,33 +208,19 @@ const GeneratePage = () => {
                   <span className="font-body text-xs mt-1">PDF, DOC, TXT up to 10MB</span>
                 </div>
               )}
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx,.txt"
-                className="hidden"
-                onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
-              />
+              <input type="file" accept=".pdf,.doc,.docx,.txt" className="hidden" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} />
             </label>
           </div>
 
-          <Button
-            type="submit"
-            variant="cta"
-            size="lg"
-            className="w-full rounded-xl py-6 text-lg"
-            disabled={!githubData || isProcessing || githubFetching}
-          >
-            {isProcessing ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>{status || "Processing..."}</span>
-              </div>
-            ) : (
-              <>
-                Continue to Themes <ArrowRight className="ml-2 w-5 h-5" />
-              </>
-            )}
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button type="submit" variant="cta" size="lg" className="w-full rounded-xl py-6 text-lg animate-pulse-glow" disabled={!githubData || isProcessing || githubFetching}>
+              {isProcessing ? (
+                <div className="flex items-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /><span>{status || "Processing..."}</span></div>
+              ) : (
+                <>Generate Your Portfolio <ArrowRight className="ml-2 w-5 h-5" /></>
+              )}
+            </Button>
+          </motion.div>
         </motion.form>
       </div>
     </div>
