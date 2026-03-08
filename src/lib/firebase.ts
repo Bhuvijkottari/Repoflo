@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, updateDoc, increment, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, updateDoc, increment, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDY6HE1WNe0MO9ClUr93bW3D--mx3JviWY",
@@ -33,6 +33,24 @@ export async function fetchFeedbacks(maxItems = 20) {
     message: string;
     created_at: string;
   }>;
+}
+
+// Real-time feedback listener
+export function subscribeFeedbacks(
+  maxItems: number,
+  callback: (feedbacks: Array<{ id: string; name: string; rating: number; message: string; created_at: string }>) => void
+) {
+  const q = query(collection(db, "feedbacks"), orderBy("created_at", "desc"), limit(maxItems));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Array<{
+      id: string;
+      name: string;
+      rating: number;
+      message: string;
+      created_at: string;
+    }>;
+    callback(data);
+  });
 }
 
 // Visitor counter functions
