@@ -134,7 +134,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
     case "minimal":
       return wrapTheme('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">', "'Inter',sans-serif", `
         <div style="background:#fafafa;color:#1a1a1a;min-height:100vh">
-        ${nav('rgba(250,250,250,.9)', '#666', '#1a1a1a', d.name)}
+        ${nav('rgba(250,250,250,.9)', '#666', '#1a1a1a', d.name, undefined, d)}
         <div style="max-width:720px;margin:0 auto;padding:40px 24px">
           <div id="about" style="text-align:center;padding:60px 0 40px"><div style="width:120px;height:120px;border-radius:50%;margin:0 auto 20px;overflow:hidden"><img src="${d.avatar}" style="width:100%;height:100%"></div>
             <h1 style="font-size:2.5rem;font-weight:700;margin-bottom:8px">${d.name}</h1><p style="color:#666;font-size:1.1rem;margin-bottom:12px">${d.title}</p><p style="color:#888;max-width:500px;margin:0 auto">${d.bio}</p></div>
