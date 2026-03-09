@@ -21,10 +21,15 @@ const nav = (bg: string, text: string, accent: string, personName: string, links
     "Contact",
   ].filter(Boolean) as string[] : (links || ["About", "Skills", "Experience", "Projects", "Education", "Contact"]);
 
-  return `<nav style="position:sticky;top:0;z-index:100;background:${bg};padding:12px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px)">
-    <a href="#about" style="font-weight:700;font-size:1.1rem;color:${accent};text-decoration:none;cursor:pointer">${personName.split(' ')[0]}</a>
-    <div class="nav-links" style="display:flex;gap:16px">${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.85rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
-    <button class="nav-hamburger" onclick="document.querySelector('.nav-mobile-menu').classList.toggle('nav-mobile-open')" style="display:none;background:none;border:none;color:${text};font-size:1.5rem;cursor:pointer;padding:4px">&#9776;</button>
+  return `<style>
+    @media(max-width:700px){.nav-links{display:none!important}.nav-hamburger{display:block!important}}
+    .nav-mobile-open{display:flex!important}
+    nav{box-sizing:border-box;width:100%}
+  </style>
+  <nav style="position:sticky;top:0;z-index:100;background:${bg};padding:10px 20px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);box-sizing:border-box;width:100%;min-height:52px">
+    <a href="#about" style="font-weight:700;font-size:1rem;color:${accent};text-decoration:none;cursor:pointer;white-space:nowrap;flex-shrink:0">${personName.split(' ')[0]}</a>
+    <div class="nav-links" style="display:flex;gap:12px;align-items:center;flex-wrap:nowrap;overflow:hidden">${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.82rem;cursor:pointer;transition:color .2s;white-space:nowrap" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
+    <button class="nav-hamburger" onclick="document.querySelector('.nav-mobile-menu').classList.toggle('nav-mobile-open')" style="display:none;background:none;border:none;color:${text};font-size:1.5rem;cursor:pointer;padding:4px;flex-shrink:0">&#9776;</button>
     <div class="nav-mobile-menu" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:${bg};z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:24px;backdrop-filter:blur(20px)">
       <button onclick="this.parentElement.classList.remove('nav-mobile-open')" style="position:absolute;top:16px;right:20px;background:none;border:none;color:${text};font-size:1.8rem;cursor:pointer">&times;</button>
       ${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();this.closest('.nav-mobile-menu').classList.remove('nav-mobile-open');document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:1.2rem;font-weight:600;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}
