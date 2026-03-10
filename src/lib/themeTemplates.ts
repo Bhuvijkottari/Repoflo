@@ -187,8 +187,62 @@ const scrollScript = `<script>document.addEventListener('DOMContentLoaded',()=>{
 })</script>`;
 
 
+const threejsScript = `<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
+<script>(function(){
+  var hero=document.getElementById('about');
+  if(!hero||hero.clientHeight<80)return;
+  hero.style.position='relative';hero.style.overflow='hidden';
+  var c=document.createElement('div');
+  c.style.cssText='position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden';
+  hero.insertBefore(c,hero.firstChild);
+  Array.from(hero.children).forEach(function(ch){if(ch!==c){ch.style.position='relative';ch.style.zIndex='1'}});
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(75,c.clientWidth/c.clientHeight,0.1,1000);
+  var renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
+  renderer.setSize(c.clientWidth,c.clientHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setClearColor(0x000000,0);
+  c.appendChild(renderer.domElement);
+  var shapes=[];
+  var geos=[
+    new THREE.IcosahedronGeometry(1.2,1),
+    new THREE.OctahedronGeometry(1,0),
+    new THREE.TorusGeometry(0.8,0.25,8,24),
+    new THREE.TetrahedronGeometry(0.9,0),
+    new THREE.DodecahedronGeometry(0.7,0),
+    new THREE.TorusKnotGeometry(0.5,0.15,48,8)
+  ];
+  for(var i=0;i<8;i++){
+    var geo=geos[i%geos.length];
+    var mat=new THREE.MeshBasicMaterial({color:0xffffff,wireframe:true,transparent:true,opacity:0.08+Math.random()*0.07});
+    var mesh=new THREE.Mesh(geo,mat);
+    mesh.position.set((Math.random()-0.5)*14,(Math.random()-0.5)*6,-2-Math.random()*5);
+    mesh.scale.setScalar(0.4+Math.random()*1.5);
+    mesh.userData={rx:(Math.random()-0.5)*0.006,ry:(Math.random()-0.5)*0.006,rz:(Math.random()-0.5)*0.003,fy:Math.random()*0.4+0.3,fo:Math.random()*6.28};
+    scene.add(mesh);shapes.push(mesh);
+  }
+  camera.position.z=5;
+  function animate(){
+    requestAnimationFrame(animate);
+    var t=Date.now()*0.001;
+    shapes.forEach(function(s){
+      s.rotation.x+=s.userData.rx;s.rotation.y+=s.userData.ry;s.rotation.z+=s.userData.rz;
+      s.position.y+=Math.sin(t*s.userData.fy+s.userData.fo)*0.0015;
+    });
+    renderer.render(scene,camera);
+  }
+  animate();
+  window.addEventListener('resize',function(){
+    if(c.clientWidth&&c.clientHeight){
+      camera.aspect=c.clientWidth/c.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(c.clientWidth,c.clientHeight);
+    }
+  });
+})()</script>`;
+
 const wrapTheme = (fontImport: string, fontFamily: string, body: string) =>
-  `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.7;font-size:16px}</style></head><body>${body}${scrollScript}</body></html>`;
+  `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.7;font-size:16px;overflow-x:hidden}</style></head><body>${body}${scrollScript}${threejsScript}</body></html>`;
 
 export const getThemeHtml = (themeId: string, customData?: PortfolioData): string => {
   const d = customData || getPortfolioData();
