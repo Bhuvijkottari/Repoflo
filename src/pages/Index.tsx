@@ -97,8 +97,8 @@ const Index = () => {
             </p>
             <div className="flex gap-2">
               <Button variant="cta" size="sm" className="rounded-full text-xs px-4" asChild>
-                <Link to="/themes" onClick={dismissPopup}>
-                  Try Recruiter View <ArrowRight className="ml-1 w-3.5 h-3.5" />
+                <Link to="/recruiter" onClick={dismissPopup}>
+                  Access Portal <ArrowRight className="ml-1 w-3.5 h-3.5" />
                 </Link>
               </Button>
               <Button variant="ghost" size="sm" className="text-xs" onClick={dismissPopup}>
@@ -239,9 +239,14 @@ const Index = () => {
       <footer className="py-8 border-t border-border bg-background">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground font-body">
-              Powered by <span className="font-semibold text-foreground">CODEHEXA</span>
-            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <p className="text-sm text-muted-foreground font-body">
+                Powered by <span className="font-semibold text-foreground">CODEHEXA</span>
+              </p>
+              <Button variant="link" size="sm" className="text-sm text-muted-foreground hover:text-primary p-0 h-auto" asChild>
+                <Link to="/recruiter">Recruiter Portal</Link>
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground font-body">
               © {new Date().getFullYear()} Repoflow. All rights reserved.
             </p>

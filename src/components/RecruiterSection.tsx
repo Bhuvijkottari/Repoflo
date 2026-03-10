@@ -65,12 +65,12 @@ const RecruiterSection = () => {
 
         <div className="text-center">
           <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-lg" asChild>
-            <Link to="/generate">
-              Try Recruiter View <ArrowRight className="ml-2 w-5 h-5" />
+            <Link to="/recruiter">
+              Access Recruiter Portal <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
           </Button>
           <p className="text-xs text-muted-foreground mt-3 font-body">
-            Select the "Recruiter View" theme after generating your portfolio
+            Secure OAuth login required for recruiter analytics
           </p>
         </div>
       </div>

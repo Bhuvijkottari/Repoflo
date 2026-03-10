@@ -33,11 +33,17 @@ interface LeetcodeInsights {
   summary: string;
 }
 
-const PreviewPage = () => {
-  const { themeId } = useParams<{ themeId: string }>();
+interface PreviewPageProps {
+  overrideThemeId?: string;
+}
+
+const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
+  const params = useParams<{ themeId: string }>();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const themeId = overrideThemeId || params.themeId || "";
   const [viewMode, setViewMode] = useState<"desktop" | "mobile" | "fullscreen">("desktop");
+  const [hideNavbar, setHideNavbar] = useState(false);
   const [inlineEditing, setInlineEditing] = useState(false);
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [editableHtml, setEditableHtml] = useState("");
@@ -75,6 +81,13 @@ const PreviewPage = () => {
       setCleanHtml(html);
     }
   }, [themeId, portfolioData]);
+
+  // hide navbar when override tells us to (recruiter dashboard)
+  useEffect(() => {
+    if (overrideThemeId === "recruiter") {
+      setHideNavbar(true);
+    }
+  }, [overrideThemeId]);
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
@@ -257,7 +270,7 @@ const PreviewPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
       
       <div className="pt-20 pb-16 container mx-auto px-4">
@@ -265,7 +278,7 @@ const PreviewPage = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
           <div className="flex items-center gap-3 flex-wrap">
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/themes"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Link>
+              <Link to={isRecruiter ? "/recruiter" : "/themes"}><ArrowLeft className="w-4 h-4 mr-1" /> Back</Link>
             </Button>
             <h1 className="font-display text-lg sm:text-xl font-bold text-foreground">
               {portfolioData?.name || "Preview"} <span className="capitalize text-primary">{themeId}</span>

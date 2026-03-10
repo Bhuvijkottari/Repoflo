@@ -9,7 +9,21 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { username } = await req.json();
+    let username: string | undefined;
+
+    if (req.method === "GET") {
+      // support query param for easier testing
+      const url = new URL(req.url);
+      username = url.searchParams.get("username") || undefined;
+    } else {
+      try {
+        const body = await req.json();
+        username = body.username;
+      } catch {
+        // ignore JSON parse error, will handle below
+      }
+    }
+
     if (!username) {
       return new Response(JSON.stringify({ error: "Username is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
