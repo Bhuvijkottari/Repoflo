@@ -58,7 +58,31 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { githubUrl } = await req.json();
+    let githubUrl: string | undefined;
+
+    if (req.method === "GET") {
+      // support query param for easier testing
+      const url = new URL(req.url);
+      githubUrl = url.searchParams.get("githubUrl") || url.searchParams.get("username");
+      if (githubUrl && !githubUrl.startsWith("http")) {
+        // assume username only
+        githubUrl = `https://github.com/${githubUrl}`;
+      }
+    } else {
+      try {
+        const body = await req.json();
+        githubUrl = body.githubUrl;
+      } catch {
+        // ignore JSON parse error, will handle below
+      }
+    }
+
+    if (!githubUrl) {
+      return new Response(JSON.stringify({ error: "Invalid GitHub URL" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     
     // Extract username from URL
     const match = githubUrl.match(/github\.com\/([^\/\?#]+)/);

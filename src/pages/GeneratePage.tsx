@@ -5,9 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
-import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, Code2, Briefcase, Search } from "lucide-react";
-import TechStackInput from "@/components/TechStackInput";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { PortfolioData } from "@/lib/mockData";
@@ -17,20 +15,12 @@ const GeneratePage = () => {
   const { toast } = useToast();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [githubUrl, setGithubUrl] = useState("");
-  const [leetcodeUsername, setLeetcodeUsername] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState("");
   const [githubData, setGithubData] = useState<PortfolioData | null>(null);
   const [githubFetching, setGithubFetching] = useState(false);
   const [githubError, setGithubError] = useState("");
-  const [leetcodeFetching, setLeetcodeFetching] = useState(false);
-  const [leetcodeData, setLeetcodeData] = useState<any>(null);
-  const [leetcodeError, setLeetcodeError] = useState("");
-  const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
-  const [experienceLevel, setExperienceLevel] = useState<string>("");
-
-  const isRecruiter = selectedTheme === "recruiter";
 
   useEffect(() => {
     const theme = sessionStorage.getItem("selectedTheme");
@@ -67,56 +57,12 @@ const GeneratePage = () => {
     return () => clearTimeout(timer);
   }, [githubUrl]);
 
-  // Auto-fetch LeetCode data when username changes (only for recruiter theme)
-  useEffect(() => {
-    if (!isRecruiter) {
-      setLeetcodeData(null);
-      setLeetcodeError("");
-      return;
-    }
-    const username = leetcodeUsername.trim();
-    if (!username) {
-      setLeetcodeData(null);
-      setLeetcodeError("");
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setLeetcodeFetching(true);
-      setLeetcodeError("");
-      try {
-        const { data, error } = await supabase.functions.invoke("fetch-leetcode", { body: { username } });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        setLeetcodeData(data);
-      } catch (e: any) {
-        setLeetcodeError(e.message || "Failed to fetch LeetCode data");
-        setLeetcodeData(null);
-      } finally {
-        setLeetcodeFetching(false);
-      }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [leetcodeUsername, isRecruiter]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!githubData) return;
     setIsProcessing(true);
     try {
       let finalData: PortfolioData = { ...githubData };
-
-      // Attach LeetCode stats if available (recruiter only)
-      if (isRecruiter && leetcodeData) {
-        finalData.leetcodeStats = leetcodeData;
-      }
-
-      // Store recruiter preferences in session for PreviewPage
-      if (isRecruiter) {
-        sessionStorage.setItem("recruiterPrefs", JSON.stringify({
-          requiredTechStack,
-          experienceLevel,
-        }));
-      }
 
       if (resumeFile) {
         setStatus("AI is parsing your resume...");
@@ -196,87 +142,6 @@ const GeneratePage = () => {
               </motion.div>
             )}
           </div>
-
-          {/* LeetCode Username - Only for Recruiter theme */}
-          {isRecruiter && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="space-y-3"
-            >
-              <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
-                <Code2 className="w-5 h-5 text-accent" /> LeetCode Username
-                <span className="text-muted-foreground font-normal text-xs ml-1">(for recruiter analysis)</span>
-              </Label>
-              <Input type="text" placeholder="your_leetcode_username" value={leetcodeUsername} onChange={(e) => setLeetcodeUsername(e.target.value)} className="h-12 text-base" />
-              {leetcodeFetching && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Fetching LeetCode profile...</div>
-              )}
-              {leetcodeError && (
-                <div className="flex items-center gap-2 text-sm text-destructive"><AlertCircle className="w-4 h-4" /> {leetcodeError}</div>
-              )}
-              {leetcodeData && !leetcodeFetching && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 p-3 bg-accent/10 rounded-xl">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                    <Code2 className="w-5 h-5 text-accent" />
-                  </div>
-                  <div>
-                    <p className="font-display font-semibold text-sm text-foreground">{leetcodeData.username}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {leetcodeData.totalSolved} solved · Easy {leetcodeData.easySolved} · Med {leetcodeData.mediumSolved} · Hard {leetcodeData.hardSolved}
-                    </p>
-                  </div>
-                  <CheckCircle2 className="w-5 h-5 text-accent ml-auto" />
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-
-          {/* Recruiter Preferences - Only for Recruiter theme */}
-          {isRecruiter && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="space-y-5"
-            >
-              {/* Required Tech Stack */}
-              <div className="space-y-3">
-                <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
-                  <Search className="w-5 h-5 text-primary" /> Required Tech Stack
-                  <span className="text-muted-foreground font-normal text-xs ml-1">(optional — AI will compare)</span>
-                </Label>
-                <TechStackInput selected={requiredTechStack} onChange={setRequiredTechStack} />
-                {requiredTechStack.length > 0 && (
-                  <p className="text-xs text-muted-foreground font-body">
-                    {requiredTechStack.length} technolog{requiredTechStack.length === 1 ? "y" : "ies"} selected — AI will evaluate the candidate's match.
-                  </p>
-                )}
-              </div>
-
-              {/* Experience Level */}
-              <div className="space-y-3">
-                <Label className="font-display font-semibold flex items-center gap-2 text-foreground">
-                  <Briefcase className="w-5 h-5 text-primary" /> Experience Level
-                  <span className="text-muted-foreground font-normal text-xs ml-1">(optional — hiring preference)</span>
-                </Label>
-                <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                  <SelectTrigger className="h-12 text-base">
-                    <SelectValue placeholder="Any experience level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any Level</SelectItem>
-                    <SelectItem value="intern">Intern</SelectItem>
-                    <SelectItem value="fresher">Fresher / Just Graduated</SelectItem>
-                    <SelectItem value="entry">Entry Level (0-2 years)</SelectItem>
-                    <SelectItem value="mid">Mid Level (2-5 years)</SelectItem>
-                    <SelectItem value="senior">Senior (5-8 years)</SelectItem>
-                    <SelectItem value="staff">Staff / Lead (8+ years)</SelectItem>
-                    <SelectItem value="principal">Principal / Architect (10+ years)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </motion.div>
-          )}
 
           {/* Resume Upload */}
           <div className="space-y-3">

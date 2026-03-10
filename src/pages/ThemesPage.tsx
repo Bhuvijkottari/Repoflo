@@ -33,7 +33,6 @@ import themeMinimal from "@/assets/theme-preview-minimal.jpg";
 import themeBold from "@/assets/theme-preview-bold.jpg";
 import themeCreative from "@/assets/theme-preview-creative.jpg";
 import themeTerminal from "@/assets/theme-preview-terminal.jpg";
-import themeRecruiter from "@/assets/theme-preview-recruiter.jpg";
 
 const themeImages: Record<string, string> = {
   blue: themeBlue, warm: themeWarm, dark: themeDark, green: themeGreen, pink: themePink,
@@ -41,11 +40,10 @@ const themeImages: Record<string, string> = {
   ocean: themeOcean, sunset: themeSunset, forest: themeForest, cherry: themeCherry, lavender: themeLavender,
   arctic: themeArctic, emerald: themeEmerald, royal: themeRoyal, rocket: themeRocket, sakura: themeSakura,
   neon: themeNeon, elegant: themeElegant, minimal: themeMinimal, bold: themeBold, creative: themeCreative,
-  terminal: themeTerminal, recruiter: themeRecruiter,
+  terminal: themeTerminal,
 };
 
 const themes = [
-  { id: "recruiter", name: "Recruiter View", description: "Data-rich dashboard with GitHub analytics and AI powered candidate assessment", image: "recruiter", isRecruiter: true },
   { id: "minimal", name: "Minimal", description: "Clean, whitespace-focused design with elegant typography", image: "minimal" },
   { id: "bold", name: "Bold Dark", description: "Eye-catching dark theme with purple gradients", image: "bold" },
   { id: "creative", name: "Creative Warm", description: "Artistic warm palette with playful layouts", image: "creative" },

@@ -6,9 +6,12 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Index from "./pages/Index";
 import GeneratePage from "./pages/GeneratePage";
+import RecruiterPage from "./pages/RecruiterPage";
+import AdminPage from "./pages/AdminPage";
 import ThemesPage from "./pages/ThemesPage";
 import PreviewPage from "./pages/PreviewPage";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +29,8 @@ const AnimatedRoutes = () => {
         <Routes location={location}>
           <Route path="/" element={<Index />} />
           <Route path="/generate" element={<GeneratePage />} />
+          <Route path="/recruiter" element={<RecruiterPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/preview/:themeId" element={<PreviewPage />} />
           <Route path="*" element={<NotFound />} />
@@ -37,13 +42,15 @@ const AnimatedRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AnimatedRoutes />
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AnimatedRoutes />
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
