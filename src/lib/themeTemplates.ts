@@ -24,13 +24,13 @@ const nav = (bg: string, text: string, accent: string, personName: string, links
   return `<style>
     @media(max-width:700px){.nav-links{display:none!important}.nav-hamburger{display:block!important}}
     .nav-mobile-open{display:flex!important}
-    nav{box-sizing:border-box;width:100%}
+    nav,nav *{box-sizing:border-box}
   </style>
-  <nav style="position:sticky;top:0;z-index:100;background:${bg};padding:10px 20px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);box-sizing:border-box;width:100%;min-height:52px">
-    <a href="#about" style="font-weight:700;font-size:1rem;color:${accent};text-decoration:none;cursor:pointer;white-space:nowrap;flex-shrink:0">${personName.split(' ')[0]}</a>
-    <div class="nav-links" style="display:flex;gap:12px;align-items:center;flex-wrap:nowrap;overflow:hidden">${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.82rem;cursor:pointer;transition:color .2s;white-space:nowrap" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}</div>
-    <button class="nav-hamburger" onclick="document.querySelector('.nav-mobile-menu').classList.toggle('nav-mobile-open')" style="display:none;background:none;border:none;color:${text};font-size:1.5rem;cursor:pointer;padding:4px;flex-shrink:0">&#9776;</button>
-    <div class="nav-mobile-menu" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:${bg};z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:24px;backdrop-filter:blur(20px)">
+  <nav style="position:sticky;top:0;z-index:100;background:${bg};padding:8px 16px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);width:100%;max-width:100vw;overflow:hidden;min-height:48px;gap:8px;box-sizing:border-box">
+    <a href="#about" style="font-weight:700;font-size:.9rem;color:${accent};text-decoration:none;cursor:pointer;white-space:nowrap;flex-shrink:0">${personName.split(' ')[0]}</a>
+    <div class="nav-links" style="display:flex;gap:6px;align-items:center;flex-wrap:nowrap;overflow:hidden;flex-shrink:1;min-width:0;justify-content:flex-end">${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:.75rem;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;padding:4px 6px;border-radius:4px" onmouseover="this.style.color='${accent}';this.style.background='${accent}11'" onmouseout="this.style.color='${text}';this.style.background='transparent'">${l}</a>`).join('')}</div>
+    <button class="nav-hamburger" onclick="document.querySelector('.nav-mobile-menu').classList.toggle('nav-mobile-open')" style="display:none;background:none;border:none;color:${text};font-size:1.3rem;cursor:pointer;padding:4px 8px;flex-shrink:0;line-height:1">&#9776;</button>
+    <div class="nav-mobile-menu" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:${bg};z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:28px;backdrop-filter:blur(20px)">
       <button onclick="this.parentElement.classList.remove('nav-mobile-open')" style="position:absolute;top:16px;right:20px;background:none;border:none;color:${text};font-size:1.8rem;cursor:pointer">&times;</button>
       ${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();this.closest('.nav-mobile-menu').classList.remove('nav-mobile-open');document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth',block:'start'})" style="color:${text};text-decoration:none;font-size:1.2rem;font-weight:600;cursor:pointer;transition:color .2s" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}
     </div>
@@ -187,8 +187,62 @@ const scrollScript = `<script>document.addEventListener('DOMContentLoaded',()=>{
 })</script>`;
 
 
+const threejsScript = `<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
+<script>(function(){
+  var hero=document.getElementById('about');
+  if(!hero||hero.clientHeight<80)return;
+  hero.style.position='relative';hero.style.overflow='hidden';
+  var c=document.createElement('div');
+  c.style.cssText='position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden';
+  hero.insertBefore(c,hero.firstChild);
+  Array.from(hero.children).forEach(function(ch){if(ch!==c){ch.style.position='relative';ch.style.zIndex='1'}});
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(75,c.clientWidth/c.clientHeight,0.1,1000);
+  var renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
+  renderer.setSize(c.clientWidth,c.clientHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setClearColor(0x000000,0);
+  c.appendChild(renderer.domElement);
+  var shapes=[];
+  var geos=[
+    new THREE.IcosahedronGeometry(1.2,1),
+    new THREE.OctahedronGeometry(1,0),
+    new THREE.TorusGeometry(0.8,0.25,8,24),
+    new THREE.TetrahedronGeometry(0.9,0),
+    new THREE.DodecahedronGeometry(0.7,0),
+    new THREE.TorusKnotGeometry(0.5,0.15,48,8)
+  ];
+  for(var i=0;i<8;i++){
+    var geo=geos[i%geos.length];
+    var mat=new THREE.MeshBasicMaterial({color:0xffffff,wireframe:true,transparent:true,opacity:0.08+Math.random()*0.07});
+    var mesh=new THREE.Mesh(geo,mat);
+    mesh.position.set((Math.random()-0.5)*14,(Math.random()-0.5)*6,-2-Math.random()*5);
+    mesh.scale.setScalar(0.4+Math.random()*1.5);
+    mesh.userData={rx:(Math.random()-0.5)*0.006,ry:(Math.random()-0.5)*0.006,rz:(Math.random()-0.5)*0.003,fy:Math.random()*0.4+0.3,fo:Math.random()*6.28};
+    scene.add(mesh);shapes.push(mesh);
+  }
+  camera.position.z=5;
+  function animate(){
+    requestAnimationFrame(animate);
+    var t=Date.now()*0.001;
+    shapes.forEach(function(s){
+      s.rotation.x+=s.userData.rx;s.rotation.y+=s.userData.ry;s.rotation.z+=s.userData.rz;
+      s.position.y+=Math.sin(t*s.userData.fy+s.userData.fo)*0.0015;
+    });
+    renderer.render(scene,camera);
+  }
+  animate();
+  window.addEventListener('resize',function(){
+    if(c.clientWidth&&c.clientHeight){
+      camera.aspect=c.clientWidth/c.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(c.clientWidth,c.clientHeight);
+    }
+  });
+})()</script>`;
+
 const wrapTheme = (fontImport: string, fontFamily: string, body: string) =>
-  `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.7;font-size:16px}</style></head><body>${body}${scrollScript}</body></html>`;
+  `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.7;font-size:16px;overflow-x:hidden}</style></head><body>${body}${scrollScript}${threejsScript}</body></html>`;
 
 export const getThemeHtml = (themeId: string, customData?: PortfolioData): string => {
   const d = customData || getPortfolioData();
