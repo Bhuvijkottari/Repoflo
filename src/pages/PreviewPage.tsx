@@ -51,8 +51,22 @@ const PreviewPage = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
+  const [recruiterUnlocked, setRecruiterUnlocked] = useState(() => sessionStorage.getItem("recruiterUnlocked") === "true");
+  const [recruiterPin, setRecruiterPin] = useState("");
+  const RECRUITER_PASSWORD = "repoflow";
 
   const isRecruiter = themeId === "recruiter";
+
+  const handleRecruiterLogin = () => {
+    if (recruiterPin === RECRUITER_PASSWORD) {
+      setRecruiterUnlocked(true);
+      sessionStorage.setItem("recruiterUnlocked", "true");
+      toast({ title: "Access Granted", description: "Welcome to the recruiter analysis panel." });
+    } else {
+      toast({ title: "Access Denied", description: "Incorrect password.", variant: "destructive" });
+      setRecruiterPin("");
+    }
+  };
 
   useEffect(() => {
     try {
