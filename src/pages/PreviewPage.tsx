@@ -101,10 +101,10 @@ const PreviewPage = () => {
   }, []);
 
   useEffect(() => {
-    if (isRecruiter && portfolioData && !analysis && !isAnalyzing) {
+    if (isRecruiter && portfolioData && !analysis && !isAnalyzing && recruiterUnlocked) {
       runAnalysis();
     }
-  }, [isRecruiter, portfolioData]);
+  }, [isRecruiter, portfolioData, recruiterUnlocked]);
 
   const runAnalysis = async () => {
     if (!portfolioData) return;
