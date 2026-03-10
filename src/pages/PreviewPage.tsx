@@ -15,6 +15,8 @@ import { generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport
 import RecruiterAnalysisPanel from "@/components/RecruiterAnalysisPanel";
 import TechStackInput from "@/components/TechStackInput";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import { storeCandidateAnalysis, updateCandidateAnalysis, updateRecruiterHistoryAnalysis } from "@/lib/firebase";
 
 interface AtsScore {
   overall: number;
@@ -41,6 +43,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
   const params = useParams<{ themeId: string }>();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   const themeId = overrideThemeId || params.themeId || "";
   const [viewMode, setViewMode] = useState<"desktop" | "mobile" | "fullscreen">("desktop");
   const [hideNavbar, setHideNavbar] = useState(false);
@@ -57,6 +60,8 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
+  const [candidateId, setCandidateId] = useState<string | null>(null);
+  const [historyId, setHistoryId] = useState<string | null>(null);
 
   const isRecruiter = themeId === "recruiter";
 
@@ -70,6 +75,16 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
         const parsed = JSON.parse(prefs);
         if (parsed.requiredTechStack?.length) setRequiredTechStack(parsed.requiredTechStack);
         if (parsed.experienceLevel) setExperienceLevel(parsed.experienceLevel);
+      }
+      // Load candidate ID for updating analysis
+      const storedCandidateId = sessionStorage.getItem("candidateId");
+      if (storedCandidateId) {
+        setCandidateId(storedCandidateId);
+      }
+      // Load history ID for updating analysis
+      const storedHistoryId = sessionStorage.getItem("historyId");
+      if (storedHistoryId) {
+        setHistoryId(storedHistoryId);
       }
     } catch {}
   }, []);
@@ -119,6 +134,19 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setAnalysis(data as CandidateAnalysis);
+
+      // Generate HTML report
+      const reportHtml = generateReportHtml(portfolioData, data as CandidateAnalysis);
+
+      // Store/update candidate analysis in database
+      if (candidateId && user?.email) {
+        await updateCandidateAnalysis(candidateId, data, reportHtml);
+      }
+
+      // Update history entry with analysis
+      if (historyId && user?.email) {
+        await updateRecruiterHistoryAnalysis(user.email, historyId, data);
+      }
     } catch (e: any) {
       toast({ title: "Analysis Failed", description: e.message || "Could not generate candidate analysis.", variant: "destructive" });
     } finally {

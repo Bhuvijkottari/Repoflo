@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PreviewPage from "./PreviewPage";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { signInWithGoogle, signOutUser, updateRecruiterUsage, checkRecruiterLimit, addRecruiterHistory, fetchRecruiterHistory } from "@/lib/firebase";
+import { signInWithGoogle, signOutUser, updateRecruiterUsage, checkRecruiterLimit, addRecruiterHistory, fetchRecruiterHistory, storeCandidateAnalysis } from "@/lib/firebase";
 import type { PortfolioData } from "@/lib/mockData";
 
 const RecruiterPage = () => {
@@ -189,12 +189,29 @@ const RecruiterPage = () => {
       // Update usage count
       await updateRecruiterUsage(user.email!);
 
+      // Store candidate data in database
+      const candidateId = await storeCandidateAnalysis({
+        githubUsername: githubData.githubStats?.username || '',
+        leetcodeUsername: leetcodeData?.username,
+        name: githubData.name,
+        portfolioData: finalData,
+        analysis: null, // will be updated when analysis is generated
+        recruiterEmail: user.email!,
+      });
+
+      // Store candidate ID for later update
+      sessionStorage.setItem("candidateId", candidateId);
+
       // persist history entry before preview
-      await addRecruiterHistory(user.email!, {
+      const historyId = await addRecruiterHistory(user.email!, {
         portfolioData: finalData,
         analysis: null, // will fetch once preview loads
         createdAt: new Date().toISOString(),
+        candidateId, // reference to the candidate document
       });
+
+      // Store history ID for later update
+      sessionStorage.setItem("historyId", historyId);
 
       // stay on recruiter route and show preview panel
       navigate(`/recruiter?preview=1`);

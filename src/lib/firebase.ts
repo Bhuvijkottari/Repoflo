@@ -229,14 +229,26 @@ export interface RecruiterHistoryEntry {
   portfolioData: any;
   analysis: any;
   createdAt: string;
+  candidateId?: string;
 }
 
-export const addRecruiterHistory = async (email: string, entry: RecruiterHistoryEntry): Promise<void> => {
+export const addRecruiterHistory = async (email: string, entry: RecruiterHistoryEntry): Promise<string> => {
   try {
     const col = collection(db, "recruiters", email, "history");
-    await addDoc(col, entry);
+    const docRef = await addDoc(col, entry);
+    return docRef.id;
   } catch (error) {
     console.error("Error adding history entry:", error);
+    throw error;
+  }
+};
+
+export const updateRecruiterHistoryAnalysis = async (email: string, historyId: string, analysis: any): Promise<void> => {
+  try {
+    const ref = doc(db, "recruiters", email, "history", historyId);
+    await updateDoc(ref, { analysis });
+  } catch (error) {
+    console.error("Error updating history analysis:", error);
     throw error;
   }
 };
@@ -252,6 +264,98 @@ export const fetchRecruiterHistory = async (email: string): Promise<RecruiterHis
     return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RecruiterHistoryEntry));
   } catch (error) {
     console.error("Error fetching history:", error);
+    return [];
+  }
+};
+
+// Candidate functions
+export interface CandidateData {
+  id?: string;
+  githubUsername: string;
+  leetcodeUsername?: string;
+  name: string;
+  email?: string;
+  portfolioData: any;
+  analysis: any;
+  htmlReport?: string;
+  recruiterEmail: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const storeCandidateAnalysis = async (candidate: Omit<CandidateData, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+  try {
+    const candidateData: CandidateData = {
+      ...candidate,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    const docRef = await addDoc(collection(db, "candidates"), candidateData);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error storing candidate analysis:", error);
+    throw error;
+  }
+};
+
+export const updateCandidateAnalysis = async (candidateId: string, analysis: any, htmlReport?: string): Promise<void> => {
+  try {
+    const ref = doc(db, "candidates", candidateId);
+    const updateData: any = {
+      analysis,
+      updatedAt: new Date().toISOString(),
+    };
+    if (htmlReport) {
+      updateData.htmlReport = htmlReport;
+    }
+    await updateDoc(ref, updateData);
+  } catch (error) {
+    console.error("Error updating candidate analysis:", error);
+    throw error;
+  }
+};
+
+export const fetchCandidateById = async (candidateId: string): Promise<CandidateData | null> => {
+  try {
+    const ref = doc(db, "candidates", candidateId);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      return { id: snap.id, ...snap.data() } as CandidateData;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching candidate:", error);
+    return null;
+  }
+};
+
+export const fetchCandidatesByRecruiter = async (recruiterEmail: string): Promise<CandidateData[]> => {
+  try {
+    const q = query(
+      collection(db, "candidates"),
+      where("recruiterEmail", "==", recruiterEmail),
+      orderBy("createdAt", "desc"),
+      limit(100)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as CandidateData));
+  } catch (error) {
+    console.error("Error fetching candidates by recruiter:", error);
+    return [];
+  }
+};
+
+export const fetchAllCandidates = async (limitCount = 100): Promise<CandidateData[]> => {
+  try {
+    const q = query(
+      collection(db, "candidates"),
+      orderBy("createdAt", "desc"),
+      limit(limitCount)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as CandidateData));
+  } catch (error) {
+    console.error("Error fetching all candidates:", error);
     return [];
   }
 };
