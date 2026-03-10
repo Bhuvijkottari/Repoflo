@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { getThemeHtml } from "@/lib/themeTemplates";
 import { injectEditor, stripEditor } from "@/lib/editorInjection";
-import { Download, ArrowLeft, Smartphone, Monitor, Maximize, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye } from "lucide-react";
+import { Download, ArrowLeft, Smartphone, Monitor, Maximize, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye, Lock, ShieldCheck } from "lucide-react";
 import type { PortfolioData } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,8 +51,22 @@ const PreviewPage = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
+  const [recruiterUnlocked, setRecruiterUnlocked] = useState(() => sessionStorage.getItem("recruiterUnlocked") === "true");
+  const [recruiterPin, setRecruiterPin] = useState("");
+  const RECRUITER_PASSWORD = "repoflow";
 
   const isRecruiter = themeId === "recruiter";
+
+  const handleRecruiterLogin = () => {
+    if (recruiterPin === RECRUITER_PASSWORD) {
+      setRecruiterUnlocked(true);
+      sessionStorage.setItem("recruiterUnlocked", "true");
+      toast({ title: "Access Granted", description: "Welcome to the recruiter analysis panel." });
+    } else {
+      toast({ title: "Access Denied", description: "Incorrect password.", variant: "destructive" });
+      setRecruiterPin("");
+    }
+  };
 
   useEffect(() => {
     try {
@@ -87,10 +101,10 @@ const PreviewPage = () => {
   }, []);
 
   useEffect(() => {
-    if (isRecruiter && portfolioData && !analysis && !isAnalyzing) {
+    if (isRecruiter && portfolioData && !analysis && !isAnalyzing && recruiterUnlocked) {
       runAnalysis();
     }
-  }, [isRecruiter, portfolioData]);
+  }, [isRecruiter, portfolioData, recruiterUnlocked]);
 
   const runAnalysis = async () => {
     if (!portfolioData) return;
@@ -334,9 +348,50 @@ const PreviewPage = () => {
           </motion.div>
         </div>
 
+        {/* Recruiter Password Lock */}
+        {isRecruiter && portfolioData && !recruiterUnlocked && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="mt-8 max-w-md mx-auto"
+          >
+            <div className="bg-card rounded-2xl border border-border p-8 text-center shadow-card-hover">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5"
+              >
+                <Lock className="w-7 h-7 text-primary" />
+              </motion.div>
+              <h3 className="font-display text-xl font-bold text-foreground mb-2">Recruiter Access Required</h3>
+              <p className="text-sm text-muted-foreground font-body mb-6">Enter the recruiter password to unlock candidate analysis, scoring, and reports.</p>
+              <div className="flex gap-2">
+                <Input
+                  type="password"
+                  placeholder="Enter password"
+                  value={recruiterPin}
+                  onChange={(e) => setRecruiterPin(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleRecruiterLogin(); }}
+                  className="text-center font-display tracking-widest"
+                />
+                <Button onClick={handleRecruiterLogin} className="px-6">
+                  <ShieldCheck className="w-4 h-4 mr-1" /> Unlock
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-4 font-body">Default password: <code className="bg-secondary px-1.5 py-0.5 rounded text-[10px]">repoflow</code></p>
+            </div>
+          </motion.div>
+        )}
+
         {/* Recruiter Tech Stack Input & Analysis Panel */}
-        {isRecruiter && portfolioData && (
-          <>
+        {isRecruiter && portfolioData && recruiterUnlocked && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6 bg-card rounded-2xl border border-border p-6">
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
                 <Code className="w-3.5 h-3.5" /> Required Tech Stack (Optional)
@@ -358,7 +413,7 @@ const PreviewPage = () => {
               onDownloadReport={handleDownloadReport}
               requiredTechStack={requiredTechStack}
             />
-          </>
+          </motion.div>
         )}
 
         {/* Finalized banner */}
