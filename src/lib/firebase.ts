@@ -261,7 +261,7 @@ export const fetchRecruiterHistory = async (email: string): Promise<RecruiterHis
       limit(50)
     );
     const snap = await getDocs(q);
-    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as RecruiterHistoryEntry[];
+    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown)) as RecruiterHistoryEntry[];
   } catch (error) {
     console.error("Error fetching history:", error);
     return [];
