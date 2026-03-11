@@ -4,20 +4,17 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, Code2, Briefcase, Search, LogIn, LogOut, Shield } from "lucide-react";
+import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, Code2, Briefcase, Search, Shield } from "lucide-react";
 import TechStackInput from "@/components/TechStackInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import PreviewPage from "./PreviewPage";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { signInWithGoogle, signOutUser, updateRecruiterUsage, checkRecruiterLimit, addRecruiterHistory, fetchRecruiterHistory, storeCandidateAnalysis } from "@/lib/firebase";
 import type { PortfolioData } from "@/lib/mockData";
 
 const RecruiterPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, recruiterProfile, loading, isRecruiter, isApprovedRecruiter } = useAuth();
 
   const [githubUrl, setGithubUrl] = useState("");
   const [leetcodeUsername, setLeetcodeUsername] = useState("");
@@ -35,16 +32,6 @@ const RecruiterPage = () => {
   const [leetcodeError, setLeetcodeError] = useState("");
   const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
-
-  // history
-  const [historyEntries, setHistoryEntries] = useState<any[]>([]);
-  const loadHistory = async () => {
-    if (user?.email) {
-      const h = await fetchRecruiterHistory(user.email);
-      setHistoryEntries(h);
-    }
-  };
-
 
   // Auto-fetch GitHub data when URL changes
   useEffect(() => {
@@ -97,54 +84,8 @@ const RecruiterPage = () => {
     fetchLeetcode();
   }, [leetcodeUsername]);
 
-  const handleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      toast({
-        title: "Sign in failed",
-        description: "Failed to sign in with Google. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOutUser();
-    } catch (error) {
-      toast({
-        title: "Sign out failed",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // fetch history when user becomes available
-  useEffect(() => {
-    if (user) loadHistory();
-  }, [user]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !recruiterProfile) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to continue.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!checkRecruiterLimit(recruiterProfile)) {
-      toast({
-        title: "Usage limit reached",
-        description: `You've reached your limit of ${recruiterProfile.level === 1 ? 10 : recruiterProfile.level === 2 ? 50 : 200} analyses. Please contact support to upgrade.`,
-        variant: "destructive"
-      });
-      return;
-    }
 
     if (!githubData) return;
     setIsProcessing(true);
@@ -186,33 +127,6 @@ const RecruiterPage = () => {
       setStatus("Generating analysis...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
 
-      // Update usage count
-      await updateRecruiterUsage(user.email!);
-
-      // Store candidate data in database
-      const candidateId = await storeCandidateAnalysis({
-        githubUsername: githubUrl.match(/github\.com\/([^\/\?#]+)/)?.[1] || '',
-        leetcodeUsername: leetcodeData?.username,
-        name: githubData.name,
-        portfolioData: finalData,
-        analysis: null, // will be updated when analysis is generated
-        recruiterEmail: user.email!,
-      });
-
-      // Store candidate ID for later update
-      sessionStorage.setItem("candidateId", candidateId);
-
-      // persist history entry before preview
-      const historyId = await addRecruiterHistory(user.email!, {
-        portfolioData: finalData,
-        analysis: null, // will fetch once preview loads
-        createdAt: new Date().toISOString(),
-        candidateId, // reference to the candidate document
-      });
-
-      // Store history ID for later update
-      sessionStorage.setItem("historyId", historyId);
-
       // stay on recruiter route and show preview panel
       navigate(`/recruiter?preview=1`);
     } catch (e: any) {
@@ -223,63 +137,9 @@ const RecruiterPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   // if preview flag set, render the preview page directly under /recruiter
   if (showPreview) {
     return <PreviewPage overrideThemeId="recruiter" />;
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-24 max-w-md">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Shield className="w-8 h-8 text-primary" />
-            </div>
-            <h1 className="font-display text-3xl font-bold text-foreground mb-4">Recruiter Access</h1>
-            <p className="text-muted-foreground font-body mb-8">
-              Sign in with your Google account to access the recruiter analysis dashboard.
-            </p>
-            <Button onClick={handleSignIn} className="w-full" size="lg">
-              <LogIn className="w-5 h-5 mr-2" />
-              Sign in with Google
-            </Button>
-          </motion.div>
-        </div>
-      </div>
-    );
-  }
-
-  // recruiter dashboard begins here
-
-  if (!isApprovedRecruiter) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h1 className="font-display text-2xl font-bold text-foreground mb-4">Access Pending Approval</h1>
-          <p className="text-muted-foreground mb-6">
-            Your recruiter account ({user?.email}) is pending approval. 
-            Please contact an administrator to approve your access.
-          </p>
-          <Button variant="outline" onClick={handleSignOut}>
-            Sign Out
-          </Button>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -290,44 +150,14 @@ const RecruiterPage = () => {
             <div>
               <h1 className="font-display text-xl font-bold text-foreground">Recruiter Dashboard</h1>
               <p className="text-sm text-muted-foreground">
-                Level {recruiterProfile.level} • {recruiterProfile.usageCount} analyses used
+                AI-powered candidate analysis
               </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-foreground">{user.displayName}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
-              </div>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="w-4 h-4" />
-              </Button>
             </div>
           </div>
         </div>
       </div>
 
       <div className="pt-8 pb-16 container mx-auto px-4 max-w-xl">
-        {historyEntries.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-4">Previous Analyses</h2>
-            <div className="space-y-2">
-              {historyEntries.map((h, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-card p-3 rounded-lg">
-                  <div>
-                    <p className="font-medium text-foreground">{h.portfolioData.name || 'Unnamed'}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(h.createdAt).toLocaleString()}</p>
-                  </div>
-                  <Button size="sm" onClick={() => {
-                    sessionStorage.setItem('portfolioData', JSON.stringify(h.portfolioData));
-                    navigate('/recruiter?preview=1');
-                  }}>
-                    View
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4">
             <Shield className="w-4 h-4" /> Candidate Analysis
