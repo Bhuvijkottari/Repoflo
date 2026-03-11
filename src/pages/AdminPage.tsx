@@ -76,7 +76,7 @@ const AdminPage = () => {
   }
 
   // Check if user is admin (you can modify this logic)
-  const isAdmin = user?.email === 'skanda0402@gmail.com'; // Replace with your admin email
+  const isAdmin = user?.email === 'skanda0402@gmail.com' || user?.email === 'cadithya110@gmail.com'; // Replace with your admin email
 
   if (!isAdmin) {
     return (
