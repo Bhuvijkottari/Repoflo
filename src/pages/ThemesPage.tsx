@@ -102,7 +102,7 @@ const ThemesPage = () => {
               onClick={() => setSelected(theme.id)}
               className={`relative bg-card rounded-xl overflow-hidden shadow-card cursor-pointer transition-all duration-300 border-2 ${
                 selected === theme.id ? "border-primary shadow-glow ring-2 ring-primary/30" : "border-transparent hover:shadow-card-hover"
-              } ${theme.isRecruiter ? "ring-2 ring-accent/40" : ""}`}
+              }`}
             >
               <div className="h-16 sm:h-20 overflow-hidden">
                 <img src={themeImages[theme.image]} alt={theme.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
@@ -111,11 +111,6 @@ const ThemesPage = () => {
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
                   <Check className="w-3 h-3 text-primary-foreground" />
                 </motion.div>
-              )}
-              {theme.isRecruiter && (
-                <span className="absolute top-1.5 left-1.5 text-[10px] font-display font-semibold bg-background/90 text-accent px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                  <Briefcase className="w-2.5 h-2.5" /> Recruiter
-                </span>
               )}
               <div className="p-3 sm:p-4">
                 <h3 className="font-display font-semibold text-foreground text-sm mb-1 truncate">{theme.name}</h3>
@@ -147,9 +142,6 @@ const ThemesPage = () => {
                 <div className="min-w-0">
                   <p className="font-display font-semibold text-foreground text-sm sm:text-base truncate">
                     {selectedThemeData?.name}
-                    {selectedThemeData?.isRecruiter && (
-                      <span className="ml-2 text-accent text-xs">For Recruiters</span>
-                    )}
                   </p>
                   <p className="text-xs text-muted-foreground truncate hidden sm:block">{selectedThemeData?.description}</p>
                 </div>

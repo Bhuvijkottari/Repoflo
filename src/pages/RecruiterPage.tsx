@@ -191,7 +191,7 @@ const RecruiterPage = () => {
 
       // Store candidate data in database
       const candidateId = await storeCandidateAnalysis({
-        githubUsername: githubData.githubStats?.username || '',
+        githubUsername: githubUrl.match(/github\.com\/([^\/\?#]+)/)?.[1] || '',
         leetcodeUsername: leetcodeData?.username,
         name: githubData.name,
         portfolioData: finalData,
