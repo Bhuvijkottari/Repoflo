@@ -142,9 +142,6 @@ const ThemesPage = () => {
                 <div className="min-w-0">
                   <p className="font-display font-semibold text-foreground text-sm sm:text-base truncate">
                     {selectedThemeData?.name}
-                    {selectedThemeData?.isRecruiter && (
-                      <span className="ml-2 text-accent text-xs">For Recruiters</span>
-                    )}
                   </p>
                   <p className="text-xs text-muted-foreground truncate hidden sm:block">{selectedThemeData?.description}</p>
                 </div>
