@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, updateDoc, increment, getDoc, setDoc, onSnapshot, where } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, updateDoc, increment, getDoc, setDoc, onSnapshot, where, deleteDoc } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
 
 const firebaseConfig = {
@@ -191,6 +191,70 @@ export const rejectRecruiter = async (email: string, adminEmail: string): Promis
   }
 };
 
+export const createRecruiter = async (email: string, level: 1 | 2 | 3, status: 'pending' | 'approved' = 'approved'): Promise<RecruiterProfile> => {
+  const profile: RecruiterProfile = {
+    email,
+    level,
+    usageCount: 0,
+    lastUsed: new Date().toISOString(),
+    status,
+    approvedBy: status === 'approved' ? 'admin' : undefined,
+    approvedAt: status === 'approved' ? new Date().toISOString() : undefined,
+  };
+  try {
+    await setDoc(doc(db, 'recruiters', email), profile);
+    return profile;
+  } catch (error) {
+    console.error('Error creating recruiter:', error);
+    throw error;
+  }
+};
+
+export const updateRecruiter = async (email: string, updates: Partial<RecruiterProfile>): Promise<void> => {
+  try {
+    const ref = doc(db, 'recruiters', email);
+    await updateDoc(ref, updates);
+  } catch (error) {
+    console.error('Error updating recruiter:', error);
+    throw error;
+  }
+};
+
+export const updateRecruiterEmail = async (oldEmail: string, newEmail: string): Promise<void> => {
+  try {
+    const oldRef = doc(db, 'recruiters', oldEmail);
+    const oldSnap = await getDoc(oldRef);
+    if (!oldSnap.exists()) {
+      throw new Error('Recruiter not found');
+    }
+    const data = oldSnap.data() as RecruiterProfile;
+    if (newEmail === oldEmail) {
+      return;
+    }
+    const newRef = doc(db, 'recruiters', newEmail);
+    const newSnap = await getDoc(newRef);
+    if (newSnap.exists()) {
+      throw new Error('A recruiter with that email already exists');
+    }
+    await setDoc(newRef, { ...data, email: newEmail });
+    await updateDoc(oldRef, { status: 'deleted' });
+    await deleteDoc(oldRef);
+  } catch (error) {
+    console.error('Error updating recruiter email:', error);
+    throw error;
+  }
+};
+
+export const deleteRecruiter = async (email: string): Promise<void> => {
+  try {
+    const ref = doc(db, 'recruiters', email);
+    await deleteDoc(ref);
+  } catch (error) {
+    console.error('Error deleting recruiter:', error);
+    throw error;
+  }
+};
+
 export const getPendingRecruiters = async (): Promise<RecruiterProfile[]> => {
   try {
     const q = query(collection(db, "recruiters"), where("status", "==", "pending"));
@@ -198,6 +262,17 @@ export const getPendingRecruiters = async (): Promise<RecruiterProfile[]> => {
     return snapshot.docs.map(doc => ({ ...doc.data() } as RecruiterProfile));
   } catch (error) {
     console.error("Error getting pending recruiters:", error);
+    return [];
+  }
+};
+
+export const getApprovedRecruiters = async (): Promise<RecruiterProfile[]> => {
+  try {
+    const q = query(collection(db, "recruiters"), where("status", "==", "approved"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ ...doc.data() } as RecruiterProfile));
+  } catch (error) {
+    console.error("Error getting approved recruiters:", error);
     return [];
   }
 };
