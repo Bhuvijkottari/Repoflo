@@ -12,6 +12,8 @@ import ThemesPage from "./pages/ThemesPage";
 import PreviewPage from "./pages/PreviewPage";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -28,11 +30,12 @@ const AnimatedRoutes = () => {
       <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
         <Routes location={location}>
           <Route path="/" element={<Index />} />
-          <Route path="/generate" element={<GeneratePage />} />
+          <Route path="/generate" element={<ProtectedRoute requireApproved>{<GeneratePage />}</ProtectedRoute>} />
           <Route path="/recruiter" element={<RecruiterPage />} />
-          <Route path="/protectedRoutes/pages/admin" element={<AdminPage />} />
-          <Route path="/themes" element={<ThemesPage />} />
-          <Route path="/preview/:themeId" element={<PreviewPage />} />
+        
+           <Route path="/protectedRoutes/pages/admin" element={<AdminPage />} />
+          <Route path="/themes" element={<ProtectedRoute>{<ThemesPage />}</ProtectedRoute>} />
+          <Route path="/preview/:themeId" element={<ProtectedRoute>{<PreviewPage />}</ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
