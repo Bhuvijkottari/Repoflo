@@ -78,6 +78,92 @@ const RecruiterPage = () => {
   const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
   const [historyEntries, setHistoryEntries] = useState<any[]>([]);
+// ONLY the changed section is rewritten cleanly — rest of your file stays SAME
+
+const [debouncedGithubUrl, setDebouncedGithubUrl] = useState("");
+const [debouncedLeetcode, setDebouncedLeetcode] = useState("");
+
+/* ── GitHub Debounce ── */
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedGithubUrl(githubUrl);
+  }, 1000);
+
+  return () => clearTimeout(timer);
+}, [githubUrl]);
+
+useEffect(() => {
+  const match = debouncedGithubUrl.match(/github\.com\/([^\/\?#]+)/);
+
+  if (!debouncedGithubUrl || !match) {
+    setGithubData(null);
+    setGithubError("");
+    return;
+  }
+
+  const fetchGithub = async () => {
+    setGithubFetching(true);
+    setGithubError("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-github", {
+        body: { githubUrl: debouncedGithubUrl },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setGithubData(data);
+    } catch (e: any) {
+      setGithubError(e.message || "Failed to fetch GitHub data");
+      setGithubData(null);
+    } finally {
+      setGithubFetching(false);
+    }
+  };
+
+  fetchGithub();
+}, [debouncedGithubUrl]);
+
+/* ── LeetCode Debounce ── */
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedLeetcode(leetcodeUsername);
+  }, 1000);
+
+  return () => clearTimeout(timer);
+}, [leetcodeUsername]);
+
+useEffect(() => {
+  if (!debouncedLeetcode.trim()) {
+    setLeetcodeData(null);
+    setLeetcodeError("");
+    return;
+  }
+
+  const fetchLeetcode = async () => {
+    setLeetcodeFetching(true);
+    setLeetcodeError("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-leetcode", {
+        body: { username: debouncedLeetcode },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setLeetcodeData(data);
+    } catch (e: any) {
+      setLeetcodeError(e.message || "Failed to fetch LeetCode data");
+      setLeetcodeData(null);
+    } finally {
+      setLeetcodeFetching(false);
+    }
+  };
+
+  fetchLeetcode();
+}, [debouncedLeetcode]);
 
   const loadHistory = async () => {
     if (user?.email) {
@@ -86,38 +172,8 @@ const RecruiterPage = () => {
     }
   };
 
-  useEffect(() => {
-    const match = githubUrl.match(/github\.com\/([^\/\?#]+)/);
-    if (!match) { setGithubData(null); setGithubError(""); return; }
-    const timer = setTimeout(async () => {
-      setGithubFetching(true); setGithubError("");
-      try {
-        const { data, error } = await supabase.functions.invoke("fetch-github", { body: { githubUrl } });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        setGithubData(data as PortfolioData);
-      } catch (e: any) {
-        setGithubError(e.message || "Failed to fetch GitHub data");
-        setGithubData(null);
-      } finally { setGithubFetching(false); }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [githubUrl]);
+  
 
-  useEffect(() => {
-    if (!leetcodeUsername.trim()) { setLeetcodeData(null); setLeetcodeError(""); return; }
-    const go = async () => {
-      setLeetcodeFetching(true); setLeetcodeError("");
-      try {
-        const { data, error } = await supabase.functions.invoke("fetch-leetcode", { body: { username: leetcodeUsername } });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        setLeetcodeData(data);
-      } catch (e: any) { setLeetcodeError(e.message); setLeetcodeData(null); }
-      finally { setLeetcodeFetching(false); }
-    };
-    go();
-  }, [leetcodeUsername]);
 
   useEffect(() => { if (user) loadHistory(); }, [user]);
 
