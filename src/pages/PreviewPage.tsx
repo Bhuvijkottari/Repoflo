@@ -361,7 +361,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
                   <div className="w-3 h-3 rounded-full bg-primary/40" />
                 </div>
                 <div className="flex-1 text-center text-xs text-muted-foreground font-body truncate">
-                  {sanitizedName}.html {inlineEditing && <span className="text-primary font-semibold ml-1">Editing</span>}
+                   {inlineEditing && <span className="text-primary font-semibold ml-1">Editing</span>}
                 </div>
               </div>
               <iframe

@@ -105,19 +105,35 @@ const RecruiterPage = () => {
   }, [githubUrl]);
 
   useEffect(() => {
-    if (!leetcodeUsername.trim()) { setLeetcodeData(null); setLeetcodeError(""); return; }
-    const go = async () => {
-      setLeetcodeFetching(true); setLeetcodeError("");
-      try {
-        const { data, error } = await supabase.functions.invoke("fetch-leetcode", { body: { username: leetcodeUsername } });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        setLeetcodeData(data);
-      } catch (e: any) { setLeetcodeError(e.message); setLeetcodeData(null); }
-      finally { setLeetcodeFetching(false); }
-    };
-    go();
-  }, [leetcodeUsername]);
+  if (!leetcodeUsername.trim()) {
+    setLeetcodeData(null);
+    setLeetcodeError("");
+    return;
+  }
+
+  const timer = setTimeout(async () => {
+    setLeetcodeFetching(true);
+    setLeetcodeError("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-leetcode", {
+        body: { username: leetcodeUsername },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setLeetcodeData(data);
+    } catch (e) {
+      setLeetcodeError("Invalid username or profile not found");
+      setLeetcodeData(null);
+    } finally {
+      setLeetcodeFetching(false);
+    }
+  }, 1200); // ⏳ wait 1.2 sec after typing stops
+
+  return () => clearTimeout(timer);
+}, [leetcodeUsername]);
 
   useEffect(() => { if (user) loadHistory(); }, [user]);
 
