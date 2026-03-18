@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import type { CandidateAnalysis } from "@/lib/generateReport";
 import type { PortfolioData } from "@/lib/mockData";
+import { on } from "events";
 
 interface Props {
   analysis: CandidateAnalysis | null;
@@ -15,6 +16,8 @@ interface Props {
   portfolioData: PortfolioData;
   onReanalyze: () => void;
   onDownloadReport: () => void;
+  onDownloadPDF: () => void;
+  onGenerateReport: () => void;
   requiredTechStack?: string[];
 }
 
@@ -171,7 +174,7 @@ const StatPill = ({ icon: Icon, label, value }: { icon: any; label: string; valu
 
 /* ════════════════════════════════════════════════════════ */
 const RecruiterAnalysisPanel = ({
-  analysis, isAnalyzing, portfolioData, onReanalyze, onDownloadReport, requiredTechStack = [],
+  analysis, isAnalyzing, portfolioData, onReanalyze,onGenerateReport,onDownloadReport,onDownloadPDF, requiredTechStack = [],
 }: Props) => {
   const d = portfolioData;
   const s = d.githubStats;
@@ -639,15 +642,18 @@ const RecruiterAnalysisPanel = ({
 
           {/* ══ DOWNLOAD CTA ════════════════════════════════════ */}
           <motion.div {...fadeUp(0.1)} className="flex justify-center py-4">
-            <Button
-              variant="cta"
-              size="lg"
-              onClick={onDownloadReport}
-              className="rounded-full px-10 text-base font-bold gap-2.5 shadow-lg"
-            >
-              <Download className="w-5 h-5" />
-              Download Full Report
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={onGenerateReport}>
+                Generate PDF Report
+              </Button>
+              <Button onClick={onDownloadReport}>
+                Download HTML
+              </Button>
+
+              <Button onClick={onDownloadPDF} className="bg-red-500 hover:bg-red-600 text-white">
+                Download PDF
+              </Button>
+            </div>
           </motion.div>
         </>
       )}
