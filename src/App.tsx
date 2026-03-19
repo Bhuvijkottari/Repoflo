@@ -12,6 +12,7 @@ import ThemesPage from "./pages/ThemesPage";
 import PreviewPage from "./pages/PreviewPage";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
+import PremiumPage from "./pages/PremiumPage";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,8 @@ const AnimatedRoutes = () => {
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/preview/:themeId" element={<PreviewPage />} />
           <Route path="*" element={<NotFound />} />
+
+<Route path="/premium" element={<PremiumPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
