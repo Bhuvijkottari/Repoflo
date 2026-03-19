@@ -11,12 +11,13 @@ import { Download, ArrowLeft, Smartphone, Monitor, Maximize, Pencil, Check, X, T
 import type { PortfolioData } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
+import { downloadHtml, generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
 import RecruiterAnalysisPanel from "@/components/RecruiterAnalysisPanel";
 import TechStackInput from "@/components/TechStackInput";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { storeCandidateAnalysis, updateCandidateAnalysis, updateRecruiterHistoryAnalysis } from "@/lib/firebase";
+import html2pdf from "html2pdf.js";
 
 interface AtsScore {
   overall: number;
@@ -153,19 +154,63 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
       setIsAnalyzing(false);
     }
   };
+const handleDownloadReport = () => {
+  const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
 
-  const handleDownloadReport = () => {
-    if (!portfolioData || !analysis) return;
-    const reportHtml = generateReportHtml(portfolioData, analysis);
-    const blob = new Blob([reportHtml], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${sanitizedName}-recruiter-report.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: "Report Downloaded", description: "Open the HTML file in any browser to view or print as PDF." });
-  };
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${sanitizedName}-full-ui.html`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+
+  toast({
+    title: "Downloaded",
+    description: "Full UI HTML downloaded",
+  });
+};
+const handleGenerateReport = () => {
+  if (!portfolioData || !analysis) return;
+
+  const reportHtml = generateReportHtml(portfolioData, analysis);
+
+  // Create a temp container
+  const element = document.createElement("div");
+  element.innerHTML = reportHtml;
+
+  html2pdf().from(element).set({
+    filename: `${sanitizedName}-report.pdf`,
+    margin: 10,
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+    },
+    jsPDF: {
+      format: "a4",
+      orientation: "portrait",
+    },
+  }).save();
+};
+
+const handleDownloadPDF = () => {
+  const element = document.body; // IMPORTANT
+
+  html2pdf().from(element).set({
+    filename: `${sanitizedName}-full-report.pdf`,
+    margin: 10,
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+    },
+    jsPDF: {
+      format: "a4",
+      orientation: "portrait",
+    },
+  }).save();
+};
 
   const updateField = (field: keyof PortfolioData, value: any) => {
     if (!portfolioData) return;
@@ -397,6 +442,8 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
               portfolioData={portfolioData}
               onReanalyze={runAnalysis}
               onDownloadReport={handleDownloadReport}
+              onDownloadPDF={handleDownloadPDF}
+              onGenerateReport={handleGenerateReport}
               requiredTechStack={requiredTechStack}
             />
           </>

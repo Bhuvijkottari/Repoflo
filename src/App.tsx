@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Index from "./pages/Index";
 import GeneratePage from "./pages/GeneratePage";
@@ -29,9 +29,9 @@ const AnimatedRoutes = () => {
       <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
         <Routes location={location}>
           <Route path="/" element={<Index />} />
-          <Route path="/generate" element={<GeneratePage />} />
+           <Route path="/generate" element={<GeneratePage />} />
           <Route path="/recruiter" element={<RecruiterPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/protectedRoutes/pages/admin" element={<AdminPage />} />
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/preview/:themeId" element={<PreviewPage />} />
           <Route path="*" element={<NotFound />} />
