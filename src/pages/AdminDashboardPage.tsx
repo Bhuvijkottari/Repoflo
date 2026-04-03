@@ -164,20 +164,20 @@ const AdminDashboardPage = () => {
     <div className="min-h-screen bg-[#0b1f3a] text-white">
 
       {/* TOP NAV */}
-      <header className="bg-[#132f52]/90 backdrop-blur-lg border-b border-[#3fc4e7]/15 px-6 py-3 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="" className="h-8 w-8 rounded-full object-cover border border-[#3fc4e7]/30" />
-          <div>
-            <span className="font-display font-bold text-white">Repoflo Admin</span>
+      <header className="bg-[#132f52]/90 backdrop-blur-lg border-b border-[#3fc4e7]/15 px-3 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <img src={logo} alt="" className="h-7 w-7 sm:h-8 sm:w-8 rounded-full object-cover border border-[#3fc4e7]/30 flex-shrink-0" />
+          <div className="min-w-0">
+            <span className="font-display font-bold text-white text-sm sm:text-base">Repoflo Admin</span>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-emerald-400 text-xs font-body">Live</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Site status pills */}
-          <div className="hidden sm:flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          {/* Site status pills — hidden on mobile */}
+          <div className="hidden md:flex items-center gap-2">
             <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${settings.portfolioEnabled ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}>
               Portfolio {settings.portfolioEnabled ? "ON" : "OFF"}
             </span>
@@ -197,27 +197,28 @@ const AdminDashboardPage = () => {
             size="sm"
             variant="ghost"
             onClick={() => { adminLogout(); navigate("/admin-login", { replace: true }); }}
-            className="text-[#b8c7e0] hover:text-red-400 hover:bg-red-500/10"
+            className="text-[#b8c7e0] hover:text-red-400 hover:bg-red-500/10 px-2 sm:px-3"
           >
-            <LogOut className="w-4 h-4 mr-1" /> Logout
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline ml-1">Logout</span>
           </Button>
         </div>
       </header>
 
       {/* TAB BAR */}
-      <div className="bg-[#132f52]/50 border-b border-[#3fc4e7]/10 px-4 flex gap-1 overflow-x-auto">
+      <div className="bg-[#132f52]/50 border-b border-[#3fc4e7]/10 px-1 sm:px-4 flex gap-0 sm:gap-1 overflow-x-auto scrollbar-hide">
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id as any)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold font-body whitespace-nowrap border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold font-body whitespace-nowrap border-b-2 transition-all flex-shrink-0 ${
               activeTab === t.id
                 ? "border-[#3fc4e7] text-[#3fc4e7]"
                 : "border-transparent text-[#b8c7e0] hover:text-white"
             }`}
           >
-            <t.icon className="w-4 h-4" />
-            {t.label}
+            <t.icon className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline">{t.label}</span>
             {"badge" in t && t.badge > 0 && (
               <span className="bg-amber-500 text-black text-xs font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                 {t.badge}
@@ -227,7 +228,7 @@ const AdminDashboardPage = () => {
         ))}
       </div>
 
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-6xl">
 
         {loading && activeTab !== "overview" ? (
           <div className="flex items-center justify-center py-24">
@@ -248,7 +249,7 @@ const AdminDashboardPage = () => {
             {activeTab === "overview" && (
               <div className="space-y-6">
                 {/* Stats grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   {[
                     { label: "Pending Requests", value: pending.length, icon: Clock, color: "text-amber-400", bg: "bg-amber-500/10" },
                     { label: "Active Recruiters", value: approved.length, icon: Users, color: "text-emerald-400", bg: "bg-emerald-500/10" },
@@ -400,8 +401,8 @@ const AdminDashboardPage = () => {
                   {approved.length === 0 ? (
                     <div className="p-8 text-center text-[#b8c7e0] font-body text-sm">No approved recruiters yet</div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm font-body">
+                    <div className="overflow-x-auto -mx-0">
+                      <table className="w-full text-sm font-body min-w-[500px]">
                         <thead className="border-b border-[#3fc4e7]/10">
                           <tr className="text-[#b8c7e0] text-xs">
                             <th className="text-left px-5 py-3 font-semibold">Recruiter</th>
@@ -497,8 +498,8 @@ const AdminDashboardPage = () => {
                   {portfolioUsage.length === 0 ? (
                     <div className="p-8 text-center text-[#b8c7e0] font-body text-sm">No portfolio generations recorded yet</div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm font-body">
+                    <div className="overflow-x-auto -mx-0">
+                      <table className="w-full text-sm font-body min-w-[500px]">
                         <thead className="border-b border-[#3fc4e7]/10">
                           <tr className="text-[#b8c7e0] text-xs">
                             <th className="text-left px-5 py-3 font-semibold">Name</th>

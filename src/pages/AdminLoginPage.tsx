@@ -147,7 +147,7 @@ const AdminLoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b1f3a] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0b1f3a] flex items-center justify-center p-3 sm:p-4">
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#3fc4e7]/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#6366f1]/5 rounded-full blur-3xl pointer-events-none" />
 
