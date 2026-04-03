@@ -3,13 +3,13 @@ import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, 
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyDumAetwxolsrsPBeyEJbFsRJ_aIatcpCk",
+  authDomain: "repoflo-f31ec.firebaseapp.com",
+  projectId: "repoflo-f31ec",
+  storageBucket: "repoflo-f31ec.firebasestorage.app",
+  messagingSenderId: "744947441867",
+  appId: "1:744947441867:web:a7a7fcfdacc692ec147b4e",
+  measurementId: "G-Z68RE0S0CF"
 };
 
 const app = initializeApp(firebaseConfig);
