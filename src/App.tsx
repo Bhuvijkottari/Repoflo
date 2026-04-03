@@ -13,7 +13,7 @@ import PreviewPage from "./pages/PreviewPage";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import PremiumPage from "./pages/PremiumPage";
-import RecruiterLanding from "./pages/RecruiterLanding";
+
 const queryClient = new QueryClient();
 
 const pageVariants = {
@@ -30,8 +30,7 @@ const AnimatedRoutes = () => {
         <Routes location={location}>
           <Route path="/" element={<Index />} />
            <Route path="/generate" element={<GeneratePage />} />
-          <Route path="/recruiter" element={<RecruiterLanding />} />
-<Route path="/recruiter/dashboard" element={<RecruiterPage />} />
+          <Route path="/recruiter" element={<RecruiterPage />} />
           <Route path="/protectedRoutes/pages/admin" element={<AdminPage />} />
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/preview/:themeId" element={<PreviewPage />} />

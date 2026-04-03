@@ -60,7 +60,7 @@ const RecruiterPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, recruiterProfile, loading, isRecruiter, isApprovedRecruiter } = useAuth();
-const [showLogin, setShowLogin] = useState(false);
+
   const [githubUrl, setGithubUrl] = useState("");
   const [leetcodeUsername, setLeetcodeUsername] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);

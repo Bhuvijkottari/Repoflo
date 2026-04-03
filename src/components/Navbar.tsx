@@ -94,13 +94,7 @@ const Navbar = () => {
               className="rounded-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black"
               asChild
             >
-             <a
-    href="https://repolfo3test.vercel.app/"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    Explore RepoLens 
-  </a>
+              <Link to="/themes">Get Started</Link>
             </Button>
           </motion.div>
 
