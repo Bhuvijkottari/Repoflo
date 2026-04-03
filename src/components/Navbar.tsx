@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { GitBranch, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { motion } from "framer-motion";
+import logo from "@/favicon/IMG-20260403-WA0058.jpg";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -59,7 +60,12 @@ const Navbar = () => {
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
 
         <Link to="/" className="flex items-center gap-2">
-          <GitBranch className="w-6 h-6 text-[#3fc4e7]" />
+          <img
+            src={logo}
+            alt=""
+            className="h-10 w-10 rounded-full object-cover"
+            style={{ border: "2px solid rgba(63,196,231,0.4)" }}
+          />
           <span className="font-display font-bold text-xl text-white">Repoflo</span>
         </Link>
 
@@ -83,6 +89,18 @@ const Navbar = () => {
 
         <div className="flex items-center gap-3">
 
+          <motion.a
+            href="https://www.repolyn.site"
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold font-body border border-[#a78bfa]/40 text-[#c4b5fd] hover:bg-[#3fc4e7] hover:border-[#3fc4e7] hover:text-black transition-all duration-200"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse" />
+            Try Repolyn
+          </motion.a>
+
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -91,7 +109,7 @@ const Navbar = () => {
             <Button
               variant="cta"
               size="sm"
-              className="rounded-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black"
+              className="rounded-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
               asChild
             >
               <Link to="/themes">Get Started</Link>
@@ -133,10 +151,20 @@ const Navbar = () => {
                     </a>
                   ))}
 
-                  <div className="mt-4 px-4">
+                  <div className="mt-4 px-4 flex flex-col gap-2">
+                    <a
+                      href="https://www.repolyn.site"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setOpen(false)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold font-body border border-[#a78bfa]/40 text-[#c4b5fd] hover:bg-[#3fc4e7] hover:border-[#3fc4e7] hover:text-black transition-all"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse" />
+                      Try Repolyn
+                    </a>
                     <Button
                       variant="cta"
-                      className="w-full rounded-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black"
+                      className="w-full rounded-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
                       asChild
                       onClick={() => setOpen(false)}
                     >

@@ -44,7 +44,7 @@ const RecruiterSection = () => {
             },
             {
               icon: FileCheck,
-              title: "Nova Powered Assessment",
+              title: "AI Powered Assessment",
               desc: "Get a hire/no-hire recommendation with confidence score, strengths analysis, and actionable hiring notes.",
             },
             {
@@ -87,8 +87,8 @@ const RecruiterSection = () => {
             className="rounded-full px-10 py-6 text-lg bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black"
             asChild
           >
-            <Link to="/recruiter">
-              Access Recruiter Portal <ArrowRight className="ml-2 w-5 h-5" />
+            <Link to="/for-recruiters">
+              Explore Recruiter Features <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
           </Button>
 

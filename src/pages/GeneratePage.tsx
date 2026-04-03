@@ -9,11 +9,18 @@ import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { PortfolioData } from "@/lib/mockData";
+import { subscribeSiteSettings, SiteSettings, trackPortfolioGeneration } from "@/lib/firebase";
 
 const GeneratePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({ portfolioEnabled: true, recruiterEnabled: true });
+
+  useEffect(() => {
+    const unsub = subscribeSiteSettings(setSiteSettings);
+    return unsub;
+  }, []);
   const [githubUrl, setGithubUrl] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -74,6 +81,16 @@ const GeneratePage = () => {
       }
       setStatus("Generating portfolio...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
+      // Track for admin dashboard
+      trackPortfolioGeneration({
+        name: finalData.name || "",
+        email: finalData.email || "",
+        phone: finalData.phone || "",
+        currentOccupation: finalData.currentOccupation || "",
+        resumeName: resumeFile?.name || "No resume",
+        theme: selectedTheme || "",
+        timestamp: new Date().toISOString(),
+      });
       navigate(`/preview/${selectedTheme}`);
     } catch (e: any) {
       toast({ title: "Error processing data", description: e.message || "Something went wrong. Please try again.", variant: "destructive" });
@@ -81,6 +98,37 @@ const GeneratePage = () => {
   };
 
   if (!selectedTheme) return null;
+
+  // Maintenance gate
+  if (!siteSettings.portfolioEnabled) {
+    return (
+      <div className="min-h-screen bg-[#0b1f3a] text-white flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center max-w-md"
+          >
+            <div className="text-7xl mb-6">🛠️</div>
+            <h1 className="font-display text-3xl font-bold text-white mb-4">
+              Under Maintenance
+            </h1>
+            <p className="text-[#b8c7e0] font-body text-lg mb-8 leading-relaxed">
+              Portfolio generation is temporarily unavailable.<br />
+              We're working hard to improve things — check back soon! ✨
+            </p>
+            <Button
+              onClick={() => navigate("/")}
+              className="rounded-full px-8 bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
+            >
+              ← Back to Home
+            </Button>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0b1f3a] text-white">

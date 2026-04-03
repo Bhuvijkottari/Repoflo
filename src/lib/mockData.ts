@@ -4,6 +4,8 @@ export interface PortfolioData {
   bio: string;
   avatar: string;
   email: string;
+  phone?: string;
+  currentOccupation?: string;
   location: string;
   github: string;
   linkedin: string;
@@ -78,37 +80,43 @@ export const mockPortfolioData: PortfolioData = {
   leetcodeStats: null,
 };
 
-// Dummy lorem ipsum data for theme previews
+// Rich dummy data for theme previews
 export const dummyPreviewData: PortfolioData = {
-  name: "Jane Doe",
-  title: "Software Engineer",
-  bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Preview",
-  email: "jane@example.com",
-  location: "New York, NY",
-  github: "https://github.com/janedoe",
-  linkedin: "https://linkedin.com/in/janedoe",
-  website: "https://janedoe.dev",
-  skills: ["JavaScript", "React", "Python", "Node.js", "CSS", "Git", "Docker", "SQL"],
+  name: "Alex Rivera",
+  title: "Full Stack Engineer",
+  bio: "Passionate engineer with 5+ years building scalable products. I love clean code, great UX, and shipping things that matter. Open source contributor and occasional tech blogger.",
+  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=AlexRivera",
+  email: "alex@example.dev",
+  location: "San Francisco, CA",
+  github: "https://github.com/alexrivera",
+  linkedin: "https://linkedin.com/in/alexrivera",
+  website: "https://alexrivera.dev",
+  skills: ["TypeScript", "React", "Node.js", "Python", "PostgreSQL", "Docker", "AWS", "GraphQL", "Next.js", "Tailwind CSS", "Redis", "Kubernetes"],
   experience: [
-    { company: "Acme Corp", role: "Lead Engineer", period: "2022 - Present", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam." },
-    { company: "Lorem Labs", role: "Developer", period: "2020 - 2022", description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore." },
+    { company: "Stripe", role: "Senior Software Engineer", period: "2022 - Present", description: "Leading the developer experience team, building APIs used by 500K+ developers worldwide. Improved SDK performance by 40% and reduced integration time by half." },
+    { company: "Vercel", role: "Software Engineer", period: "2020 - 2022", description: "Built core features for the edge network platform serving 10B+ requests/month. Contributed to open-source Next.js codebase with 10+ merged PRs." },
+    { company: "Startup Lab", role: "Frontend Engineer", period: "2019 - 2020", description: "Developed responsive web applications for 8 client projects. Established the component library adopted by the entire team." },
   ],
-  education: [{ institution: "MIT", degree: "B.S. Computer Science", period: "2016 - 2020" }],
+  education: [
+    { institution: "UC Berkeley", degree: "B.S. Electrical Engineering & CS", period: "2015 - 2019" },
+  ],
   projects: [
-    { name: "ProjectAlpha", description: "Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit.", tech: ["React", "TypeScript", "Node.js"], stars: 142, link: "#" },
-    { name: "BetaApp", description: "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.", tech: ["Python", "FastAPI", "PostgreSQL"], stars: 87, link: "#" },
-    { name: "GammaKit", description: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.", tech: ["Go", "Docker", "Redis"], stars: 56, link: "#" },
+    { name: "OpenFlow", description: "A real-time collaborative code editor supporting 20+ languages with sub-100ms sync. Used by 3,000+ developers in beta.", tech: ["React", "WebSockets", "Node.js", "Redis"], stars: 1240, link: "#" },
+    { name: "Prism UI", description: "Accessible component library for React with full TypeScript support, dark mode, and 60+ components. 8K+ weekly npm downloads.", tech: ["TypeScript", "React", "Storybook", "CSS"], stars: 892, link: "#" },
+    { name: "DataPulse", description: "AI-powered analytics dashboard that auto-generates insights from your database. Connects to Postgres, MySQL, and BigQuery.", tech: ["Python", "FastAPI", "React", "OpenAI"], stars: 534, link: "#" },
+    { name: "DevPod", description: "Instant cloud development environments that spin up in under 5 seconds. Built on Docker and Kubernetes.", tech: ["Go", "Docker", "K8s", "TypeScript"], stars: 310, link: "#" },
   ],
-  volunteering: [{ org: "Open Source Foundation", role: "Contributor", period: "2021 - Present", description: "Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse." }],
+  volunteering: [
+    { org: "Code for America", role: "Technical Lead Volunteer", period: "2021 - Present", description: "Leading a team of 6 engineers building tools to improve access to public benefits for low-income families." },
+  ],
   githubStats: {
-    totalCommits: 1523, publicRepos: 28, privateRepos: 8, followers: 650, following: 120,
-    pullRequests: 189, pushes: 920, daysOnGithub: 1200,
-    recentCollaborations: ["org/open-lib", "team/dashboard"],
-    aiGeneratedContent: 0,
-    aiDetectedRepos: [],
-    topLanguages: [{ name: "JavaScript", percentage: 40 }, { name: "Python", percentage: 30 }, { name: "TypeScript", percentage: 20 }, { name: "Go", percentage: 10 }],
-    contributionStreak: 32,
+    totalCommits: 3241, publicRepos: 48, privateRepos: 12, followers: 2100, following: 340,
+    pullRequests: 428, pushes: 1820, daysOnGithub: 2190,
+    recentCollaborations: ["vercel/next.js", "stripe/stripe-node", "tailwindlabs/tailwindcss"],
+    aiGeneratedContent: 1,
+    aiDetectedRepos: ["demo-app"],
+    topLanguages: [{ name: "TypeScript", percentage: 48 }, { name: "Python", percentage: 28 }, { name: "Go", percentage: 14 }, { name: "Rust", percentage: 10 }],
+    contributionStreak: 63,
   },
   leetcodeStats: null,
 };

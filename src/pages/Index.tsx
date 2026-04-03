@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import logo from "@/favicon/IMG-20260403-WA0058.jpg";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ProcessSection from "@/components/ProcessSection";
 import RecruiterSection from "@/components/RecruiterSection";
 import FeedbackSection from "@/components/FeedbackSection";
-import { ArrowRight, X, Target, Sparkles, Layers, Wand2, Globe } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Sparkles, Layers, Wand2, Globe } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import themeBlue from "@/assets/theme-preview-blue.jpg";
 import themeWarm from "@/assets/theme-preview-warm.jpg";
@@ -55,21 +55,6 @@ const featureHighlights = [
 ];
 
 const Index = () => {
-  const [showRecruiterPopup, setShowRecruiterPopup] = useState(false);
-
-  useEffect(() => {
-    const dismissed = sessionStorage.getItem("recruiterPopupDismissed");
-    if (!dismissed) {
-      const timer = setTimeout(() => setShowRecruiterPopup(true), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const dismissPopup = () => {
-    setShowRecruiterPopup(false);
-    sessionStorage.setItem("recruiterPopupDismissed", "true");
-  };
-
   return (
     <div className="min-h-screen bg-[#0b1f3a] text-white">
       <Navbar />
@@ -82,6 +67,24 @@ const Index = () => {
       <section className="py-16 sm:py-20 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0b1f3a] via-[#132f52]/30 to-[#0b1f3a] pointer-events-none" />
         <div className="container mx-auto px-4 sm:px-6 relative">
+
+          {/* Section heading */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <p className="text-xs font-semibold text-[#3fc4e7] tracking-[3px] uppercase mb-3 font-body">Why Repoflo</p>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+              Everything you need to{" "}
+              <span className="text-[#3fc4e7]">stand out</span>
+            </h2>
+            <p className="text-[#b8c7e0] font-body text-sm mt-2 max-w-md mx-auto">
+              From your GitHub to a stunning portfolio in minutes — no code required.
+            </p>
+          </motion.div>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
 
             {featureHighlights.map((f, i) => (
@@ -141,7 +144,6 @@ const Index = () => {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 max-w-5xl mx-auto">
             {[
-              { name: "Recruiter", image: "recruiter" },
               { name: "Minimal", image: "minimal" },
               { name: "Bold Dark", image: "bold" },
               { name: "Creative", image: "creative" },
@@ -186,8 +188,8 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-14">
-            <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-lg bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black">
-              <Link to="/themes">Start Building Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
+            <Button variant="cta" size="lg" className="rounded-full px-10 py-6 text-lg bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black" asChild>
+              <Link to="/themes" className="flex items-center gap-2">Start Building Now <ArrowRight className="w-5 h-5" /></Link>
             </Button>
           </div>
 
@@ -197,51 +199,24 @@ const Index = () => {
       <ProcessSection />
       <RecruiterSection />
       <FeedbackSection />
-{/* Recruiter Floating Button */}
-
-<motion.div
-initial={{ opacity: 0, scale: 0.8 }}
-animate={{ opacity: 1, scale: 1 }}
-transition={{ delay: 1 }}
-className="fixed bottom-6 right-6 z-50"
->
-
-<Link to="/recruiter">
-
-<Button
-variant="cta"
-size="lg"
-className="rounded-full px-6 py-4 shadow-xl flex items-center gap-2"
->
-
-<Target className="w-5 h-5" />
-Recruiter Portal
-
-</Button>
-
-</Link>
-
-</motion.div>
       {/* Footer */}
       <footer className="py-8 border-t border-[#3fc4e7]/20 bg-[#0b1f3a]">
         <div className="container mx-auto px-4">
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
 
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-
-              <p className="text-sm text-[#b8c7e0] font-body">
-                Powered by <span className="font-semibold text-white">DEVORA TECHNOLOGIES</span>
-              </p>
-
-              <Button variant="link" size="sm" className="text-sm text-[#b8c7e0] hover:text-[#69d2f1] p-0 h-auto" asChild>
-                <Link to="/recruiter">Recruiter Portal</Link>
-              </Button>
-
-            </div>
+            <Link to="/admin-login" className="flex items-center gap-2 group" title="Admin Portal">
+              <img
+                src={logo}
+                alt=""
+                className="h-9 w-9 rounded-full object-cover transition-all group-hover:ring-2 group-hover:ring-[#3fc4e7]/50"
+                style={{ border: "2px solid rgba(63,196,231,0.3)" }}
+              />
+              <span className="font-display font-bold text-white text-lg group-hover:text-[#3fc4e7] transition-colors">Repoflo</span>
+            </Link>
 
             <p className="text-sm text-[#b8c7e0] font-body">
-              © {new Date().getFullYear()} Repoflo. All rights reserved.
+              © {new Date().getFullYear()} Repoflo · Powered by <span className="font-semibold text-white">Devora Technologies</span>
             </p>
 
           </div>

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import {
   Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle,
   Loader2, Code2, Briefcase, Search, LogIn, LogOut, Shield,
+  MessageCircle, X, Send,
 } from "lucide-react";
 import TechStackInput from "@/components/TechStackInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,11 +16,44 @@ import PreviewPage from "./PreviewPage";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  signInWithGoogle, signOutUser, updateRecruiterUsage,
+  signInWithGoogle, signOutUser, updateRecruiterUsage, incrementRecruiterRequestUsage,
   checkRecruiterLimit, addRecruiterHistory, fetchRecruiterHistory,
-  storeCandidateAnalysis,
+  storeCandidateAnalysis, subscribeRecruiterRequest, RecruiterRequest,
+  submitSupportTicket,
 } from "@/lib/firebase";
+import { sanitizeSupportMessage, sanitizeEmail, sanitizeText } from "@/lib/sanitize";
 import type { PortfolioData } from "@/lib/mockData";
+
+/* ── friendly error messages ─────────────────────────────────── */
+const friendlyError = (e: any): string => {
+  const msg: string = e?.message || String(e) || "";
+  if (msg.includes("503") || msg.includes("504") || msg.includes("timeout") ||
+      msg.includes("overloaded") || msg.includes("busy") || msg.includes("rate limit") ||
+      msg.includes("too many") || msg.includes("upstream") || msg.includes("gateway"))
+    return "⏳ Server is busy right now. Please wait a moment and try again.";
+  if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("network"))
+    return "🌐 Network error. Please check your connection and try again.";
+  if (msg.includes("Function") || msg.includes("edge") || msg.includes("invoke"))
+    return "⏳ Our servers are temporarily busy. Please try again in a few seconds.";
+  return msg || "Something went wrong. Please try again.";
+};
+
+/* ── name validation ─────────────────────────────────────────── */
+/** Returns true if at least one 3-char substring of `a` appears in `b` (case-insensitive) */
+const shareAtLeast3Chars = (a: string, b: string): boolean => {
+  if (!a || !b) return false;
+  const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const ca = clean(a), cb = clean(b);
+  if (ca.length < 3 || cb.length < 3) return false;
+  for (let i = 0; i <= ca.length - 3; i++) {
+    if (cb.includes(ca.slice(i, i + 3))) return true;
+  }
+  return false;
+};
+
+/** Extract GitHub username from a URL string */
+const extractGithubUser = (url: string) =>
+  url?.match(/github\.com\/([^\/\?#\s]+)/i)?.[1]?.toLowerCase() || "";
 
 /* ── small helpers ───────────────────────────────────────────── */
 const NavyCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -60,6 +94,22 @@ const RecruiterPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, recruiterProfile, loading, isRecruiter, isApprovedRecruiter } = useAuth();
+  const [recruiterRequest, setRecruiterRequest] = useState<RecruiterRequest | null>(null);
+  const [requestLoading, setRequestLoading] = useState(true);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [supportMsg, setSupportMsg] = useState("");
+  const [supportSending, setSupportSending] = useState(false);
+  const [supportSent, setSupportSent] = useState(false);
+
+  // Subscribe to recruiter request status
+  useEffect(() => {
+    if (!user) { setRequestLoading(false); return; }
+    const unsub = subscribeRecruiterRequest(user.uid, (r) => {
+      setRecruiterRequest(r);
+      setRequestLoading(false);
+    });
+    return unsub;
+  }, [user]);
 
   const [githubUrl, setGithubUrl] = useState("");
   const [leetcodeUsername, setLeetcodeUsername] = useState("");
@@ -82,6 +132,7 @@ const RecruiterPage = () => {
 
 const [debouncedGithubUrl, setDebouncedGithubUrl] = useState("");
 const [debouncedLeetcode, setDebouncedLeetcode] = useState("");
+const [nameWarning, setNameWarning] = useState("");
 
 /* ── GitHub Debounce ── */
 useEffect(() => {
@@ -114,8 +165,9 @@ useEffect(() => {
       if (data?.error) throw new Error(data.error);
 
       setGithubData(data);
+      setNameWarning(""); // cleared — full cross-check happens on submit
     } catch (e: any) {
-      setGithubError(e.message || "Failed to fetch GitHub data");
+      setGithubError(friendlyError(e));
       setGithubData(null);
     } finally {
       setGithubFetching(false);
@@ -155,7 +207,7 @@ useEffect(() => {
 
       setLeetcodeData(data);
     } catch (e: any) {
-      setLeetcodeError(e.message || "Failed to fetch LeetCode data");
+      setLeetcodeError(friendlyError(e));
       setLeetcodeData(null);
     } finally {
       setLeetcodeFetching(false);
@@ -200,8 +252,7 @@ useEffect(() => {
     if (!githubData) return;
     setIsProcessing(true);
     try {
-      let finalData: PortfolioData = { ...githubData };
-      if (leetcodeData) finalData.leetcodeStats = leetcodeData;
+      let finalData: PortfolioData = { ...githubData, leetcodeStats: leetcodeData ?? null };
       sessionStorage.setItem("recruiterPrefs", JSON.stringify({ requiredTechStack, experienceLevel }));
 
       if (resumeFile) {
@@ -223,15 +274,53 @@ useEffect(() => {
         const data = await response.json();
         if (data?.error) throw new Error(data.error);
         finalData = { ...finalData, ...data, avatar: data.avatar || githubData.avatar, githubStats: githubData.githubStats, leetcodeStats: finalData.leetcodeStats };
+
+        // ── NAME VALIDATION ──────────────────────────────────────────
+        const resumeName: string = (data.name || "").trim();
+        const githubName: string = (githubData.name || "").trim();
+        const githubUser: string = extractGithubUser(githubUrl);
+
+        // 1. Resume name must share ≥3 chars with GitHub display name OR username
+        if (resumeName && githubName) {
+          const nameMatchesDisplay = shareAtLeast3Chars(resumeName, githubName);
+          const nameMatchesUsername = shareAtLeast3Chars(resumeName, githubUser);
+          if (!nameMatchesDisplay && !nameMatchesUsername) {
+            setIsProcessing(false);
+            setStatus("");
+            setNameWarning(
+              `Name mismatch: Resume says "${resumeName}" but GitHub shows "${githubName}" (@${githubUser}). They must share at least 3 consecutive characters — please verify you've entered the correct candidate's GitHub profile.`
+            );
+            return;
+          }
+        }
+
+        // 2. If resume contains a GitHub URL, it must match the one entered
+        const resumeGithub: string = (data.github || "").trim();
+        if (resumeGithub) {
+          const resumeGhUser = extractGithubUser(resumeGithub);
+          const enteredGhUser = extractGithubUser(githubUrl);
+          if (resumeGhUser && enteredGhUser && resumeGhUser !== enteredGhUser) {
+            setIsProcessing(false);
+            setStatus("");
+            setNameWarning(
+              `GitHub mismatch: The resume lists GitHub as "@${resumeGhUser}" but you entered "@${enteredGhUser}". Please ensure the GitHub URL and resume belong to the same candidate.`
+            );
+            return;
+          }
+        }
+
+        setNameWarning(""); // all checks passed
+        // ── END VALIDATION ───────────────────────────────────────────
       }
 
       setStatus("Generating analysis...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
       await updateRecruiterUsage(user.email!);
+      await incrementRecruiterRequestUsage(user.uid);
 
       const candidateId = await storeCandidateAnalysis({
         githubUsername: githubData.githubStats?.username || "",
-        leetcodeUsername: leetcodeData?.username,
+        ...(leetcodeData?.username ? { leetcodeUsername: leetcodeData.username } : {}),
         name: githubData.name,
         portfolioData: finalData,
         analysis: null,
@@ -248,12 +337,12 @@ useEffect(() => {
       sessionStorage.setItem("historyId", historyId);
       navigate(`/recruiter?preview=1`);
     } catch (e: any) {
-      toast({ title: "Error processing data", description: e.message || "Something went wrong.", variant: "destructive" });
+      toast({ title: "Error processing data", description: friendlyError(e), variant: "destructive" });
     } finally { setIsProcessing(false); setStatus(""); }
   };
 
   /* ── loading spinner ── */
-  if (loading) {
+  if (loading || requestLoading) {
     return (
       <div className="min-h-screen bg-[#0b1f3a] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -266,67 +355,35 @@ useEffect(() => {
 
   if (showPreview) return <PreviewPage overrideThemeId="recruiter" />;
 
-  /* ── sign-in gate ── */
+  /* ── not signed in → send to landing to sign in properly ── */
   if (!user) {
-    return (
-      <div className="min-h-screen bg-[#0b1f3a] flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-sm"
-        >
-          <NavyCard className="p-10 text-center shadow-xl">
-            <div className="w-16 h-16 rounded-2xl bg-[#3fc4e7]/15 border border-[#3fc4e7]/30 flex items-center justify-center mx-auto mb-6">
-              <Shield className="w-8 h-8 text-[#3fc4e7]" />
-            </div>
-            <h1 className="font-display text-2xl font-bold text-white mb-3">Recruiter Access</h1>
-            <p className="text-[#b8c7e0] font-body text-sm leading-relaxed mb-8">
-              Sign in with your Google account to access the recruiter analysis dashboard.
-            </p>
-            <Button
-              onClick={handleSignIn}
-              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black hover:opacity-90 transition-opacity rounded-xl font-display"
-            >
-              <LogIn className="w-5 h-5 mr-2" />
-              Sign in with Google
-            </Button>
-            <div className="mt-8 pt-6 border-t border-white/10">
-
-      <p className="text-sm text-gray-400 mb-3">
-        Want deeper candidate insights?
-      </p>
-
-      <Button
-        variant="outline"
-        className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black"
-        onClick={() => navigate("/premium")}
-      >
-        Explore Premium Features
-      </Button>
-
-    </div>
-          </NavyCard>
-        </motion.div>
-      </div>
-    );
+    navigate("/for-recruiters", { replace: true });
+    return null;
   }
 
-  /* ── pending approval ── */
-  if (!isApprovedRecruiter) {
+  /* ── signed in but no approved request → send to landing ── */
+  if (!recruiterRequest || recruiterRequest.status === "rejected") {
+    navigate("/for-recruiters", { replace: true });
+    return null;
+  }
+
+  /* ── pending approval (from our new request system) ── */
+  if (user && recruiterRequest?.status === "pending") {
     return (
       <div className="min-h-screen bg-[#0b1f3a] flex items-center justify-center px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <NavyCard className="p-10 text-center max-w-sm shadow-xl">
-            <Shield className="w-14 h-14 text-[#b8c7e0] mx-auto mb-5" />
-            <h1 className="font-display text-xl font-bold text-white mb-3">Access Pending Approval</h1>
+          <NavyCard className="p-10 text-center max-w-md shadow-xl">
+            <div className="text-5xl mb-4">⏳</div>
+            <h1 className="font-display text-2xl font-bold text-white mb-3">Waiting for Approval</h1>
             <p className="text-[#b8c7e0] text-sm font-body mb-6 leading-relaxed">
-              Your recruiter account (<span className="text-[#69d2f1]">{user?.email}</span>) is pending approval. Please contact an administrator.
+              Your <strong className="text-[#3fc4e7]">{recruiterRequest.packageName}</strong> plan request is under review. The admin will approve it shortly — this page updates automatically.
             </p>
-            <Button
-              variant="outline"
-              onClick={handleSignOut}
-              className="border-[#3fc4e7]/30 text-[#69d2f1] hover:bg-[#3fc4e7]/10 bg-transparent"
-            >
+            <div className="bg-[#0b1f3a] rounded-xl p-4 text-left text-sm font-body space-y-2 border border-[#3fc4e7]/10 mb-6">
+              <div className="flex justify-between"><span className="text-[#b8c7e0]">Plan</span><span className="text-[#3fc4e7] font-bold">{recruiterRequest.packageName}</span></div>
+              <div className="flex justify-between"><span className="text-[#b8c7e0]">Status</span><span className="text-amber-400 font-bold">Pending</span></div>
+              <div className="flex justify-between"><span className="text-[#b8c7e0]">Requested</span><span className="text-white">{new Date(recruiterRequest.requestedAt).toLocaleDateString()}</span></div>
+            </div>
+            <Button variant="outline" onClick={handleSignOut} className="border-[#3fc4e7]/30 text-[#69d2f1] hover:bg-[#3fc4e7]/10 bg-transparent w-full">
               Sign Out
             </Button>
           </NavyCard>
@@ -346,7 +403,14 @@ useEffect(() => {
             <div>
               <h1 className="font-display text-lg font-bold text-white leading-tight">Recruiter Dashboard</h1>
               <p className="text-xs text-[#b8c7e0] font-body">
-                Level {recruiterProfile.level} &nbsp;·&nbsp; {recruiterProfile.usageCount} analyses used
+                <span className="text-[#3fc4e7] font-semibold">{recruiterRequest?.packageName ?? recruiterProfile?.packageName ?? "Starter"}</span>
+                &nbsp;·&nbsp;
+                {recruiterRequest?.usageCount ?? recruiterProfile?.usageCount ?? 0}
+                {" / "}
+                {(recruiterRequest?.packageLimit ?? recruiterProfile?.packageLimit) === -1
+                  ? "∞"
+                  : (recruiterRequest?.packageLimit ?? recruiterProfile?.packageLimit ?? 25)
+                } analyses used
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -532,8 +596,8 @@ useEffect(() => {
 
           {/* Resume Upload */}
           <NavyCard className="p-6">
-            <FieldLabel icon={FileText} text="Candidate Resume" note="enriches experience & education" />
-            <label className="mt-3 flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-[#3fc4e7]/25 rounded-xl cursor-pointer hover:border-[#3fc4e7]/50 hover:bg-[#3fc4e7]/5 transition-all duration-200">
+            <FieldLabel icon={FileText} text="Candidate Resume" note="required" />
+            <label className={`mt-3 flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${resumeFile ? "border-[#3fc4e7]/60 bg-[#3fc4e7]/5" : "border-red-400/40 hover:border-[#3fc4e7]/50 hover:bg-[#3fc4e7]/5"}`}>
               {resumeFile ? (
                 <div className="flex items-center gap-2.5 text-white">
                   <CheckCircle2 className="w-5 h-5 text-[#3fc4e7]" />
@@ -541,19 +605,41 @@ useEffect(() => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center text-[#b8c7e0]">
-                  <Upload className="w-8 h-8 mb-2 text-[#3fc4e7]/60" />
-                  <span className="font-body text-sm">Click to upload candidate resume</span>
-                  <span className="font-body text-xs mt-1 text-[#b8c7e0]/60">PDF, DOC, TXT up to 10MB</span>
+                  <Upload className="w-8 h-8 mb-2 text-red-400/70" />
+                  <span className="font-body text-sm">Upload candidate resume <span className="text-red-400 font-semibold">*</span></span>
+                  <span className="font-body text-xs mt-1 text-[#b8c7e0]/60">PDF, DOC, TXT — required for analysis</span>
                 </div>
               )}
               <input type="file" accept=".pdf,.doc,.docx,.txt" className="hidden" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} />
             </label>
           </NavyCard>
 
+          {/* Name mismatch warning */}
+          {nameWarning && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl"
+            >
+              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-amber-400 font-semibold text-sm font-display mb-1">Identity Mismatch Detected</p>
+                <p className="text-amber-300/80 text-xs font-body leading-relaxed">{nameWarning}</p>
+                <button
+                  type="button"
+                  onClick={() => setNameWarning("")}
+                  className="text-amber-400/60 text-xs mt-2 hover:text-amber-400 transition-colors font-body"
+                >
+                  Dismiss and try different inputs
+                </button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Submit */}
           <Button
             type="submit"
-            disabled={isProcessing || !githubData}
+            disabled={isProcessing || !githubData || !resumeFile || !!nameWarning}
             className="w-full h-13 py-3.5 text-base font-bold rounded-xl bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black hover:opacity-90 transition-opacity shadow-lg disabled:opacity-40 font-display"
           >
             {isProcessing ? (
@@ -569,6 +655,94 @@ useEffect(() => {
             )}
           </Button>
         </motion.form>
+      </div>
+
+      {/* ── Support floating button ── */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+
+        {/* Support modal */}
+        {supportOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 10 }}
+            className="bg-[#132f52] border border-[#3fc4e7]/25 rounded-2xl shadow-2xl w-80 overflow-hidden"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#3fc4e7]/15 bg-[#0b1f3a]/60">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-[#3fc4e7]" />
+                <span className="font-display font-semibold text-white text-sm">Customer Support</span>
+              </div>
+              <button onClick={() => { setSupportOpen(false); setSupportSent(false); setSupportMsg(""); }}
+                className="text-[#b8c7e0]/50 hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4">
+              {supportSent ? (
+                <div className="text-center py-4">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
+                  <p className="text-white font-semibold text-sm mb-1">Message sent!</p>
+                  <p className="text-[#b8c7e0] text-xs">Our team will get back to you soon.</p>
+                  <button onClick={() => { setSupportSent(false); setSupportMsg(""); }}
+                    className="mt-3 text-[#3fc4e7] text-xs hover:text-white transition-colors">
+                    Send another message
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-[#b8c7e0] text-xs font-body mb-3">
+                    Describe your issue and we'll help you as soon as possible.
+                  </p>
+                  <textarea
+                    value={supportMsg}
+                    onChange={(e) => setSupportMsg(e.target.value)}
+                    placeholder="Describe your issue..."
+                    rows={4}
+                    className="w-full bg-[#0b1f3a] border border-[#3fc4e7]/20 rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-[#b8c7e0]/30 focus:outline-none focus:border-[#3fc4e7]/50 resize-none font-body"
+                  />
+                  <Button
+                    disabled={!supportMsg.trim() || supportSending}
+                    onClick={async () => {
+                      if (!supportMsg.trim() || !user) return;
+                      setSupportSending(true);
+                      try {
+                        await submitSupportTicket({
+                          recruiterEmail: sanitizeEmail(user.email || ""),
+                          recruiterName: sanitizeText(user.displayName || user.email || "", 100),
+                          message: sanitizeSupportMessage(supportMsg),
+                          createdAt: new Date().toISOString(),
+                          status: "open",
+                        });
+                        setSupportSent(true);
+                        setSupportMsg("");
+                      } catch {
+                        toast({ title: "Failed to send", description: "Please try again.", variant: "destructive" });
+                      } finally {
+                        setSupportSending(false);
+                      }
+                    }}
+                    className="w-full mt-2 bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold rounded-xl text-sm h-9 hover:opacity-90"
+                  >
+                    {supportSending
+                      ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />Sending…</>
+                      : <><Send className="w-3.5 h-3.5 mr-1.5" />Send Message</>}
+                  </Button>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Floating button */}
+        <button
+          onClick={() => setSupportOpen(!supportOpen)}
+          className="w-12 h-12 rounded-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black flex items-center justify-center shadow-lg shadow-[#3fc4e7]/25 hover:scale-105 transition-transform"
+        >
+          {supportOpen ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
+        </button>
       </div>
     </div>
   );

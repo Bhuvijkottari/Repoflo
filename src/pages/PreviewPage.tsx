@@ -234,44 +234,46 @@ const handleDownloadPDF = () => {
   const personName = portfolioData?.name || "portfolio";
   const sanitizedName = personName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
 
-  const handleDownload = () => {
-    const html = inlineEditing ? cleanHtml : editableHtml;
+  // Always get the latest HTML (edited or original)
+  const getFinalHtml = () => inlineEditing ? cleanHtml : editableHtml;
+
+  const triggerDownload = (html: string, filename: string) => {
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${sanitizedName}.html`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownload = () => {
+    triggerDownload(getFinalHtml(), `${sanitizedName}.html`);
   };
 
   const handleDownloadCode = () => {
-    const html = inlineEditing ? cleanHtml : editableHtml;
-    const blob = new Blob([html], { type: "text/html" });
+    // Download as .txt so it opens in any text editor for easy copy-paste
+    const html = getFinalHtml();
+    const blob = new Blob([html], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${sanitizedName}-source.html`;
+    a.download = `${sanitizedName}-source.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    toast({ title: "Source Code Downloaded", description: `Open "${sanitizedName}-source.html" in any code editor to customize further.` });
+    toast({ title: "Source Code Downloaded", description: `Open "${sanitizedName}-source.txt" in any text editor to copy the code.` });
   };
 
   const handleFinalize = () => {
-    if (inlineEditing) {
-      setEditableHtml(cleanHtml);
-      setInlineEditing(false);
-    }
+    // Capture edited HTML BEFORE clearing state
+    const finalHtml = getFinalHtml();
+    // Persist the edited version so all future downloads use it
+    setEditableHtml(finalHtml);
+    setCleanHtml(finalHtml);
+    setInlineEditing(false);
     setFinalized(true);
-    const html = inlineEditing ? cleanHtml : editableHtml;
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${sanitizedName}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: "Portfolio Finalized", description: `Your edits have been saved and "${sanitizedName}.html" has been downloaded.` });
+    triggerDownload(finalHtml, `${sanitizedName}.html`);
+    toast({ title: "Portfolio Finalized! 🎉", description: `"${sanitizedName}.html" downloaded with all your edits.` });
   };
 
   const toggleInlineEditor = () => {
@@ -333,8 +335,8 @@ const handleDownloadPDF = () => {
     return (
       <div className="fixed inset-0 z-50 bg-background">
         <div className="absolute top-4 right-4 z-10 flex gap-2">
-          <Button variant="secondary" size="sm" onClick={() => setViewMode("desktop")}>Exit Fullscreen</Button>
-          <Button variant="default" size="sm" onClick={handleDownload}><Download className="w-4 h-4 mr-1" /> Download</Button>
+          <Button size="sm" onClick={() => setViewMode("desktop")} className="bg-[#132f52] text-[#b8c7e0] border border-[#3fc4e7]/40 hover:bg-[#3fc4e7]/15 hover:text-white font-semibold">Exit Fullscreen</Button>
+          <Button size="sm" onClick={handleDownload} className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold hover:opacity-90"><Download className="w-4 h-4 mr-1" /> Download</Button>
         </div>
         <iframe srcDoc={editableHtml} className="w-full h-full border-0" title="Portfolio Preview" />
       </div>
@@ -342,7 +344,7 @@ const handleDownloadPDF = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#0b1f3a]">
       {!hideNavbar && <Navbar />}
       <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
       
@@ -350,91 +352,123 @@ const handleDownloadPDF = () => {
         {/* Top bar */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
           <div className="flex items-center gap-3 flex-wrap">
-            <Button variant="ghost" size="sm" asChild>
+            <Button
+              size="sm"
+              className="bg-white text-black hover:bg-gray-100 font-semibold"
+              asChild
+            >
               <Link to={isRecruiter ? "/recruiter" : "/themes"}><ArrowLeft className="w-4 h-4 mr-1" /> Back</Link>
             </Button>
-            <h1 className="font-display text-lg sm:text-xl font-bold text-foreground">
-              {portfolioData?.name || "Preview"} <span className="capitalize text-primary">{themeId}</span>
+            <h1 className="font-display text-lg sm:text-xl font-bold text-white">
+              {portfolioData?.name || "Preview"}
+              {!isRecruiter && <span className="capitalize text-[#3fc4e7] ml-2">{themeId}</span>}
             </h1>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {!isRecruiter && (
               <>
                 {!isMobile && (
-                  <div className="flex bg-secondary rounded-lg p-1">
-                    <button onClick={() => setViewMode("desktop")} className={`p-2 rounded-md transition-colors ${viewMode === "desktop" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}><Monitor className="w-4 h-4" /></button>
-                    <button onClick={() => setViewMode("mobile")} className={`p-2 rounded-md transition-colors ${viewMode === "mobile" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}><Smartphone className="w-4 h-4" /></button>
-                    <button onClick={() => setViewMode("fullscreen")} className="p-2 rounded-md text-muted-foreground hover:text-foreground transition-colors"><Maximize className="w-4 h-4" /></button>
+                  <div className="flex bg-[#132f52] border border-[#3fc4e7]/20 rounded-lg p-1">
+                    <button
+                      onClick={() => setViewMode("desktop")}
+                      className={`p-2 rounded-md transition-colors ${viewMode === "desktop" ? "bg-[#3fc4e7]/20 text-[#3fc4e7]" : "text-[#b8c7e0] hover:text-white"}`}
+                    ><Monitor className="w-4 h-4" /></button>
+                    <button
+                      onClick={() => setViewMode("mobile")}
+                      className={`p-2 rounded-md transition-colors ${viewMode === "mobile" ? "bg-[#3fc4e7]/20 text-[#3fc4e7]" : "text-[#b8c7e0] hover:text-white"}`}
+                    ><Smartphone className="w-4 h-4" /></button>
+                    <button
+                      onClick={() => setViewMode("fullscreen")}
+                      className="p-2 rounded-md text-[#b8c7e0] hover:text-white transition-colors"
+                    ><Maximize className="w-4 h-4" /></button>
                   </div>
                 )}
-                <Button variant={inlineEditing ? "default" : "outline"} size="sm" onClick={toggleInlineEditor}>
+                <Button
+                  size="sm"
+                  onClick={toggleInlineEditor}
+                  className={inlineEditing
+                    ? "bg-[#3fc4e7] text-black hover:bg-[#69d2f1] font-semibold"
+                    : "bg-[#132f52] text-[#69d2f1] border border-[#3fc4e7]/40 hover:bg-[#3fc4e7]/15 hover:border-[#3fc4e7]/70 hover:text-white font-semibold"
+                  }
+                >
                   {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Edit</> : <><Pencil className="w-4 h-4 mr-1" /> Edit</>}
                 </Button>
                 {!isMobile && (
-                  <Button variant="outline" size="sm" onClick={handleDownloadCode}>
+                  <Button
+                    size="sm"
+                    onClick={handleDownloadCode}
+                    className="bg-[#132f52] text-[#b8c7e0] border border-[#3fc4e7]/30 hover:bg-[#3fc4e7]/12 hover:text-white hover:border-[#3fc4e7]/60 font-semibold"
+                  >
                     <Code className="w-4 h-4 mr-1" /> Code
                   </Button>
                 )}
-                <Button variant="cta" size="sm" onClick={handleFinalize}>
+                <Button
+                  size="sm"
+                  onClick={handleFinalize}
+                  className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold hover:opacity-90 shadow-lg shadow-[#3fc4e7]/20"
+                >
                   <Check className="w-4 h-4 mr-1" /> {isMobile ? "Download" : "Finalize"}
                 </Button>
               </>
             )}
             {isRecruiter && (
-              <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!analysis}>
-                <FileText className="w-4 h-4 mr-1" /> Report
+              <Button
+                size="sm"
+                onClick={handleDownloadReport}
+                disabled={!analysis}
+                className="bg-white text-black hover:bg-gray-100 font-semibold disabled:opacity-40"
+              >
+                <FileText className="w-4 h-4 mr-1" /> Download Report
               </Button>
             )}
           </div>
         </motion.div>
 
-        <div className="flex gap-4 justify-center">
-          {/* Preview Panel */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="w-full max-w-5xl"
-          >
-            <div className={`bg-card rounded-2xl shadow-card-hover overflow-hidden transition-all duration-500 ${
-              viewMode === "mobile" && !isMobile ? "w-[390px] h-[844px] mx-auto" : "w-full h-[80vh]"
-            }`}>
-              <div className="bg-secondary/50 px-4 py-2 flex items-center gap-2 border-b border-border">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-destructive/60" />
-                  <div className="w-3 h-3 rounded-full bg-accent/60" />
-                  <div className="w-3 h-3 rounded-full bg-primary/40" />
+        {/* Portfolio preview — non-recruiter only */}
+        {!isRecruiter && (
+          <div className="flex gap-4 justify-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="w-full max-w-5xl"
+            >
+              <div className={`bg-card rounded-2xl shadow-card-hover overflow-hidden transition-all duration-500 ${
+                viewMode === "mobile" && !isMobile ? "w-[390px] h-[844px] mx-auto" : "w-full h-[80vh]"
+              }`}>
+                <div className="bg-secondary/50 px-4 py-2 flex items-center gap-2 border-b border-border">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-destructive/60" />
+                    <div className="w-3 h-3 rounded-full bg-accent/60" />
+                    <div className="w-3 h-3 rounded-full bg-primary/40" />
+                  </div>
+                  <div className="flex-1 text-center text-xs text-muted-foreground font-body truncate">
+                    {inlineEditing && <span className="text-primary font-semibold ml-1">Editing</span>}
+                  </div>
                 </div>
-                <div className="flex-1 text-center text-xs text-muted-foreground font-body truncate">
-                   {inlineEditing && <span className="text-primary font-semibold ml-1">Editing</span>}
-                </div>
+                <iframe
+                  ref={iframeRef}
+                  srcDoc={inlineEditing ? injectEditor(editableHtml) : editableHtml}
+                  className="w-full border-0"
+                  style={{ height: "calc(100% - 36px)" }}
+                  title="Portfolio Preview"
+                />
               </div>
-              <iframe
-                ref={iframeRef}
-                srcDoc={inlineEditing ? injectEditor(editableHtml) : editableHtml}
-                className="w-full border-0"
-                style={{ height: "calc(100% - 36px)" }}
-                title="Portfolio Preview"
-              />
-            </div>
-          </motion.div>
-        </div>
+            </motion.div>
+          </div>
+        )}
 
-        {/* Recruiter Tech Stack Input & Analysis Panel */}
+        {/* Recruiter — single scrollable page: tech stack filter + analysis */}
         {isRecruiter && portfolioData && (
           <>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6 bg-card rounded-2xl border border-border p-6">
+            {/* Optional tech stack filter */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              className="mb-4 bg-card border border-border rounded-2xl p-5">
               <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <Code className="w-3.5 h-3.5" /> Required Tech Stack (Optional)
+                <Code className="w-3.5 h-3.5" /> Required Tech Stack
+                <span className="normal-case font-normal opacity-60 ml-1">(optional)</span>
               </h4>
-              <p className="text-xs text-muted-foreground font-body mb-3">Add the tech stack your role requires. The analysis will show how well the candidate matches.</p>
               <TechStackInput selected={requiredTechStack} onChange={setRequiredTechStack} />
-              {requiredTechStack.length > 0 && analysis && (
-                <Button variant="outline" size="sm" className="mt-3" onClick={runAnalysis} disabled={isAnalyzing}>
-                  {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-                  Re-analyze with Tech Stack
-                </Button>
-              )}
             </motion.div>
             <RecruiterAnalysisPanel
               analysis={analysis}
@@ -454,14 +488,24 @@ const handleDownloadPDF = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 bg-primary/10 border border-primary/20 rounded-xl p-4 text-center"
+            className="mt-6 bg-[#132f52] border border-[#3fc4e7]/25 rounded-xl p-5 text-center"
           >
-            <p className="font-display font-semibold text-foreground">Portfolio Finalized</p>
-            <p className="text-sm text-muted-foreground mt-1">Your file <code className="bg-secondary px-1.5 py-0.5 rounded text-xs">{sanitizedName}.html</code> has been downloaded.</p>
-            <div className="flex gap-2 justify-center mt-3 flex-wrap">
-              <Button variant="outline" size="sm" onClick={handleDownload}><Download className="w-4 h-4 mr-1" /> Download Again</Button>
-              <Button variant="outline" size="sm" onClick={handleOpenInVSCode}><Code className="w-4 h-4 mr-1" /> Open in VS Code</Button>
+            <p className="font-display font-semibold text-white text-lg">Portfolio Finalized 🎉</p>
+            <p className="text-sm text-[#b8c7e0] mt-1">
+              <code className="bg-[#0b1f3a] px-2 py-0.5 rounded text-xs text-[#69d2f1]">{sanitizedName}.html</code>
+              {" "}downloaded with all your edits.
+            </p>
+            <div className="flex gap-3 justify-center mt-4 flex-wrap">
+              <Button size="sm" onClick={handleDownload}
+                className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold hover:opacity-90">
+                <Download className="w-4 h-4 mr-1" /> Download HTML
+              </Button>
+              <Button size="sm" onClick={handleDownloadCode}
+                className="bg-white text-black hover:bg-gray-100 font-bold">
+                <Code className="w-4 h-4 mr-1" /> Download Code
+              </Button>
             </div>
+            <p className="text-xs text-[#b8c7e0]/40 mt-2 font-body">Both files include all your edits</p>
           </motion.div>
         )}
       </div>

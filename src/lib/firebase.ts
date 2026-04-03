@@ -3,13 +3,13 @@ import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, 
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDumAetwxolsrsPBeyEJbFsRJ_aIatcpCk",
-  authDomain: "repoflo-f31ec.firebaseapp.com",
-  projectId: "repoflo-f31ec",
-  storageBucket: "repoflo-f31ec.firebasestorage.app",
-  messagingSenderId: "744947441867",
-  appId: "1:744947441867:web:a7a7fcfdacc692ec147b4e",
-  measurementId: "G-Z68RE0S0CF"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -61,7 +61,6 @@ export function subscribeFeedbacks(
 }
 
 // Visitor counter functions
-const COUNTER_DOC = "site_stats/visitors";
 
 export async function incrementVisitorCount(): Promise<number> {
   const ref = doc(db, "site_stats", "visitors");
@@ -290,6 +289,17 @@ export const updateRecruiterUsage = async (email: string): Promise<void> => {
   }
 };
 
+/** Increments usageCount in the recruiter_requests document (used for dashboard display) */
+export const incrementRecruiterRequestUsage = async (uid: string): Promise<void> => {
+  try {
+    await updateDoc(doc(db, "recruiter_requests", uid), {
+      usageCount: increment(1),
+    });
+  } catch (error) {
+    console.error("Error incrementing recruiter request usage:", error);
+  }
+};
+
 export const checkRecruiterLimit = (profile: RecruiterProfile): boolean => {
   const limits = {
     1: 10, // Level 1: 10 uses
@@ -433,4 +443,277 @@ export const fetchAllCandidates = async (limitCount = 100): Promise<CandidateDat
     console.error("Error fetching all candidates:", error);
     return [];
   }
+};
+
+// ─── ADMIN USERS (Firestore-managed, primary always included) ───────────────
+export const PRIMARY_ADMIN = "cadithya110@gmail.com";
+
+export interface AdminUser {
+  email: string;
+  addedAt: string;
+  addedBy: string;
+  isPrimary: boolean;
+}
+
+/** Returns full list of allowed admin emails (always includes PRIMARY_ADMIN) */
+export const getAdminUsers = async (): Promise<AdminUser[]> => {
+  try {
+    const snap = await getDoc(doc(db, "admin_settings", "admin_users"));
+    const list: AdminUser[] = snap.exists() ? (snap.data().users || []) : [];
+    // Ensure primary is always present
+    if (!list.find(u => u.email === PRIMARY_ADMIN)) {
+      list.unshift({ email: PRIMARY_ADMIN, addedAt: new Date().toISOString(), addedBy: "system", isPrimary: true });
+    }
+    return list;
+  } catch {
+    return [{ email: PRIMARY_ADMIN, addedAt: new Date().toISOString(), addedBy: "system", isPrimary: true }];
+  }
+};
+
+export const addAdminUser = async (email: string, addedBy: string): Promise<void> => {
+  const current = await getAdminUsers();
+  if (current.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+    throw new Error("This email is already an admin.");
+  }
+  const updated = [...current, { email: email.toLowerCase(), addedAt: new Date().toISOString(), addedBy, isPrimary: false }];
+  await setDoc(doc(db, "admin_settings", "admin_users"), { users: updated }, { merge: true });
+};
+
+export const removeAdminUser = async (email: string): Promise<void> => {
+  if (email === PRIMARY_ADMIN) throw new Error("Cannot remove the primary admin.");
+  const current = await getAdminUsers();
+  const updated = current.filter(u => u.email !== email);
+  await setDoc(doc(db, "admin_settings", "admin_users"), { users: updated }, { merge: true });
+};
+
+// ─── ADMIN AUTH (Google Sign-In, checked against Firestore list) ─────────────
+export const signInAdminWithGoogle = async (): Promise<User> => {
+  const result = await signInWithPopup(auth, googleProvider);
+  const email = result.user.email?.toLowerCase() || "";
+
+  // Always allow primary admin without Firestore check (bootstrap)
+  if (email !== PRIMARY_ADMIN) {
+    const admins = await getAdminUsers();
+    const allowed = admins.map(a => a.email.toLowerCase());
+    if (!allowed.includes(email)) {
+      await signOut(auth);
+      throw new Error(`Access denied. ${email} is not authorised as an admin.`);
+    }
+  }
+
+  localStorage.setItem("adminAuth", JSON.stringify({ email, ts: Date.now() }));
+  return result.user;
+};
+
+// kept for route compatibility
+export const verifyAdminEmailLink = async (): Promise<User | null> => null;
+export const sendAdminLoginLink = async (_email: string): Promise<void> => {};
+
+export const isAdminAuthenticated = (): boolean => {
+  try {
+    const raw = localStorage.getItem("adminAuth");
+    if (!raw) return false;
+    const { email, ts } = JSON.parse(raw);
+    const EIGHT_HOURS = 8 * 60 * 60 * 1000;
+    return !!email && Date.now() - ts < EIGHT_HOURS;
+  } catch { return false; }
+};
+
+export const getAuthenticatedAdminEmail = (): string => {
+  try {
+    const raw = localStorage.getItem("adminAuth");
+    if (!raw) return "";
+    return JSON.parse(raw).email || "";
+  } catch { return ""; }
+};
+
+export const adminLogout = () => {
+  localStorage.removeItem("adminAuth");
+  signOut(auth).catch(() => {});
+};
+
+// ─── SITE SETTINGS ──────────────────────────────────────────────────────────
+export interface SiteSettings {
+  portfolioEnabled: boolean;
+  recruiterEnabled: boolean;
+}
+
+export const getSiteSettings = async (): Promise<SiteSettings> => {
+  try {
+    const snap = await getDoc(doc(db, "admin_settings", "config"));
+    if (snap.exists()) return snap.data() as SiteSettings;
+    return { portfolioEnabled: true, recruiterEnabled: true };
+  } catch { return { portfolioEnabled: true, recruiterEnabled: true }; }
+};
+
+export const updateSiteSettings = async (settings: Partial<SiteSettings>) => {
+  await setDoc(doc(db, "admin_settings", "config"), settings, { merge: true });
+};
+
+export const subscribeSiteSettings = (cb: (s: SiteSettings) => void) =>
+  onSnapshot(doc(db, "admin_settings", "config"), (snap) => {
+    cb(snap.exists() ? (snap.data() as SiteSettings) : { portfolioEnabled: true, recruiterEnabled: true });
+  });
+
+// ─── PACKAGES ───────────────────────────────────────────────────────────────
+export const PACKAGES = [
+  { id: "enterprise_lite", name: "Enterprise Lite", inr: 25000, usd: 269.82, limit: -1,  desc: "Unlimited candidate analysis", badge: "Best Value" },
+  { id: "professional",    name: "Professional",    inr: 15000, usd: 161.89, limit: 100, desc: "Up to 100 analyses per year",   badge: "Popular" },
+  { id: "growth",          name: "Growth",          inr: 6000,  usd: 64.76,  limit: 50,  desc: "Up to 50 analyses per year",    badge: "" },
+  { id: "starter",         name: "Starter",         inr: 3000,  usd: 32.38,  limit: 25,  desc: "Up to 25 analyses per year",    badge: "" },
+] as const;
+
+// ─── RECRUITER REQUESTS ──────────────────────────────────────────────────────
+export interface RecruiterRequest {
+  uid: string;
+  email: string;
+  name: string;
+  photoURL: string;
+  packageId: string;
+  packageName: string;
+  packageLimit: number;
+  status: "pending" | "approved" | "rejected";
+  requestedAt: string;
+  approvedAt?: string;
+  expiresAt?: string;
+  usageCount: number;
+}
+
+export const createRecruiterRequest = async (
+  user: User, packageId: string
+): Promise<void> => {
+  const pkg = PACKAGES.find((p) => p.id === packageId)!;
+  const existing = await getDoc(doc(db, "recruiter_requests", user.uid));
+  if (existing.exists() && existing.data().status === "approved") return;
+  await setDoc(doc(db, "recruiter_requests", user.uid), {
+    uid: user.uid,
+    email: user.email,
+    name: user.displayName || user.email,
+    photoURL: user.photoURL || "",
+    packageId: pkg.id,
+    packageName: pkg.name,
+    packageLimit: pkg.limit,
+    status: "pending",
+    requestedAt: new Date().toISOString(),
+    usageCount: 0,
+  } satisfies RecruiterRequest);
+};
+
+export const getRecruiterRequest = async (uid: string): Promise<RecruiterRequest | null> => {
+  const snap = await getDoc(doc(db, "recruiter_requests", uid));
+  return snap.exists() ? (snap.data() as RecruiterRequest) : null;
+};
+
+export const subscribeRecruiterRequest = (uid: string, cb: (r: RecruiterRequest | null) => void) =>
+  onSnapshot(doc(db, "recruiter_requests", uid), (snap) =>
+    cb(snap.exists() ? (snap.data() as RecruiterRequest) : null)
+  );
+
+export const getAllRecruiterRequests = async (): Promise<RecruiterRequest[]> => {
+  try {
+    const snap = await getDocs(query(collection(db, "recruiter_requests"), orderBy("requestedAt", "desc")));
+    return snap.docs.map((d) => d.data() as RecruiterRequest);
+  } catch { return []; }
+};
+
+export const approveRecruiterRequest = async (uid: string, packageId: string): Promise<void> => {
+  const pkg = PACKAGES.find((p) => p.id === packageId)!;
+  const now = new Date();
+  const expires = new Date(now);
+  expires.setFullYear(expires.getFullYear() + 1);
+
+  // Update new system
+  await updateDoc(doc(db, "recruiter_requests", uid), {
+    status: "approved",
+    packageId: pkg.id,
+    packageName: pkg.name,
+    packageLimit: pkg.limit,
+    approvedAt: now.toISOString(),
+    expiresAt: expires.toISOString(),
+  });
+
+  // Sync old recruiters collection so checkRecruiterLimit works
+  const reqSnap = await getDoc(doc(db, "recruiter_requests", uid));
+  const email = reqSnap.data()?.email;
+  if (email) {
+    const level = pkg.limit === -1 ? 3 : pkg.limit === 100 ? 3 : pkg.limit === 50 ? 2 : 1;
+    await setDoc(doc(db, "recruiters", email), {
+      email,
+      level,
+      usageCount: 0,
+      lastUsed: now.toISOString(),
+      status: "approved",
+      approvedAt: now.toISOString(),
+      packageId: pkg.id,
+      packageName: pkg.name,
+      packageLimit: pkg.limit,
+    }, { merge: true });
+  }
+};
+
+export const rejectRecruiterRequest = async (uid: string): Promise<void> => {
+  await updateDoc(doc(db, "recruiter_requests", uid), { status: "rejected" });
+};
+
+// ─── PORTFOLIO USAGE TRACKING ────────────────────────────────────────────────
+export interface PortfolioUsageEntry {
+  id?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  currentOccupation?: string;
+  resumeName: string;
+  theme: string;
+  timestamp: string;
+}
+
+export const trackPortfolioGeneration = async (entry: Omit<PortfolioUsageEntry, "id">) => {
+  try {
+    await addDoc(collection(db, "portfolio_usage"), entry);
+  } catch { /* silent */ }
+};
+
+export const fetchPortfolioUsage = async (): Promise<PortfolioUsageEntry[]> => {
+  try {
+    const snap = await getDocs(query(collection(db, "portfolio_usage"), orderBy("timestamp", "desc"), limit(200)));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() } as PortfolioUsageEntry));
+  } catch { return []; }
+};
+
+// ─── FEEDBACK DELETE (admin) ─────────────────────────────────────────────────
+export const deleteFeedback = async (id: string) => {
+  await deleteDoc(doc(db, "feedbacks", id));
+};
+
+// ─── SUPPORT TICKETS ─────────────────────────────────────────────────────────
+export interface SupportTicket {
+  id?: string;
+  recruiterEmail: string;
+  recruiterName: string;
+  message: string;
+  createdAt: string;
+  status: "open" | "resolved";
+}
+
+export const submitSupportTicket = async (
+  ticket: Omit<SupportTicket, "id">
+): Promise<void> => {
+  await addDoc(collection(db, "support_tickets"), ticket);
+};
+
+export const fetchSupportTickets = async (): Promise<SupportTicket[]> => {
+  try {
+    const snap = await getDocs(
+      query(collection(db, "support_tickets"), orderBy("createdAt", "desc"), limit(200))
+    );
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() } as SupportTicket));
+  } catch { return []; }
+};
+
+export const resolveSupportTicket = async (id: string): Promise<void> => {
+  await updateDoc(doc(db, "support_tickets", id), { status: "resolved" });
+};
+
+export const deleteSupportTicket = async (id: string): Promise<void> => {
+  await deleteDoc(doc(db, "support_tickets", id));
 };
