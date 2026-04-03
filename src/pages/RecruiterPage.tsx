@@ -9,7 +9,6 @@ import {
   Loader2, Code2, Briefcase, Search, LogIn, LogOut, Shield,
   MessageCircle, X, Send,
 } from "lucide-react";
-import TechStackInput from "@/components/TechStackInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import PreviewPage from "./PreviewPage";
@@ -125,7 +124,7 @@ const RecruiterPage = () => {
   const [leetcodeFetching, setLeetcodeFetching] = useState(false);
   const [leetcodeData, setLeetcodeData] = useState<any>(null);
   const [leetcodeError, setLeetcodeError] = useState("");
-  const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
+  const [requiredTechStack] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
   const [historyEntries, setHistoryEntries] = useState<any[]>([]);
 // ONLY the changed section is rewritten cleanly — rest of your file stays SAME
@@ -555,17 +554,6 @@ useEffect(() => {
           {/* Recruiter Preferences */}
           <NavyCard className="p-6 space-y-6">
             <p className="text-xs font-bold text-[#69d2f1] uppercase tracking-widest font-display">Role Requirements</p>
-
-            {/* Tech Stack */}
-            <div className="space-y-2.5">
-              <FieldLabel icon={Search} text="Required Tech Stack" note="(optional — AI will compare)" />
-              <TechStackInput selected={requiredTechStack} onChange={setRequiredTechStack} />
-              {requiredTechStack.length > 0 && (
-                <p className="text-xs text-[#b8c7e0] font-body">
-                  {requiredTechStack.length} technolog{requiredTechStack.length === 1 ? "y" : "ies"} selected — AI will evaluate the candidate's match.
-                </p>
-              )}
-            </div>
 
             {/* Experience Level */}
             <div className="space-y-2.5">
