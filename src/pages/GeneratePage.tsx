@@ -5,7 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
-import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, ServerCrash } from "lucide-react";
+
+const friendlyError = (e: any): string => {
+  const msg: string = e?.message || String(e) || "";
+  if (
+    msg.includes("503") || msg.includes("504") || msg.includes("timeout") ||
+    msg.includes("overloaded") || msg.includes("busy") || msg.includes("rate limit") ||
+    msg.includes("too many") || msg.includes("upstream") || msg.includes("gateway") ||
+    msg.includes("Function") || msg.includes("edge") || msg.includes("invoke") ||
+    msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("network") ||
+    msg.includes("fetch")
+  ) return "server_busy";
+  return msg || "Something went wrong. Please try again.";
+};
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { PortfolioData } from "@/lib/mockData";
@@ -46,7 +59,10 @@ const GeneratePage = () => {
         if (data?.error) throw new Error(data.error);
         setGithubData(data as PortfolioData);
       } catch (e: any) {
-        setGithubError(e.message || "Failed to fetch GitHub data");
+        const fe = friendlyError(e);
+        setGithubError(fe === "server_busy"
+          ? "__busy__"
+          : fe);
         setGithubData(null);
       } finally { setGithubFetching(false); }
     }, 800);
@@ -93,7 +109,14 @@ const GeneratePage = () => {
       });
       navigate(`/preview/${selectedTheme}`);
     } catch (e: any) {
-      toast({ title: "Error processing data", description: e.message || "Something went wrong. Please try again.", variant: "destructive" });
+      const fe = friendlyError(e);
+      toast({
+        title: fe === "server_busy" ? "⏳ Server Busy" : "Error",
+        description: fe === "server_busy"
+          ? "Our servers are temporarily overloaded. Please wait a moment and try again."
+          : fe,
+        variant: "destructive"
+      });
     } finally { setIsProcessing(false); setStatus(""); }
   };
 
@@ -177,9 +200,28 @@ const GeneratePage = () => {
               </div>
             )}
             {githubError && (
-              <div className="flex items-center gap-2 text-sm text-red-400 font-body">
-                <AlertCircle className="w-4 h-4" /> {githubError}
-              </div>
+              githubError === "__busy__" ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                  className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl"
+                >
+                  <ServerCrash className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-amber-400 font-semibold text-sm font-display">Server Busy</p>
+                    <p className="text-amber-300/70 text-xs font-body mt-0.5">Our servers are temporarily overloaded. Please wait a moment and try again.</p>
+                    <button
+                      onClick={() => { setGithubError(""); setGithubData(null); }}
+                      className="text-amber-400/60 text-xs mt-1.5 hover:text-amber-400 transition-colors font-body"
+                    >
+                      Retry ↻
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-red-400 font-body">
+                  <AlertCircle className="w-4 h-4" /> {githubError}
+                </div>
+              )
             )}
             {githubData && !githubFetching && (
               <motion.div
