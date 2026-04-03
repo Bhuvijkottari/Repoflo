@@ -1098,7 +1098,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
               <div class="eln-rule reveal"></div>
               <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:#e8e4df;margin-bottom:48px">Skills</h2>
               <div class="reveal" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
-                ${d.skills.map(s=>`<span class="skill-tag" style="color:#c9a84c;border:1px solid rgba(201,168,76,.25);padding:9px 22px;border-radius:3px;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;background:rgba(201,168,76,.04);transition:all .3s" onmouseover="this.style.background='rgba(201,168,76,.1)';this.style.borderColor='rgba(201,168,76,.6)'" onmouseout="this.style.background='rgba(201,168,76,.04)';this.style.borderColor='rgba(201,168,76,.25)'">${s}</span>`).join('')}
+                ${d.skills.map(s=>`<span class="skill-tag" style="color:#e8d5a0;border:1px solid rgba(201,168,76,.4);padding:10px 26px;border-radius:3px;font-size:.9rem;letter-spacing:1px;text-transform:uppercase;background:rgba(201,168,76,.07);font-family:'Jost',sans-serif;font-weight:500;transition:all .3s" onmouseover="this.style.background='rgba(201,168,76,.16)';this.style.borderColor='rgba(201,168,76,.7)';this.style.color='#f5e6c0'" onmouseout="this.style.background='rgba(201,168,76,.07)';this.style.borderColor='rgba(201,168,76,.4)';this.style.color='#e8d5a0'">${s}</span>`).join('')}
               </div>
             </div>
           </section>`:''}
@@ -1120,8 +1120,8 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
                   <p style="color:#c9a84c;font-size:.9rem;font-weight:500">${e.company}</p>
                 </div>
                 <div style="${i%2!==0?'order:0;':''}border-left:${i%2===0?'1':'0'}px solid rgba(201,168,76,.12);border-right:${i%2!==0?'1':'0'}px solid rgba(201,168,76,.12);padding:0 ${i%2===0?'0 0 40':'40 0 0'}px">
-                  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;color:#e8e4df;margin-bottom:12px;letter-spacing:1px">${e.role}</h3>
-                  <p style="color:#5a554e;font-size:.9rem;line-height:1.85">${e.description}</p>
+                  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;color:#e8e4df;margin-bottom:12px;letter-spacing:1px">${e.role}</h3>
+                  <p style="color:#a89e90;font-size:.92rem;line-height:1.9;font-family:'Jost',sans-serif;font-weight:300">${e.description}</p>
                 </div>
               </div>`).join('')}
             </div>
@@ -1259,7 +1259,8 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           .ocean-right{flex:1;background:#f0f9ff;padding:48px 40px}
           .ocean-card{background:#fff;border:1px solid #e0f2fe;border-radius:14px;padding:22px;margin-bottom:14px;transition:transform .3s,box-shadow .3s}
           .ocean-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(2,132,199,.12)}
-          .ocean-skill{background:rgba(56,189,248,.12);color:#0369a1;border-radius:50px;padding:5px 14px;font-size:.78rem;font-weight:700;display:inline-block;margin:3px;border:1.5px solid rgba(56,189,248,.25)}
+          .ocean-skill{background:rgba(255,255,255,.18);color:#fff;border-radius:50px;padding:6px 14px;font-size:.78rem;font-weight:700;display:inline-block;margin:3px;border:1.5px solid rgba(255,255,255,.35);transition:all .2s}
+          .ocean-skill:hover{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.6)}
           @media(max-width:768px){.ocean-split{flex-direction:column}.ocean-left{width:100%!important;position:relative!important;height:auto!important;padding:28px 20px!important}.ocean-right{padding:28px 20px!important}}
         </style>
         <div class="ocean-split">
