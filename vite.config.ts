@@ -27,6 +27,12 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     hmr: { overlay: false },
+    proxy: {
+      "/api": {
+        target: "http://localhost:4001",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     react(),

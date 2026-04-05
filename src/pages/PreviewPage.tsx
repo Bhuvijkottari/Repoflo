@@ -10,7 +10,6 @@ import { injectEditor, stripEditor } from "@/lib/editorInjection";
 import { Download, ArrowLeft, Smartphone, Monitor, Maximize, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye } from "lucide-react";
 import type { PortfolioData } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { downloadHtml, generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
 import RecruiterAnalysisPanel from "@/components/RecruiterAnalysisPanel";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -134,14 +133,16 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
     if (!portfolioData) return;
     setIsAnalyzing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("analyze-candidate", {
-        body: {
+      const res = await fetch("/api/analyze-candidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           portfolioData,
           requiredTechStack: requiredTechStack.length > 0 ? requiredTechStack : undefined,
           experienceLevel: experienceLevel || undefined,
-        },
+        }),
       });
-      if (error) throw error;
+      const data = await res.json();
       if (data?.error) throw new Error(data.error);
       setAnalysis(data as CandidateAnalysis);
 

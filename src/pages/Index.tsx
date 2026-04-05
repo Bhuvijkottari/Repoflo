@@ -205,15 +205,15 @@ const Index = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
 
-            <div className="flex items-center gap-2">
+            <Link to="/adminProtectedRoutes/auth/signin" className="flex items-center gap-2 group" title="Admin">
               <img
                 src={logo}
                 alt=""
-                className="h-9 w-9 rounded-full object-cover"
+                className="h-9 w-9 rounded-full object-cover transition-all group-hover:ring-2 group-hover:ring-[#3fc4e7]/50"
                 style={{ border: "2px solid rgba(63,196,231,0.3)" }}
               />
-              <span className="font-display font-bold text-white text-lg">Repoflo</span>
-            </div>
+              <span className="font-display font-bold text-white text-lg group-hover:text-[#3fc4e7] transition-colors">Repoflo</span>
+            </Link>
 
             <p className="text-sm text-[#b8c7e0] font-body">
               © {new Date().getFullYear()} Repoflo · Powered by <span className="font-semibold text-white">Devora Technologies</span>

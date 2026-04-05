@@ -33,7 +33,6 @@ const friendlyError = (e: any): string => {
   ) return "server_busy";
   return msg || "Something went wrong. Please try again.";
 };
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { PortfolioData } from "@/lib/mockData";
 import { subscribeSiteSettings, SiteSettings, trackPortfolioGeneration } from "@/lib/firebase";
@@ -70,8 +69,8 @@ const GeneratePage = () => {
     const timer = setTimeout(async () => {
       setGithubFetching(true); setGithubError("");
       try {
-        const { data, error } = await supabase.functions.invoke("fetch-github", { body: { githubUrl } });
-        if (error) throw error;
+        const res = await fetch("/api/fetch-github", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ githubUrl }) });
+        const data = await res.json();
         if (data?.error) throw new Error(data.error);
         setGithubData(data as PortfolioData);
       } catch (e: any) {
@@ -93,14 +92,11 @@ const GeneratePage = () => {
       let finalData: PortfolioData = { ...githubData };
       if (resumeFile) {
         setStatus("AI is parsing your resume...");
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         const formData = new FormData();
         formData.append("resume", resumeFile);
         formData.append("githubData", JSON.stringify(githubData));
-        const response = await fetch(`${supabaseUrl}/functions/v1/parse-resume`, {
+        const response = await fetch("/api/parse-resume", {
           method: "POST",
-          headers: { "Authorization": `Bearer ${supabaseKey}` },
           body: formData,
         });
         if (!response.ok) {

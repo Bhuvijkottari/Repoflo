@@ -10,7 +10,6 @@ import {
   MessageCircle, X, Send,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import PreviewPage from "./PreviewPage";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -157,11 +156,8 @@ useEffect(() => {
     setGithubError("");
 
     try {
-      const { data, error } = await supabase.functions.invoke("fetch-github", {
-        body: { githubUrl: debouncedGithubUrl },
-      });
-
-      if (error) throw error;
+      const res = await fetch("/api/fetch-github", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ githubUrl: debouncedGithubUrl }) });
+      const data = await res.json();
       if (data?.error) throw new Error(data.error);
 
       setGithubData(data);
@@ -198,11 +194,8 @@ useEffect(() => {
     setLeetcodeError("");
 
     try {
-      const { data, error } = await supabase.functions.invoke("fetch-leetcode", {
-        body: { username: debouncedLeetcode },
-      });
-
-      if (error) throw error;
+      const res = await fetch("/api/fetch-leetcode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: debouncedLeetcode }) });
+      const data = await res.json();
       if (data?.error) throw new Error(data.error);
 
       setLeetcodeData(data);
@@ -285,14 +278,11 @@ useEffect(() => {
 
       if (resumeFile) {
         setStatus("AI is parsing your resume...");
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         const formData = new FormData();
         formData.append("resume", resumeFile);
         formData.append("githubData", JSON.stringify(githubData));
-        const response = await fetch(`${supabaseUrl}/functions/v1/parse-resume`, {
+        const response = await fetch("/api/parse-resume", {
           method: "POST",
-          headers: { Authorization: `Bearer ${supabaseKey}` },
           body: formData,
         });
         if (!response.ok) {
