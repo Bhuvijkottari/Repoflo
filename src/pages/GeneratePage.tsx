@@ -36,6 +36,7 @@ const GeneratePage = () => {
   }, []);
   const [githubUrl, setGithubUrl] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState("");
   const [githubData, setGithubData] = useState<PortfolioData | null>(null);
@@ -263,11 +264,37 @@ const GeneratePage = () => {
             </label>
           </div>
 
+          {/* Data Privacy & Terms */}
+          <label className={`flex items-start gap-3 cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 ${termsAccepted ? 'border-[#3fc4e7]/40 bg-[#3fc4e7]/5' : 'border-amber-500/40 bg-amber-500/5'}`}>
+            <div className="flex-shrink-0 mt-0.5">
+              <div
+                onClick={() => setTermsAccepted(!termsAccepted)}
+                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all cursor-pointer ${termsAccepted ? 'bg-[#3fc4e7] border-[#3fc4e7]' : 'bg-transparent border-amber-400'}`}
+              >
+                {termsAccepted && (
+                  <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className={`text-xs font-semibold font-display ${termsAccepted ? 'text-[#3fc4e7]' : 'text-amber-400'}`}>
+                {termsAccepted ? '✓ Agreed' : '⚠ Required — please agree to continue'}
+              </p>
+              <p className="text-xs text-[#b8c7e0] font-body leading-relaxed">
+                By generating your portfolio, you agree that your profile data (name, skills, experience, education, and projects) may be shared with{' '}
+                <span className="text-white font-medium">third-party applications, hiring agencies, recruiters, education consultancies,</span>{' '}
+                and career platforms for professional discovery and job opportunities. Sensitive personal information (email, phone) will not be shared without explicit consent.
+              </p>
+            </div>
+          </label>
+
           {/* Submit */}
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <motion.div whileHover={{ scale: termsAccepted ? 1.02 : 1 }} whileTap={{ scale: termsAccepted ? 0.98 : 1 }}>
             <button
               type="submit"
-              disabled={!githubData || isProcessing || githubFetching}
+              disabled={!githubData || isProcessing || githubFetching || !termsAccepted}
               className="w-full h-13 py-3.5 rounded-xl text-base font-bold font-display
                          bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black
                          hover:opacity-90 active:scale-[0.98] transition-all duration-200
