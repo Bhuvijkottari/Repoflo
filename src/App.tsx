@@ -46,9 +46,9 @@ const AnimatedRoutes = () => {
            <Route path="/generate" element={<GeneratePage />} />
           <Route path="/recruiter" element={<RecruiterPage />} />
           <Route path="/for-recruiters" element={<RecruiterLandingPage />} />
-          <Route path="/admin-login" element={<AdminLoginPage />} />
-          <Route path="/admin-verify" element={<AdminVerifyPage />} />
-          <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/rfl-secure/signin" element={<AdminLoginPage />} />
+          <Route path="/rfl-secure/verify" element={<AdminVerifyPage />} />
+          <Route path="/rfl-secure/dashboard" element={<AdminDashboardPage />} />
           <Route path="/protectedRoutes/pages/admin" element={<AdminPage />} />
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/preview/:themeId" element={<PreviewPage />} />

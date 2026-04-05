@@ -15,7 +15,7 @@ const AdminVerifyPage = () => {
         const user = await verifyAdminEmailLink();
         if (user) {
           setStatus("success");
-          setTimeout(() => navigate("/admin", { replace: true }), 1500);
+          setTimeout(() => navigate("/rfl-secure/dashboard", { replace: true }), 1500);
         } else {
           setStatus("error");
           setErrorMsg("This email is not authorised to access the admin portal.");
@@ -61,7 +61,7 @@ const AdminVerifyPage = () => {
             <h2 className="font-display text-xl font-bold text-white mb-2">Verification failed</h2>
             <p className="text-[#b8c7e0] font-body text-sm mb-4">{errorMsg}</p>
             <button
-              onClick={() => navigate("/admin-login")}
+              onClick={() => navigate("/rfl-secure/signin")}
               className="text-[#3fc4e7] text-sm font-body hover:text-white transition-colors"
             >
               ← Try again
