@@ -13,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadHtml, generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
 import RecruiterAnalysisPanel from "@/components/RecruiterAnalysisPanel";
-import TechStackInput from "@/components/TechStackInput";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { storeCandidateAnalysis, updateCandidateAnalysis, updateRecruiterHistoryAnalysis } from "@/lib/firebase";
@@ -196,21 +195,29 @@ const handleGenerateReport = () => {
 };
 
 const handleDownloadPDF = () => {
-  const element = document.body; // IMPORTANT
+  if (!portfolioData || !analysis) return;
+  const reportHtml = generateReportHtml(portfolioData, analysis);
 
-  html2pdf().from(element).set({
-    filename: `${sanitizedName}-full-report.pdf`,
-    margin: 10,
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-    },
-    jsPDF: {
-      format: "a4",
-      orientation: "portrait",
-    },
-  }).save();
+  // Open the report in a new window and trigger browser print-to-PDF
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    toast({ title: "Popup Blocked", description: "Please allow popups for this site to download the PDF.", variant: "destructive" });
+    return;
+  }
+
+  printWindow.document.open();
+  printWindow.document.write(reportHtml);
+  printWindow.document.close();
+
+  // Wait for resources (fonts, images) to load before printing
+  printWindow.onload = () => {
+    printWindow.focus();
+    printWindow.print();
+    // Optional: close the window after print dialog closes
+    printWindow.onafterprint = () => printWindow.close();
+  };
 };
+
 
   const updateField = (field: keyof PortfolioData, value: any) => {
     if (!portfolioData) return;
@@ -344,7 +351,7 @@ const handleDownloadPDF = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b1f3a]">
+    <div className="min-h-screen bg-white">
       {!hideNavbar && <Navbar />}
       <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
       
@@ -462,14 +469,6 @@ const handleDownloadPDF = () => {
         {isRecruiter && portfolioData && (
           <>
             {/* Optional tech stack filter */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              className="mb-4 bg-card border border-border rounded-2xl p-5">
-              <h4 className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <Code className="w-3.5 h-3.5" /> Required Tech Stack
-                <span className="normal-case font-normal opacity-60 ml-1">(optional)</span>
-              </h4>
-              <TechStackInput selected={requiredTechStack} onChange={setRequiredTechStack} />
-            </motion.div>
             <RecruiterAnalysisPanel
               analysis={analysis}
               isAnalyzing={isAnalyzing}

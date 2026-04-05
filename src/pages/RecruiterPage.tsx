@@ -21,6 +21,7 @@ import {
   submitSupportTicket,
 } from "@/lib/firebase";
 import { sanitizeSupportMessage, sanitizeEmail, sanitizeText } from "@/lib/sanitize";
+import TechStackInput from "@/components/TechStackInput";
 import type { PortfolioData } from "@/lib/mockData";
 
 /* ── friendly error messages ─────────────────────────────────── */
@@ -124,7 +125,7 @@ const RecruiterPage = () => {
   const [leetcodeFetching, setLeetcodeFetching] = useState(false);
   const [leetcodeData, setLeetcodeData] = useState<any>(null);
   const [leetcodeError, setLeetcodeError] = useState("");
-  const [requiredTechStack] = useState<string[]>([]);
+  const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
   const [historyEntries, setHistoryEntries] = useState<any[]>([]);
 // ONLY the changed section is rewritten cleanly — rest of your file stays SAME
@@ -555,6 +556,12 @@ useEffect(() => {
           <NavyCard className="p-6 space-y-6">
             <p className="text-xs font-bold text-[#69d2f1] uppercase tracking-widest font-display">Role Requirements</p>
 
+            {/* Required Tech Stack */}
+            <div className="space-y-2.5">
+              <FieldLabel icon={Code2} text="Required Tech Stack" note="(optional)" />
+              <TechStackInput selected={requiredTechStack} onChange={setRequiredTechStack} />
+            </div>
+
             {/* Experience Level */}
             <div className="space-y-2.5">
               <FieldLabel icon={Briefcase} text="Experience Level" note="(optional — hiring preference)" />
@@ -595,10 +602,10 @@ useEffect(() => {
                 <div className="flex flex-col items-center text-[#b8c7e0]">
                   <Upload className="w-8 h-8 mb-2 text-red-400/70" />
                   <span className="font-body text-sm">Upload candidate resume <span className="text-red-400 font-semibold">*</span></span>
-                  <span className="font-body text-xs mt-1 text-[#b8c7e0]/60">PDF, DOC, TXT — required for analysis</span>
+                  <span className="font-body text-xs mt-1 text-[#b8c7e0]/60">PDF only — required for analysis</span>
                 </div>
               )}
-              <input type="file" accept=".pdf,.doc,.docx,.txt" className="hidden" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} />
+              <input type="file" accept=".pdf" className="hidden" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} />
             </label>
           </NavyCard>
 

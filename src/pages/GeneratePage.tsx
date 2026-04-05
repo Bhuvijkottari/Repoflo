@@ -257,10 +257,10 @@ const GeneratePage = () => {
                 <div className="flex flex-col items-center text-[#b8c7e0]">
                   <Upload className="w-8 h-8 mb-2 text-[#3fc4e7]/60" />
                   <span className="font-body text-sm">Click to upload or drag & drop</span>
-                  <span className="font-body text-xs mt-1 text-[#b8c7e0]/60">PDF, DOC, TXT up to 10MB</span>
+                  <span className="font-body text-xs mt-1 text-[#b8c7e0]/60">PDF only</span>
                 </div>
               )}
-              <input type="file" accept=".pdf,.doc,.docx,.txt" className="hidden" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} />
+              <input type="file" accept=".pdf" className="hidden" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} />
             </label>
           </div>
 
