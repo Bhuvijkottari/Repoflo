@@ -17,6 +17,7 @@ import {
   getAllRecruiterRequests, approveRecruiterRequest, rejectRecruiterRequest, RecruiterRequest,
   fetchFeedbacks, deleteFeedback,
   fetchPortfolioUsage, PortfolioUsageEntry,
+  fetchGeminiUsageToday, GeminiUsageToday,
   PACKAGES, getAdminUsers, addAdminUser, removeAdminUser, AdminUser,
   fetchSupportTickets, resolveSupportTicket, deleteSupportTicket, SupportTicket,
 } from "@/lib/firebase";
@@ -217,6 +218,7 @@ const AdminDashboardPage = () => {
   const [requests, setRequests] = useState<RecruiterRequest[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [portfolioUsage, setPortfolioUsage] = useState<PortfolioUsageEntry[]>([]);
+  const [geminiUsage, setGeminiUsage] = useState<GeminiUsageToday>({ parseResume: 0, analyzeCandidate: 0, total: 0, remaining: 500, dailyLimit: 500 });
   const [loading, setLoading] = useState(true);
   const [approvePkg, setApprovePkg] = useState<Record<string, string>>({});
   const [actionLoading, setActionLoading] = useState<string>("");
@@ -235,18 +237,20 @@ const AdminDashboardPage = () => {
 
   const loadAll = useCallback(async () => {
     setLoading(true);
-    const [reqs, fbs, usage, admins, tickets] = await Promise.all([
+    const [reqs, fbs, usage, admins, tickets, gemini] = await Promise.all([
       getAllRecruiterRequests(),
       fetchFeedbacks(100),
       fetchPortfolioUsage(),
       getAdminUsers(),
       fetchSupportTickets(),
+      fetchGeminiUsageToday(),
     ]);
     setAdminUsers(admins);
     setSupportTickets(tickets);
     setRequests(reqs);
     setFeedbacks(fbs);
     setPortfolioUsage(usage);
+    setGeminiUsage(gemini);
     // default approve package = their requested package
     const pkgMap: Record<string, string> = {};
     reqs.forEach((r) => { pkgMap[r.uid] = r.packageId; });
@@ -401,6 +405,50 @@ const AdminDashboardPage = () => {
                     </Card>
                   ))}
                 </div>
+
+                {/* Gemini AI Usage Today */}
+                <Card>
+                  <SectionTitle icon={BarChart3} title="AI Usage Today (Gemini Free Tier)" />
+                  <div className="p-6 space-y-5">
+                    {/* Progress bar */}
+                    <div>
+                      <div className="flex justify-between items-end mb-2">
+                        <span className="text-white font-bold text-2xl">{geminiUsage.total} <span className="text-sm font-normal text-[#b8c7e0]">AI calls used</span></span>
+                        <span className={`text-sm font-semibold ${geminiUsage.remaining < 50 ? 'text-red-400' : geminiUsage.remaining < 150 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                          {geminiUsage.remaining} left today
+                        </span>
+                      </div>
+                      <div className="h-4 w-full bg-[#0b1f3a] rounded-full overflow-hidden border border-[#3fc4e7]/10">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${
+                            geminiUsage.total / geminiUsage.dailyLimit > 0.8 ? 'bg-red-500' :
+                            geminiUsage.total / geminiUsage.dailyLimit > 0.5 ? 'bg-amber-500' : 'bg-emerald-500'
+                          }`}
+                          style={{ width: `${Math.min(100, (geminiUsage.total / geminiUsage.dailyLimit) * 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-[#b8c7e0]/50 font-body mt-1">Resets every day at midnight · Free limit: {geminiUsage.dailyLimit} calls/day</p>
+                    </div>
+                    {/* Breakdown */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-[#0b1f3a] rounded-xl p-4 border border-[#3fc4e7]/10">
+                        <p className="text-xs text-[#b8c7e0]/60 font-body mb-1">📄 Resumes read by AI</p>
+                        <p className="text-2xl font-black text-[#3fc4e7]">{geminiUsage.parseResume}</p>
+                        <p className="text-xs text-[#b8c7e0]/50 font-body mt-1">1 call per resume upload</p>
+                      </div>
+                      <div className="bg-[#0b1f3a] rounded-xl p-4 border border-[#3fc4e7]/10">
+                        <p className="text-xs text-[#b8c7e0]/60 font-body mb-1">🔍 Recruiter analyses done</p>
+                        <p className="text-2xl font-black text-purple-400">{geminiUsage.analyzeCandidate}</p>
+                        <p className="text-xs text-[#b8c7e0]/50 font-body mt-1">1 call per analysis</p>
+                      </div>
+                    </div>
+                    {/* Simple summary */}
+                    <div className="bg-[#0b1f3a] rounded-xl p-4 border border-[#3fc4e7]/10 text-sm font-body text-[#b8c7e0] space-y-1">
+                      <p>✅ You can still make approximately <span className="text-white font-semibold">{geminiUsage.remaining} more AI-powered actions</span> today</p>
+                      <p>📊 That's roughly <span className="text-white font-semibold">{geminiUsage.remaining} portfolio resumes</span> or <span className="text-white font-semibold">{geminiUsage.remaining} recruiter analyses</span></p>
+                    </div>
+                  </div>
+                </Card>
 
                 {/* Site controls quick access */}
                 <Card>

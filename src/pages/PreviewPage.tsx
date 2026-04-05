@@ -14,7 +14,7 @@ import { downloadHtml, generateReportHtml, type CandidateAnalysis } from "@/lib/
 import RecruiterAnalysisPanel from "@/components/RecruiterAnalysisPanel";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
-import { storeCandidateAnalysis, updateCandidateAnalysis, updateRecruiterHistoryAnalysis } from "@/lib/firebase";
+import { storeCandidateAnalysis, updateCandidateAnalysis, updateRecruiterHistoryAnalysis, trackGeminiCall } from "@/lib/firebase";
 import html2pdf from "html2pdf.js";
 
 interface AtsScore {
@@ -145,6 +145,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
       const data = await res.json();
       if (data?.error) throw new Error(data.error);
       setAnalysis(data as CandidateAnalysis);
+      trackGeminiCall("analyze-candidate");
 
       // Generate HTML report
       const reportHtml = generateReportHtml(portfolioData, data as CandidateAnalysis);

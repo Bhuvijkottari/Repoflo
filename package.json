@@ -53,6 +53,7 @@
     "embla-carousel-react": "^8.6.0",
     "express": "^5.2.1",
     "firebase": "^12.11.0",
+    "formidable": "^3.5.4",
     "framer-motion": "^12.35.1",
     "html2pdf.js": "^0.14.0",
     "input-otp": "^1.4.2",

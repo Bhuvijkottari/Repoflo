@@ -35,7 +35,7 @@ const friendlyError = (e: any): string => {
 };
 import { useToast } from "@/hooks/use-toast";
 import type { PortfolioData } from "@/lib/mockData";
-import { subscribeSiteSettings, SiteSettings, trackPortfolioGeneration } from "@/lib/firebase";
+import { subscribeSiteSettings, SiteSettings, trackPortfolioGeneration, trackGeminiCall } from "@/lib/firebase";
 
 const GeneratePage = () => {
   const navigate = useNavigate();
@@ -106,6 +106,7 @@ const GeneratePage = () => {
         const data = await response.json();
         if (data?.error) throw new Error(data.error);
         finalData = { ...finalData, ...data, avatar: data.avatar || githubData.avatar, githubStats: githubData.githubStats, leetcodeStats: finalData.leetcodeStats };
+        trackGeminiCall("parse-resume");
 
         // ── Name validation: resume name must share ≥3 chars with GitHub name/username ──
         const resumeName = (data.name || "").trim();

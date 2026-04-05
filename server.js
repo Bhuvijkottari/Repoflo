@@ -18,8 +18,8 @@ const githubHeaders = {
   "User-Agent": "PortfolioForge",
   ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
 };
-// gemini-2.5-flash-lite: fastest available model, used for all AI calls
-const GEMINI_FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_KEY}`;
+// gemini-flash-lite-latest: fastest available model (~2s response)
+const GEMINI_FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_KEY}`;
 const GEMINI_URL = GEMINI_FAST_URL;
 
 // ── helper: call Gemini with text only ────────────────────────────────────────

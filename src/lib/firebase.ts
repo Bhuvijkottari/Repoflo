@@ -694,6 +694,45 @@ export const fetchPortfolioUsage = async (): Promise<PortfolioUsageEntry[]> => {
   } catch { return []; }
 };
 
+// ─── GEMINI USAGE TRACKING ───────────────────────────────────────────────────
+export type GeminiCallType = "parse-resume" | "analyze-candidate";
+
+export const trackGeminiCall = async (type: GeminiCallType) => {
+  try {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    await addDoc(collection(db, "gemini_usage"), {
+      type,
+      date: today,
+      timestamp: new Date().toISOString(),
+    });
+  } catch { /* silent */ }
+};
+
+export interface GeminiUsageToday {
+  parseResume: number;
+  analyzeCandidate: number;
+  total: number;
+  remaining: number;
+  dailyLimit: number;
+}
+
+export const fetchGeminiUsageToday = async (): Promise<GeminiUsageToday> => {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const snap = await getDocs(
+      query(collection(db, "gemini_usage"), where("date", "==", today))
+    );
+    const docs = snap.docs.map((d) => d.data());
+    const parseResume = docs.filter((d) => d.type === "parse-resume").length;
+    const analyzeCandidate = docs.filter((d) => d.type === "analyze-candidate").length;
+    const total = docs.length;
+    const dailyLimit = 500;
+    return { parseResume, analyzeCandidate, total, remaining: Math.max(0, dailyLimit - total), dailyLimit };
+  } catch {
+    return { parseResume: 0, analyzeCandidate: 0, total: 0, remaining: 500, dailyLimit: 500 };
+  }
+};
+
 // ─── FEEDBACK DELETE (admin) ─────────────────────────────────────────────────
 export const deleteFeedback = async (id: string) => {
   await deleteDoc(doc(db, "feedbacks", id));
