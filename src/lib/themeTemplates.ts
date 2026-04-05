@@ -830,10 +830,11 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="contact" style="padding:100px 48px;background:linear-gradient(135deg,#fde68a,#fb923c,#f97316);text-align:center;position:relative;overflow:hidden">
             <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:rgba(255,255,255,.15);border-radius:50%"></div>
             <h2 class="reveal" style="font-family:'Fraunces',serif;font-size:3.5rem;font-weight:900;color:#1a0e00;margin-bottom:16px;line-height:1">Let's create<br>together.</h2>
-            <p class="reveal" style="color:#7c2d12;margin-bottom:32px;font-size:1rem">${d.location} · ${d.email}</p>
+            <p class="reveal" style="color:#7c2d12;margin-bottom:32px;font-size:1rem">${d.location} · <a href="mailto:${d.email}" style="color:#7c2d12;text-decoration:none;font-weight:600">${d.email}</a></p>
             <div class="reveal" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
               <a href="mailto:${d.email}" style="background:#1a0e00;color:#fdf8f0;text-decoration:none;padding:14px 36px;border-radius:50px;font-weight:800;font-size:.95rem;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">Email me ↗</a>
               ${d.github?`<a href="${d.github}" target="_blank" style="background:rgba(26,14,0,.1);color:#1a0e00;text-decoration:none;padding:14px 36px;border-radius:50px;font-weight:800;font-size:.95rem;border:2px solid rgba(26,14,0,.2)">GitHub ↗</a>`:''}
+              ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="background:rgba(26,14,0,.1);color:#1a0e00;text-decoration:none;padding:14px 36px;border-radius:50px;font-weight:800;font-size:.95rem;border:2px solid rgba(26,14,0,.2)">LinkedIn ↗</a>`:''}
             </div>
           </section>
         </div>`);
@@ -922,9 +923,9 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
                   <p><span class="kw">export default</span> <span class="fn">developer</span>;</p>
                   <p>&nbsp;</p>
                   <p><span class="cmt">// Contact</span></p>
-                  <p><span class="kw">const</span> <span class="prop">email</span> <span class="op">=</span> <span class="str">"${d.email}"</span>;</p>
-                  ${d.github?`<p><span class="kw">const</span> <span class="prop">github</span> <span class="op">=</span> <span class="str">"${d.github}"</span>;</p>`:''}
-                  ${d.linkedin?`<p><span class="kw">const</span> <span class="prop">linkedin</span> <span class="op">=</span> <span class="str">"${d.linkedin}"</span>;</p>`:''}
+                  <p><span class="kw">const</span> <span class="prop">email</span> <span class="op">=</span> <a href="mailto:${d.email}" style="text-decoration:none"><span class="str">"${d.email}"</span></a>;</p>
+                  ${d.github?`<p><span class="kw">const</span> <span class="prop">github</span> <span class="op">=</span> <a href="${d.github}" target="_blank" style="text-decoration:none"><span class="str">"${d.github}"</span></a>;</p>`:''}
+                  ${d.linkedin?`<p><span class="kw">const</span> <span class="prop">linkedin</span> <span class="op">=</span> <a href="${d.linkedin}" target="_blank" style="text-decoration:none"><span class="str">"${d.linkedin}"</span></a>;</p>`:''}
                 </div>
 
                 <!-- SKILLS -->
@@ -1277,7 +1278,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             </div>
             <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.15)">
               <p style="font-size:.62rem;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:10px">Connect</p>
-              <p style="color:rgba(255,255,255,.6);font-size:.78rem;margin-bottom:6px">📧 ${d.email}</p>
+              <p style="color:rgba(255,255,255,.6);font-size:.78rem;margin-bottom:6px">📧 <a href="mailto:${d.email}" style="color:rgba(255,255,255,.85);text-decoration:none;font-weight:600">${d.email}</a></p>
               <p style="color:rgba(255,255,255,.6);font-size:.78rem;margin-bottom:12px">📍 ${d.location}</p>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 ${d.github?`<a href="${d.github}" target="_blank" style="color:#fff;background:rgba(255,255,255,.15);text-decoration:none;padding:6px 14px;border-radius:50px;font-size:.72rem;font-weight:700;border:1px solid rgba(255,255,255,.25)">GitHub</a>`:''}
@@ -1482,10 +1483,11 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           ${d.projects.length?`<div class="lv-glass reveal" id="lv-projects" style="grid-column:span 12;padding:28px"><p style="font-size:.65rem;text-transform:uppercase;letter-spacing:3px;color:#7c3aed;font-weight:700;margin-bottom:20px">Projects</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="tilt-card" style="background:rgba(255,255,255,.4);border:1.5px solid rgba(255,255,255,.7);border-radius:14px;padding:20px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700;color:#2e1065">${p.link?`<a href="${p.link}" target="_blank" style="color:#2e1065;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#f59e0b;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#4c1d95;font-size:.84rem;line-height:1.65;margin-bottom:10px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span style="font-size:.72rem;color:#6d28d9;background:rgba(124,58,237,.1);padding:3px 10px;border-radius:50px;font-weight:600">${t}</span>`).join('')}</div></div>`).join('')}</div></div>`:''}
           <div class="lv-glass reveal" id="lv-contact" style="grid-column:span 12;padding:36px;text-align:center">
             <h2 style="font-size:1.6rem;font-weight:800;color:#2e1065;margin-bottom:12px">Let's connect ✨</h2>
-            <p style="color:#4c1d95;margin-bottom:24px">${d.email} · ${d.location}</p>
+            <p style="color:#4c1d95;margin-bottom:24px"><a href="mailto:${d.email}" style="color:#4c1d95;text-decoration:none;font-weight:600">${d.email}</a> · ${d.location}</p>
             <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
               <a href="mailto:${d.email}" style="background:#7c3aed;color:#fff;text-decoration:none;padding:12px 32px;border-radius:50px;font-weight:700;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Email me</a>
               ${d.github?`<a href="${d.github}" target="_blank" style="background:rgba(124,58,237,.12);color:#5b21b6;border:2px solid rgba(124,58,237,.3);text-decoration:none;padding:10px 32px;border-radius:50px;font-weight:700">GitHub</a>`:''}
+              ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="background:rgba(124,58,237,.12);color:#5b21b6;border:2px solid rgba(124,58,237,.3);text-decoration:none;padding:10px 32px;border-radius:50px;font-weight:700">LinkedIn</a>`:''}
             </div>
             ${d.education.length?`<div style="margin-top:28px;border-top:1px solid rgba(124,58,237,.1);padding-top:20px">${d.education.map((e:{degree:string,institution:string,period:string})=>`<p style="color:#5b21b6;font-size:.88rem"><strong>${e.degree}</strong> · ${e.institution} · <span style="opacity:.6">${e.period}</span></p>`).join('')}</div>`:''}
           </div>
