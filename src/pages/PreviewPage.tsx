@@ -78,13 +78,15 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
       }
       // Load candidate ID for updating analysis
       const storedCandidateId = sessionStorage.getItem("candidateId");
-      if (storedCandidateId) {
-        setCandidateId(storedCandidateId);
-      }
+      if (storedCandidateId) setCandidateId(storedCandidateId);
       // Load history ID for updating analysis
       const storedHistoryId = sessionStorage.getItem("historyId");
-      if (storedHistoryId) {
-        setHistoryId(storedHistoryId);
+      if (storedHistoryId) setHistoryId(storedHistoryId);
+      // Restore saved analysis (from history "View" button) — skip re-running
+      const savedAnalysis = sessionStorage.getItem("savedAnalysis");
+      if (savedAnalysis) {
+        setAnalysis(JSON.parse(savedAnalysis));
+        sessionStorage.removeItem("savedAnalysis");
       }
     } catch {}
   }, []);
@@ -115,8 +117,16 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
   }, []);
 
   useEffect(() => {
+    // Skip auto-analysis if a saved analysis was restored from history
     if (isRecruiter && portfolioData && !analysis && !isAnalyzing) {
-      runAnalysis();
+      // Small delay to let the savedAnalysis useEffect run first
+      const t = setTimeout(() => {
+        setAnalysis(prev => {
+          if (!prev) runAnalysis();
+          return prev;
+        });
+      }, 50);
+      return () => clearTimeout(t);
     }
   }, [isRecruiter, portfolioData]);
 
