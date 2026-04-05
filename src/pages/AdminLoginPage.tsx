@@ -120,7 +120,7 @@ const AdminLoginPage = () => {
   const [denied, setDenied] = useState<string>("");
 
   if (isAdminAuthenticated()) {
-    navigate("/rfl-secure/dashboard", { replace: true });
+    navigate("/adminProtectedRoutes/auth/dashboard", { replace: true });
     return null;
   }
 
@@ -129,7 +129,7 @@ const AdminLoginPage = () => {
     setLoading(true);
     try {
       await signInAdminWithGoogle();
-      navigate("/rfl-secure/dashboard", { replace: true });
+      navigate("/adminProtectedRoutes/auth/dashboard", { replace: true });
     } catch (err: any) {
       // Show scary screen only for unauthorised accounts
       const msg: string = err.message || "";

@@ -29,7 +29,7 @@ const useAdminGuard = () => {
   useEffect(() => {
     // First gate: custom session check
     if (!isAdminAuthenticated()) {
-      navigate("/rfl-secure/signin", { replace: true });
+      navigate("/adminProtectedRoutes/auth/signin", { replace: true });
       return;
     }
     // Second gate: verify Firebase Auth is still active and matches
@@ -37,7 +37,7 @@ const useAdminGuard = () => {
       const sessionEmail = getAuthenticatedAdminEmail();
       if (!user || user.email?.toLowerCase() !== sessionEmail.toLowerCase()) {
         adminLogout();
-        navigate("/rfl-secure/signin", { replace: true });
+        navigate("/adminProtectedRoutes/auth/signin", { replace: true });
       }
     });
     return unsub;
@@ -196,7 +196,7 @@ const AdminDashboardPage = () => {
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => { adminLogout(); navigate("/rfl-secure/signin", { replace: true }); }}
+            onClick={() => { adminLogout(); navigate("/adminProtectedRoutes/auth/signin", { replace: true }); }}
             className="text-[#b8c7e0] hover:text-red-400 hover:bg-red-500/10 px-2 sm:px-3"
           >
             <LogOut className="w-4 h-4" />
@@ -905,7 +905,7 @@ const AdminDashboardPage = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => { adminLogout(); navigate("/rfl-secure/signin", { replace: true }); }}
+                        onClick={() => { adminLogout(); navigate("/adminProtectedRoutes/auth/signin", { replace: true }); }}
                         className="text-red-400 hover:bg-red-500/10 border border-red-500/20 w-full"
                       >
                         <LogOut className="w-4 h-4 mr-2" /> Sign Out
