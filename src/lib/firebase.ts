@@ -65,15 +65,12 @@ export function subscribeFeedbacks(
 export async function incrementVisitorCount(): Promise<number> {
   const ref = doc(db, "site_stats", "visitors");
   try {
+    // Use setDoc with merge so it works whether doc exists or not
+    await setDoc(ref, { count: increment(1) }, { merge: true });
     const snap = await getDoc(ref);
-    if (snap.exists()) {
-      await updateDoc(ref, { count: increment(1) });
-      return (snap.data().count || 0) + 1;
-    } else {
-      await setDoc(ref, { count: 1 });
-      return 1;
-    }
+    return snap.exists() ? (snap.data().count || 1) : 1;
   } catch {
+    // Firestore not set up yet — return 0 silently
     return 0;
   }
 }
