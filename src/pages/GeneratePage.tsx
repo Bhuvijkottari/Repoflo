@@ -107,6 +107,19 @@ const GeneratePage = () => {
         resumeName: resumeFile?.name || "No resume",
         theme: selectedTheme || "",
         timestamp: new Date().toISOString(),
+        bio: finalData.bio || "",
+        location: finalData.location || "",
+        title: finalData.title || "",
+        github: finalData.github || "",
+        linkedin: finalData.linkedin || "",
+        skills: finalData.skills?.slice(0, 15) || [],
+        experienceCount: finalData.experience?.length || 0,
+        projectsCount: finalData.projects?.length || 0,
+        educationCount: finalData.education?.length || 0,
+        totalCommits: finalData.githubStats?.totalCommits || 0,
+        publicRepos: finalData.githubStats?.publicRepos || 0,
+        followers: finalData.githubStats?.followers || 0,
+        topLanguages: finalData.githubStats?.topLanguages?.slice(0, 5).map((l: any) => l.name) || [],
       });
       navigate(`/preview/${selectedTheme}`);
     } catch (e: any) {

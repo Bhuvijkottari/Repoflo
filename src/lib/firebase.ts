@@ -665,6 +665,20 @@ export interface PortfolioUsageEntry {
   resumeName: string;
   theme: string;
   timestamp: string;
+  // Summary fields
+  bio?: string;
+  location?: string;
+  title?: string;
+  github?: string;
+  linkedin?: string;
+  skills?: string[];
+  experienceCount?: number;
+  projectsCount?: number;
+  educationCount?: number;
+  totalCommits?: number;
+  publicRepos?: number;
+  followers?: number;
+  topLanguages?: string[];
 }
 
 export const trackPortfolioGeneration = async (entry: Omit<PortfolioUsageEntry, "id">) => {

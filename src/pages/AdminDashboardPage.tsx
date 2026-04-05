@@ -69,6 +69,142 @@ const statusBadge = (status: RecruiterRequest["status"]) => {
   return <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">Pending</span>;
 };
 
+// ─── Portfolio summary row ────────────────────────────────────────────────────
+const PortfolioSummaryRow = ({ p }: { p: PortfolioUsageEntry }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="font-body">
+      {/* Header row — always visible */}
+      <div
+        className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-[#3fc4e7]/4 transition-colors"
+        onClick={() => setOpen(!open)}
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-full bg-[#3fc4e7]/15 border border-[#3fc4e7]/30 flex items-center justify-center flex-shrink-0 text-xs font-bold text-[#3fc4e7]">
+            {(p.name || "?")[0].toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <p className="text-white font-semibold text-sm truncate">{p.name || "—"}</p>
+            <p className="text-[#b8c7e0]/60 text-xs truncate">{p.title || p.currentOccupation || "—"}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 flex-shrink-0 ml-4">
+          <span className="hidden sm:block text-[#b8c7e0] text-xs">{p.email || "—"}</span>
+          <span className="hidden md:block text-[#b8c7e0] text-xs">{p.phone || "—"}</span>
+          <span className="text-[#3fc4e7] text-xs font-semibold capitalize px-2 py-0.5 bg-[#3fc4e7]/10 rounded-full">{p.theme}</span>
+          <span className="text-[#b8c7e0]/50 text-xs">{p.timestamp ? new Date(p.timestamp).toLocaleDateString() : "—"}</span>
+          <ChevronDown className={`w-4 h-4 text-[#b8c7e0]/50 transition-transform ${open ? "rotate-180" : ""}`} />
+        </div>
+      </div>
+
+      {/* Expanded summary */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            className="overflow-hidden"
+          >
+            <div className="px-5 pb-5 pt-2 bg-[#0b1f3a]/40 border-t border-[#3fc4e7]/8 space-y-4">
+
+              {/* Bio + contact */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {p.bio && (
+                  <div className="sm:col-span-2">
+                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">Bio</p>
+                    <p className="text-[#b8c7e0] text-xs leading-relaxed">{p.bio}</p>
+                  </div>
+                )}
+                {p.location && (
+                  <div>
+                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">Location</p>
+                    <p className="text-[#b8c7e0] text-xs">📍 {p.location}</p>
+                  </div>
+                )}
+                {p.email && (
+                  <div>
+                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">Email</p>
+                    <a href={`mailto:${p.email}`} className="text-[#3fc4e7] text-xs hover:underline">✉ {p.email}</a>
+                  </div>
+                )}
+                {p.phone && (
+                  <div>
+                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">Phone</p>
+                    <p className="text-[#b8c7e0] text-xs">📞 {p.phone}</p>
+                  </div>
+                )}
+                {p.github && (
+                  <div>
+                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">GitHub</p>
+                    <a href={p.github} target="_blank" rel="noreferrer" className="text-[#3fc4e7] text-xs hover:underline truncate block">{p.github}</a>
+                  </div>
+                )}
+                {p.linkedin && (
+                  <div>
+                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">LinkedIn</p>
+                    <a href={p.linkedin} target="_blank" rel="noreferrer" className="text-[#3fc4e7] text-xs hover:underline truncate block">{p.linkedin}</a>
+                  </div>
+                )}
+              </div>
+
+              {/* Stats row */}
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { label: "Experience", value: p.experienceCount ?? 0, icon: "💼" },
+                  { label: "Projects", value: p.projectsCount ?? 0, icon: "🚀" },
+                  { label: "Education", value: p.educationCount ?? 0, icon: "🎓" },
+                  { label: "Commits", value: p.totalCommits?.toLocaleString() ?? 0, icon: "⚡" },
+                  { label: "Repos", value: p.publicRepos ?? 0, icon: "📁" },
+                  { label: "Followers", value: p.followers ?? 0, icon: "👥" },
+                ].map(s => (
+                  <div key={s.label} className="bg-[#132f52] border border-[#3fc4e7]/15 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+                    <p className="text-base">{s.icon}</p>
+                    <p className="text-white font-bold text-sm">{s.value}</p>
+                    <p className="text-[#b8c7e0]/60 text-xs">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Skills */}
+              {p.skills && p.skills.length > 0 && (
+                <div>
+                  <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-2">Skills</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {p.skills.map((s, i) => (
+                      <span key={i} className="text-xs bg-[#3fc4e7]/10 text-[#69d2f1] border border-[#3fc4e7]/20 px-2.5 py-1 rounded-full">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Top languages */}
+              {p.topLanguages && p.topLanguages.length > 0 && (
+                <div>
+                  <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-2">Top Languages</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {p.topLanguages.map((l, i) => (
+                      <span key={i} className="text-xs bg-purple-500/10 text-purple-300 border border-purple-500/20 px-2.5 py-1 rounded-full">{l}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Resume + theme */}
+              <div className="flex flex-wrap gap-4 pt-1 border-t border-[#3fc4e7]/8 text-xs text-[#b8c7e0]/60">
+                <span>📄 {p.resumeName || "No resume"}</span>
+                <span>🎨 Theme: <span className="text-[#3fc4e7] capitalize font-semibold">{p.theme}</span></span>
+                <span>🕐 {p.timestamp ? new Date(p.timestamp).toLocaleString() : "—"}</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 // ─── main dashboard ──────────────────────────────────────────────────────────
 const AdminDashboardPage = () => {
   useAdminGuard();
@@ -494,37 +630,14 @@ const AdminDashboardPage = () => {
                 </div>
 
                 <Card>
-                  <SectionTitle icon={GitBranch} title="Resume Activity Log" count={portfolioUsage.length} />
+                  <SectionTitle icon={GitBranch} title="Portfolio Generation Log" count={portfolioUsage.length} />
                   {portfolioUsage.length === 0 ? (
                     <div className="p-8 text-center text-[#b8c7e0] font-body text-sm">No portfolio generations recorded yet</div>
                   ) : (
-                    <div className="overflow-x-auto -mx-0">
-                      <table className="w-full text-sm font-body min-w-[500px]">
-                        <thead className="border-b border-[#3fc4e7]/10">
-                          <tr className="text-[#b8c7e0] text-xs">
-                            <th className="text-left px-5 py-3 font-semibold">Name</th>
-                            <th className="text-left px-5 py-3 font-semibold">Email</th>
-                            <th className="text-left px-5 py-3 font-semibold">Phone</th>
-                            <th className="text-left px-5 py-3 font-semibold">Occupation</th>
-                            <th className="text-left px-5 py-3 font-semibold">Resume</th>
-                            <th className="text-left px-5 py-3 font-semibold">Theme</th>
-                            <th className="text-left px-5 py-3 font-semibold">Date</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[#3fc4e7]/6">
-                          {portfolioUsage.map((p, i) => (
-                            <tr key={p.id || i} className="hover:bg-[#3fc4e7]/4 transition-colors">
-                              <td className="px-5 py-3 text-white font-medium text-xs">{p.name || "—"}</td>
-                              <td className="px-5 py-3 text-[#b8c7e0] text-xs">{p.email || "—"}</td>
-                              <td className="px-5 py-3 text-[#b8c7e0] text-xs">{p.phone || "—"}</td>
-                              <td className="px-5 py-3 text-[#b8c7e0] text-xs">{p.currentOccupation || "—"}</td>
-                              <td className="px-5 py-3 text-[#b8c7e0] text-xs">{p.resumeName || "—"}</td>
-                              <td className="px-5 py-3 text-[#3fc4e7] font-semibold capitalize text-xs">{p.theme}</td>
-                              <td className="px-5 py-3 text-[#b8c7e0]/60 text-xs">{p.timestamp ? new Date(p.timestamp).toLocaleDateString() : "—"}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="divide-y divide-[#3fc4e7]/8">
+                      {portfolioUsage.map((p, i) => (
+                        <PortfolioSummaryRow key={p.id || i} p={p} />
+                      ))}
                     </div>
                   )}
                 </Card>
