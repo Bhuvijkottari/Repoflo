@@ -255,6 +255,23 @@ useEffect(() => {
       let finalData: PortfolioData = { ...githubData, leetcodeStats: leetcodeData ?? null };
       sessionStorage.setItem("recruiterPrefs", JSON.stringify({ requiredTechStack, experienceLevel }));
 
+      // ── LeetCode name validation (optional field) ────────────────────────
+      if (leetcodeData?.username) {
+        const lcUser = leetcodeData.username.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const ghName = (githubData.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const ghUser = extractGithubUser(githubUrl);
+        const matchesName = shareAtLeast3Chars(lcUser, ghName);
+        const matchesUser = shareAtLeast3Chars(lcUser, ghUser);
+        if (!matchesName && !matchesUser) {
+          setIsProcessing(false);
+          setStatus("");
+          setNameWarning(
+            `LeetCode username "${leetcodeData.username}" doesn't match the GitHub profile "${githubData.name}" (@${ghUser}). They must share at least 3 consecutive characters — please verify this LeetCode account belongs to the same candidate.`
+          );
+          return;
+        }
+      }
+
       if (resumeFile) {
         setStatus("AI is parsing your resume...");
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

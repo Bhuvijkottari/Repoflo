@@ -155,21 +155,16 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
   };
 const handleDownloadReport = () => {
   const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-
   const blob = new Blob([html], { type: "text/html" });
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
   a.href = url;
   a.download = `${sanitizedName}-full-ui.html`;
+  document.body.appendChild(a);
   a.click();
-
-  URL.revokeObjectURL(url);
-
-  toast({
-    title: "Downloaded",
-    description: "Full UI HTML downloaded",
-  });
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 150);
+  toast({ title: "Downloaded", description: "Report HTML downloaded" });
 };
 const handleGenerateReport = () => {
   if (!portfolioData || !analysis) return;
@@ -244,14 +239,16 @@ const handleDownloadPDF = () => {
   // Always get the latest HTML (edited or original)
   const getFinalHtml = () => inlineEditing ? cleanHtml : editableHtml;
 
-  const triggerDownload = (html: string, filename: string) => {
-    const blob = new Blob([html], { type: "text/html" });
+  const triggerDownload = (content: string, filename: string, type = "text/html") => {
+    const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 150);
   };
 
   const handleDownload = () => {
@@ -259,15 +256,7 @@ const handleDownloadPDF = () => {
   };
 
   const handleDownloadCode = () => {
-    // Download as .txt so it opens in any text editor for easy copy-paste
-    const html = getFinalHtml();
-    const blob = new Blob([html], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${sanitizedName}-source.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    triggerDownload(getFinalHtml(), `${sanitizedName}-source.txt`, "text/plain");
     toast({ title: "Source Code Downloaded", description: `Open "${sanitizedName}-source.txt" in any text editor to copy the code.` });
   };
 
