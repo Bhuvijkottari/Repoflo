@@ -283,9 +283,9 @@ const GeneratePage = () => {
                 {termsAccepted ? '✓ Agreed' : '⚠ Required — please agree to continue'}
               </p>
               <p className="text-xs text-[#b8c7e0] font-body leading-relaxed">
-                By generating your portfolio, you agree that your profile data (name, skills, experience, education, and projects) may be shared with{' '}
+                By generating your portfolio, you agree that your data may be shared with{' '}
                 <span className="text-white font-medium">third-party applications, hiring agencies, recruiters, education consultancies,</span>{' '}
-                and career platforms for professional discovery and job opportunities. Sensitive personal information (email, phone) will not be shared without explicit consent.
+                and career platforms for professional discovery and job opportunities.
               </p>
             </div>
           </label>
