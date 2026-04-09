@@ -48,6 +48,9 @@ const projectsHtml = (d: PortfolioData, cardBg: string, cardBorder: string, name
 const eduHtml = (d: PortfolioData, roleColor: string, instColor: string) =>
   d.education.length ? d.education.map(e => `<div class="tilt-card reveal" style="margin-bottom:20px;padding:20px 24px;border-radius:14px;background:rgba(128,128,128,.04)"><div style="font-weight:700;font-size:1.05rem;color:${roleColor}">${e.degree}</div><div style="color:${instColor};font-size:.92rem;margin-top:3px">${e.institution}</div><div style="color:${instColor};font-size:.8rem;margin-top:2px;opacity:.6">${e.period}</div></div>`).join('') : '';
 
+// Gmail compose link helper
+const gmailLink = (email: string) => `https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(email)}`;
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const volHtml = (d: PortfolioData, roleColor: string, orgColor: string, descColor: string) =>
   d.volunteering.length ? d.volunteering.map(v => `<div class="tilt-card reveal" style="margin-bottom:20px;padding:20px 24px;border-radius:14px;background:rgba(128,128,128,.04)"><div style="font-weight:700;font-size:1.05rem;color:${roleColor}">${v.role}</div><div style="color:${orgColor};font-size:.92rem">${v.org}</div><div style="color:${orgColor};font-size:.8rem;opacity:.6">${v.period}</div><p style="color:${descColor};font-size:.92rem;margin-top:8px;line-height:1.7">${v.description}</p></div>`).join('') : '';
@@ -191,7 +194,7 @@ const leetcodeHtml = (d: PortfolioData, cardBg: string, cardBorder: string, acce
 
 const contactSection = (d: PortfolioData, _bg: string, textColor: string, accentColor: string) =>
   `<section id="contact" class="reveal" style="padding:64px 0;text-align:center"><h2 style="color:${accentColor};margin-bottom:12px;font-size:1.5rem;font-weight:700">Get In Touch</h2>
-  <p style="color:${textColor};font-size:.95rem;margin-bottom:4px">Email: <a href="mailto:${d.email}" style="color:${accentColor};text-decoration:none;font-weight:600">${d.email}</a></p>
+  <p style="color:${textColor};font-size:.95rem;margin-bottom:4px">Email: <a href="${gmailLink(d.email)}" style="color:${accentColor};text-decoration:none;font-weight:600">${d.email}</a></p>
   ${d.phone ? `<p style="color:${textColor};font-size:.95rem;margin-bottom:4px">📞 <a href="tel:${d.phone}" style="color:${accentColor};text-decoration:none;font-weight:600">${d.phone}</a></p>` : ''}
   <p style="color:${textColor};font-size:.95rem;margin-bottom:24px">📍 ${d.location}</p>
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
@@ -336,15 +339,37 @@ const gridCanvas = (lineColor='rgba(0,255,255,', bgOpacity='.08') => `
 const responsiveStyles = `
 @media(max-width:768px){
   .nav-links{display:none!important}.nav-hamburger{display:block!important}
-  h1{font-size:1.9rem!important}h2{font-size:1.2rem!important}
-  .stats-grid{grid-template-columns:repeat(2,1fr)!important}
+  h1{font-size:1.7rem!important;word-break:break-word!important}
+  h2{font-size:1.15rem!important}
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
   .hero-grid{grid-template-columns:1fr!important;text-align:center!important}
-  .project-card{padding:18px!important}
-  body>div>div{padding-left:20px!important;padding-right:20px!important}
+  .project-card{padding:16px!important}
+  body>div>div{padding-left:16px!important;padding-right:16px!important}
+  section{padding:32px 0!important}
+  /* Fix flex layouts that break on mobile */
+  [style*="display:flex"][style*="gap"]{flex-wrap:wrap!important}
+  [style*="grid-template-columns:repeat(3"]{grid-template-columns:1fr!important}
+  [style*="grid-template-columns:repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
+  /* Contact links */
+  a[style*="padding:14px 36px"],a[style*="padding:14px 48px"],a[style*="padding:16px 48px"]{padding:12px 24px!important;font-size:.88rem!important}
+  /* Avatar sizing */
+  img[style*="border-radius:50%"]{max-width:100px!important;max-height:100px!important}
+  /* Skill tags wrap */
+  .skill-tag{font-size:.78rem!important;padding:6px 12px!important}
+  /* Fix overflow */
+  pre,code{overflow-x:auto!important;white-space:pre-wrap!important;word-break:break-word!important}
+  /* Fix wide text */
+  p,div,span,a{word-break:break-word!important;overflow-wrap:break-word!important}
 }
 @media(max-width:480px){
   .stats-grid{grid-template-columns:1fr!important}
-  h1{font-size:1.5rem!important}
+  h1{font-size:1.4rem!important}
+  h2{font-size:1.05rem!important}
+  body{font-size:14px!important}
+  section{padding:24px 0!important}
+  .project-card{padding:14px!important}
+  /* Stack buttons vertically */
+  [style*="display:flex"][style*="gap"]:not(nav *){flex-direction:column!important;align-items:stretch!important}
 }`;
 
 const baseStyle = `
@@ -575,7 +600,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
 
             <section id="contact" style="margin-bottom:40px;padding:28px;background:#fff;border:1px solid #eee;border-radius:12px" class="reveal">
               <p style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#bbb;margin-bottom:12px">Contact</p>
-              <a href="mailto:${d.email}" style="font-size:1.1rem;font-weight:600;color:#111;text-decoration:none;display:block;margin-bottom:4px">${d.email}</a>
+              <a href="${gmailLink(d.email)}" style="font-size:1.1rem;font-weight:600;color:#111;text-decoration:none;display:block;margin-bottom:4px">${d.email}</a>
               <p style="color:#888;font-size:.88rem">${d.location}</p>
             </section>
           </main>
@@ -717,7 +742,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             <div style="position:relative;z-index:1">
               <p class="reveal" style="font-family:'Syne Mono',monospace;font-size:.7rem;letter-spacing:4px;color:rgba(168,85,247,.5);margin-bottom:16px">CONTACT</p>
               <h2 class="reveal" style="font-size:3rem;font-weight:800;letter-spacing:-2px;margin-bottom:32px">Let's build something.</h2>
-              <a href="mailto:${d.email}" class="reveal" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,#a855f7,#6366f1);border-radius:50px;color:#fff;text-decoration:none;font-weight:700;font-size:1rem;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 20px 40px rgba(168,85,247,.35)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">${d.email}</a>
+              <a href="${gmailLink(d.email)}" class="reveal" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,#a855f7,#6366f1);border-radius:50px;color:#fff;text-decoration:none;font-weight:700;font-size:1rem;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 20px 40px rgba(168,85,247,.35)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">${d.email}</a>
               <div style="display:flex;gap:16px;justify-content:center;margin-top:24px">
                 ${d.github?`<a href="${d.github}" target="_blank" style="color:rgba(255,255,255,.35);text-decoration:none;font-size:.85rem;transition:color .2s" onmouseover="this.style.color='#a855f7'" onmouseout="this.style.color='rgba(255,255,255,.35)'">GitHub ↗</a>`:''}
                 ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="color:rgba(255,255,255,.35);text-decoration:none;font-size:.85rem;transition:color .2s" onmouseover="this.style.color='#a855f7'" onmouseout="this.style.color='rgba(255,255,255,.35)'">LinkedIn ↗</a>`:''}
@@ -830,9 +855,9 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="contact" style="padding:100px 48px;background:linear-gradient(135deg,#fde68a,#fb923c,#f97316);text-align:center;position:relative;overflow:hidden">
             <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:rgba(255,255,255,.15);border-radius:50%"></div>
             <h2 class="reveal" style="font-family:'Fraunces',serif;font-size:3.5rem;font-weight:900;color:#1a0e00;margin-bottom:16px;line-height:1">Let's create<br>together.</h2>
-            <p class="reveal" style="color:#7c2d12;margin-bottom:32px;font-size:1rem">${d.location} · <a href="mailto:${d.email}" style="color:#7c2d12;text-decoration:none;font-weight:600">${d.email}</a></p>
+            <p class="reveal" style="color:#7c2d12;margin-bottom:32px;font-size:1rem">${d.location} · <a href="${gmailLink(d.email)}" style="color:#7c2d12;text-decoration:none;font-weight:600">${d.email}</a></p>
             <div class="reveal" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-              <a href="mailto:${d.email}" style="background:#1a0e00;color:#fdf8f0;text-decoration:none;padding:14px 36px;border-radius:50px;font-weight:800;font-size:.95rem;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">Email me ↗</a>
+              <a href="${gmailLink(d.email)}" style="background:#1a0e00;color:#fdf8f0;text-decoration:none;padding:14px 36px;border-radius:50px;font-weight:800;font-size:.95rem;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">Email me ↗</a>
               ${d.github?`<a href="${d.github}" target="_blank" style="background:rgba(26,14,0,.1);color:#1a0e00;text-decoration:none;padding:14px 36px;border-radius:50px;font-weight:800;font-size:.95rem;border:2px solid rgba(26,14,0,.2)">GitHub ↗</a>`:''}
               ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="background:rgba(26,14,0,.1);color:#1a0e00;text-decoration:none;padding:14px 36px;border-radius:50px;font-weight:800;font-size:.95rem;border:2px solid rgba(26,14,0,.2)">LinkedIn ↗</a>`:''}
             </div>
@@ -923,7 +948,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
                   <p><span class="kw">export default</span> <span class="fn">developer</span>;</p>
                   <p>&nbsp;</p>
                   <p><span class="cmt">// Contact</span></p>
-                  <p><span class="kw">const</span> <span class="prop">email</span> <span class="op">=</span> <a href="mailto:${d.email}" style="text-decoration:none"><span class="str">"${d.email}"</span></a>;</p>
+                  <p><span class="kw">const</span> <span class="prop">email</span> <span class="op">=</span> <a href="${gmailLink(d.email)}" style="text-decoration:none"><span class="str">"${d.email}"</span></a>;</p>
                   ${d.github?`<p><span class="kw">const</span> <span class="prop">github</span> <span class="op">=</span> <a href="${d.github}" target="_blank" style="text-decoration:none"><span class="str">"${d.github}"</span></a>;</p>`:''}
                   ${d.linkedin?`<p><span class="kw">const</span> <span class="prop">linkedin</span> <span class="op">=</span> <a href="${d.linkedin}" target="_blank" style="text-decoration:none"><span class="str">"${d.linkedin}"</span></a>;</p>`:''}
                 </div>
@@ -994,7 +1019,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
                   <p>&nbsp;</p>
                   <p><span class="kw">echo</span> <span class="str">"Hello, ${d.name}!"</span></p>
                   <p>&nbsp;</p>
-                  <p style="margin:16px 0"><a href="mailto:${d.email}" style="display:inline-block;background:#cba6f7;color:#1e1e2e;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.85rem">$ mail ${d.email}</a></p>
+                  <p style="margin:16px 0"><a href="${gmailLink(d.email)}" style="display:inline-block;background:#cba6f7;color:#1e1e2e;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.85rem">$ mail ${d.email}</a></p>
                   <p>&nbsp;</p>
                   ${d.github?`<p><span class="fn">open</span> <span class="str">"${d.github}"</span></p>`:''}
                   ${d.linkedin?`<p><span class="fn">open</span> <span class="str">"${d.linkedin}"</span></p>`:''}
@@ -1175,7 +1200,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             <p class="reveal" style="font-size:.65rem;letter-spacing:5px;text-transform:uppercase;color:rgba(201,168,76,.4);margin-bottom:12px">Contact</p>
             <div class="eln-rule reveal"></div>
             <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:4rem;font-weight:300;letter-spacing:4px;text-transform:uppercase;color:#e8e4df;margin-bottom:40px">Say Hello.</h2>
-            <a href="mailto:${d.email}" class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-style:italic;color:#c9a84c;text-decoration:none;border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:2px;transition:border-color .3s" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='rgba(201,168,76,.3)'">${d.email}</a>
+            <a href="${gmailLink(d.email)}" class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-style:italic;color:#c9a84c;text-decoration:none;border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:2px;transition:border-color .3s" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='rgba(201,168,76,.3)'">${d.email}</a>
             <div class="reveal" style="display:flex;gap:24px;justify-content:center;margin-top:32px">
               ${d.github?`<a href="${d.github}" target="_blank" style="font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:rgba(201,168,76,.4);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='rgba(201,168,76,.4)'">GitHub</a>`:''}
               ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:rgba(201,168,76,.4);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='rgba(201,168,76,.4)'">LinkedIn</a>`:''}
@@ -1245,7 +1270,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <h2 style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#0ff;margin-bottom:12px">Initialize Contact</h2>
           ${githubActivityHtml(d,'rgba(0,255,255,.04)','rgba(0,255,255,.15)','#0ff','#555')}
           ${leetcodeHtml(d,'rgba(0,255,255,.04)','rgba(0,255,255,.15)','#0ff','#555')}
-          <a href="mailto:${d.email}" style="display:inline-block;margin-top:20px;border:1px solid #0ff;color:#0ff;padding:14px 40px;border-radius:4px;text-decoration:none;font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:3px;transition:all .2s" onmouseover="this.style.background='rgba(0,255,255,.1)';this.style.boxShadow='0 0 30px rgba(0,255,255,.2)'" onmouseout="this.style.background='transparent';this.style.boxShadow='none'">SEND MESSAGE</a>
+          <a href="${gmailLink(d.email)}" style="display:inline-block;margin-top:20px;border:1px solid #0ff;color:#0ff;padding:14px 40px;border-radius:4px;text-decoration:none;font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:3px;transition:all .2s" onmouseover="this.style.background='rgba(0,255,255,.1)';this.style.boxShadow='0 0 30px rgba(0,255,255,.2)'" onmouseout="this.style.background='transparent';this.style.boxShadow='none'">SEND MESSAGE</a>
         </section>
         </div>`);
 
@@ -1278,7 +1303,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             </div>
             <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.15)">
               <p style="font-size:.62rem;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:10px">Connect</p>
-              <p style="color:rgba(255,255,255,.6);font-size:.78rem;margin-bottom:6px">📧 <a href="mailto:${d.email}" style="color:rgba(255,255,255,.85);text-decoration:none;font-weight:600">${d.email}</a></p>
+              <p style="color:rgba(255,255,255,.6);font-size:.78rem;margin-bottom:6px">📧 <a href="${gmailLink(d.email)}" style="color:rgba(255,255,255,.85);text-decoration:none;font-weight:600">${d.email}</a></p>
               <p style="color:rgba(255,255,255,.6);font-size:.78rem;margin-bottom:12px">📍 ${d.location}</p>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 ${d.github?`<a href="${d.github}" target="_blank" style="color:#fff;background:rgba(255,255,255,.15);text-decoration:none;padding:6px 14px;border-radius:50px;font-size:.72rem;font-weight:700;border:1px solid rgba(255,255,255,.25)">GitHub</a>`:''}
@@ -1331,7 +1356,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <h2 style="font-family:'Prata',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:400;margin-bottom:20px">Let's work together</h2>
           <p style="color:rgba(255,255,255,.7);margin-bottom:32px;font-size:1rem">${d.location}</p>
           <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-            <a href="mailto:${d.email}" style="background:#fff;color:#c2410c;padding:14px 36px;border-radius:50px;text-decoration:none;font-weight:800;font-size:.95rem">${d.email}</a>
+            <a href="${gmailLink(d.email)}" style="background:#fff;color:#c2410c;padding:14px 36px;border-radius:50px;text-decoration:none;font-weight:800;font-size:.95rem">${d.email}</a>
             ${d.github?`<a href="${d.github}" target="_blank" style="background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.4);padding:12px 36px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.95rem">GitHub ↗</a>`:''}
           </div>
           ${d.education.length?`<div style="margin-top:48px">${d.education.map((e:{degree:string,institution:string,period:string})=>`<p style="color:rgba(255,255,255,.6);font-size:.85rem"><strong style="color:#fff">${e.degree}</strong> · ${e.institution} · ${e.period}</p>`).join('')}</div>`:''}
@@ -1373,7 +1398,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             <p style="color:#4ade80;font-size:.9rem;line-height:1.85;max-width:460px;position:relative;font-style:italic;opacity:.7">"${d.bio}"</p>
             <div style="display:flex;gap:10px;margin-top:28px;flex-wrap:wrap;position:relative">
               ${d.github?`<a href="${d.github}" target="_blank" style="background:#34d399;color:#0a1f0d;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.85rem">GitHub</a>`:''}
-              ${d.email?`<a href="mailto:${d.email}" style="border:1px solid rgba(52,211,153,.3);color:#34d399;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem">Contact</a>`:''}
+              ${d.email?`<a href="${gmailLink(d.email)}" style="border:1px solid rgba(52,211,153,.3);color:#34d399;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem">Contact</a>`:''}
             </div>
           </div>
           <div style="background:linear-gradient(160deg,#064e3b,#065f46);display:flex;align-items:center;justify-content:center;padding:40px">
@@ -1389,7 +1414,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           ${d.projects.length?`<section id="projects" style="margin-bottom:64px"><h2 class="reveal" style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:28px">Projects</h2><div class="f-proj-grid">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="f-card tilt-card reveal"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700;color:#f0fdf4">${p.link?`<a href="${p.link}" target="_blank" style="color:#f0fdf4;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#fbbf24;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#6ee7b7;font-size:.85rem;line-height:1.65;margin-bottom:12px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span style="font-size:.72rem;color:#34d399;background:rgba(52,211,153,.08);padding:3px 10px;border-radius:6px">${t}</span>`).join('')}</div></div>`).join('')}</div></section>`:''}
           ${githubActivityHtml(d,'rgba(52,211,153,.05)','rgba(52,211,153,.15)','#34d399','#6ee7b7')}
           ${d.education.length?`<section id="education" style="margin-bottom:48px"><h2 class="reveal" style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:20px">Education</h2>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="f-card reveal"><div style="font-weight:700;color:#f0fdf4">${e.degree}</div><div style="color:#34d399;font-size:.88rem">${e.institution}</div><div style="color:rgba(52,211,153,.4);font-size:.78rem;margin-top:2px">${e.period}</div></div>`).join('')}</section>`:''}
-          <section id="contact" class="reveal" style="text-align:center;padding:40px 0;border-top:1px solid rgba(52,211,153,.1)"><h2 style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:16px">Get in Touch</h2><a href="mailto:${d.email}" style="color:#34d399;font-size:1rem;text-decoration:none;border-bottom:1px solid rgba(52,211,153,.3)">${d.email}</a><p style="color:#6ee7b7;font-size:.88rem;margin-top:8px">${d.location}</p></section>
+          <section id="contact" class="reveal" style="text-align:center;padding:40px 0;border-top:1px solid rgba(52,211,153,.1)"><h2 style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:16px">Get in Touch</h2><a href="${gmailLink(d.email)}" style="color:#34d399;font-size:1rem;text-decoration:none;border-bottom:1px solid rgba(52,211,153,.3)">${d.email}</a><p style="color:#6ee7b7;font-size:.88rem;margin-top:8px">${d.location}</p></section>
         </div></div>`);
 
     // ── CHERRY ─ Asymmetric two-col, petal canvas, dark crimson ──────────────
@@ -1426,7 +1451,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             ${d.skills.length?`<div id="ch-skills"><p style="font-size:.65rem;text-transform:uppercase;letter-spacing:3px;color:rgba(244,63,94,.5);margin-bottom:12px">Skills 🌸</p><div style="display:flex;flex-wrap:wrap;gap:6px">${d.skills.map((s:string)=>`<span class="ch-tag skill-tag">${s}</span>`).join('')}</div></div>`:''}
             <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(244,63,94,.1)">
               <p style="font-size:.65rem;text-transform:uppercase;letter-spacing:2px;color:rgba(244,63,94,.4);margin-bottom:10px">Contact</p>
-              <a href="mailto:${d.email}" style="color:#f43f5e;font-size:.85rem;display:block;margin-bottom:4px;text-decoration:none">${d.email}</a>
+              <a href="${gmailLink(d.email)}" style="color:#f43f5e;font-size:.85rem;display:block;margin-bottom:4px;text-decoration:none">${d.email}</a>
               <p style="color:#9f7580;font-size:.82rem">${d.location}</p>
               <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
                 ${d.github?`<a href="${d.github}" target="_blank" style="color:#fda4af;background:rgba(244,63,94,.12);text-decoration:none;padding:5px 14px;border-radius:50px;font-size:.75rem;border:1px solid rgba(244,63,94,.2)">GitHub</a>`:''}
@@ -1475,7 +1500,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           </div>
           <div class="lv-glass reveal" style="grid-column:span 4;padding:28px;display:flex;flex-direction:column;gap:12px">
             <p style="font-size:.65rem;text-transform:uppercase;letter-spacing:3px;color:#7c3aed;font-weight:700">Quick Info</p>
-            <div style="font-size:.88rem;color:#4c1d95;line-height:2"><p>📍 ${d.location}</p><p>📧 <a href="mailto:${d.email}" style="color:#6d28d9;text-decoration:none">${d.email}</a></p>${d.github?`<p>🐙 <a href="${d.github}" target="_blank" style="color:#6d28d9;text-decoration:none">GitHub</a></p>`:''}</div>
+            <div style="font-size:.88rem;color:#4c1d95;line-height:2"><p>📍 ${d.location}</p><p>📧 <a href="${gmailLink(d.email)}" style="color:#6d28d9;text-decoration:none">${d.email}</a></p>${d.github?`<p>🐙 <a href="${d.github}" target="_blank" style="color:#6d28d9;text-decoration:none">GitHub</a></p>`:''}</div>
           </div>
           ${d.skills.length?`<div class="lv-glass reveal" id="lv-skills" style="grid-column:span 5;padding:28px"><p style="font-size:.65rem;text-transform:uppercase;letter-spacing:3px;color:#7c3aed;font-weight:700;margin-bottom:14px">Skills ✨</p><div style="display:flex;flex-wrap:wrap;gap:6px">${d.skills.map((s:string)=>`<span class="skill-tag" style="background:rgba(124,58,237,.1);color:#5b21b6;border:1.5px solid rgba(124,58,237,.25);padding:5px 14px;border-radius:50px;font-size:.78rem;font-weight:600">${s}</span>`).join('')}</div></div>`:''}
           <div class="lv-glass reveal" style="grid-column:span ${d.skills.length?'7':'12'};padding:28px">${githubActivityHtml(d,'rgba(255,255,255,.4)','rgba(124,58,237,.2)','#7c3aed','#4c1d95')}</div>
@@ -1483,9 +1508,9 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           ${d.projects.length?`<div class="lv-glass reveal" id="lv-projects" style="grid-column:span 12;padding:28px"><p style="font-size:.65rem;text-transform:uppercase;letter-spacing:3px;color:#7c3aed;font-weight:700;margin-bottom:20px">Projects</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="tilt-card" style="background:rgba(255,255,255,.4);border:1.5px solid rgba(255,255,255,.7);border-radius:14px;padding:20px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700;color:#2e1065">${p.link?`<a href="${p.link}" target="_blank" style="color:#2e1065;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#f59e0b;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#4c1d95;font-size:.84rem;line-height:1.65;margin-bottom:10px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span style="font-size:.72rem;color:#6d28d9;background:rgba(124,58,237,.1);padding:3px 10px;border-radius:50px;font-weight:600">${t}</span>`).join('')}</div></div>`).join('')}</div></div>`:''}
           <div class="lv-glass reveal" id="lv-contact" style="grid-column:span 12;padding:36px;text-align:center">
             <h2 style="font-size:1.6rem;font-weight:800;color:#2e1065;margin-bottom:12px">Let's connect ✨</h2>
-            <p style="color:#4c1d95;margin-bottom:24px"><a href="mailto:${d.email}" style="color:#4c1d95;text-decoration:none;font-weight:600">${d.email}</a> · ${d.location}</p>
+            <p style="color:#4c1d95;margin-bottom:24px"><a href="${gmailLink(d.email)}" style="color:#4c1d95;text-decoration:none;font-weight:600">${d.email}</a> · ${d.location}</p>
             <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-              <a href="mailto:${d.email}" style="background:#7c3aed;color:#fff;text-decoration:none;padding:12px 32px;border-radius:50px;font-weight:700;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Email me</a>
+              <a href="${gmailLink(d.email)}" style="background:#7c3aed;color:#fff;text-decoration:none;padding:12px 32px;border-radius:50px;font-weight:700;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Email me</a>
               ${d.github?`<a href="${d.github}" target="_blank" style="background:rgba(124,58,237,.12);color:#5b21b6;border:2px solid rgba(124,58,237,.3);text-decoration:none;padding:10px 32px;border-radius:50px;font-weight:700">GitHub</a>`:''}
               ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="background:rgba(124,58,237,.12);color:#5b21b6;border:2px solid rgba(124,58,237,.3);text-decoration:none;padding:10px 32px;border-radius:50px;font-weight:700">LinkedIn</a>`:''}
             </div>
@@ -1522,7 +1547,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             <p style="color:#475569;max-width:460px;margin:0 auto;line-height:1.85;font-size:.92rem">${d.bio}</p>
             <div style="margin-top:28px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
               ${d.github?`<a href="${d.github}" target="_blank" style="border:1px solid rgba(96,165,250,.3);color:#93c5fd;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:.82rem;transition:all .2s" onmouseover="this.style.borderColor='rgba(96,165,250,.7)';this.style.background='rgba(96,165,250,.08)'" onmouseout="this.style.borderColor='rgba(96,165,250,.3)';this.style.background='transparent'">GitHub</a>`:''}
-              ${d.email?`<a href="mailto:${d.email}" style="background:rgba(96,165,250,.15);color:#93c5fd;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:.82rem;border:1px solid rgba(96,165,250,.2)">Contact</a>`:''}
+              ${d.email?`<a href="${gmailLink(d.email)}" style="background:rgba(96,165,250,.15);color:#93c5fd;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:.82rem;border:1px solid rgba(96,165,250,.2)">Contact</a>`:''}
             </div>
           </div>
           <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(96,165,250,.3);font-size:.65rem;letter-spacing:2px;animation:float 2s ease-in-out infinite">▼ next</div>
@@ -1535,7 +1560,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <div style="max-width:600px;margin:0 auto">
             <p style="font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:4px;color:rgba(96,165,250,.4);margin-bottom:16px">// contact</p>
             <h2 style="font-size:clamp(2rem,5vw,3rem);font-weight:700;color:#e2e8f0;margin-bottom:24px;letter-spacing:-1px">Let's talk.</h2>
-            <a href="mailto:${d.email}" style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;padding:14px 40px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.95rem;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(96,165,250,.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">${d.email}</a>
+            <a href="${gmailLink(d.email)}" style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;padding:14px 40px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.95rem;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(96,165,250,.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">${d.email}</a>
             <p style="color:#475569;margin-top:16px;font-size:.88rem">${d.location}</p>
             ${d.education.length?`<div style="margin-top:32px;border-top:1px solid rgba(96,165,250,.1);padding-top:20px">${d.education.map((e:{degree:string,institution:string,period:string})=>`<p style="color:#64748b;font-size:.85rem"><strong style="color:#93c5fd">${e.degree}</strong> · ${e.institution} · ${e.period}</p>`).join('')}</div>`:''}
           </div>
@@ -1579,7 +1604,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
               <p style="color:rgba(255,255,255,.65);max-width:480px;line-height:1.8;font-size:.92rem">${d.bio}</p>
               <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
                 ${d.github?`<a href="${d.github}" target="_blank" style="background:#fff;color:#c2410c;padding:11px 28px;border-radius:50px;text-decoration:none;font-weight:800;font-size:.88rem">GitHub ↗</a>`:''}
-                ${d.email?`<a href="mailto:${d.email}" style="background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.4);padding:9px 28px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.88rem">${d.email}</a>`:''}
+                ${d.email?`<a href="${gmailLink(d.email)}" style="background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.4);padding:9px 28px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.88rem">${d.email}</a>`:''}
               </div>
             </div>
             <div style="flex-shrink:0;width:140px;height:140px;border-radius:50%;overflow:hidden;border:4px solid rgba(255,255,255,.6);box-shadow:0 20px 40px rgba(0,0,0,.2);margin-left:auto"><img src="${d.avatar}" style="width:100%;height:100%;object-fit:cover"></div>
@@ -1592,7 +1617,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           ${d.projects.length?`<section id="co-projects" style="margin-bottom:60px"><h2 class="reveal" style="font-size:1.6rem;font-weight:900;color:#431407;margin-bottom:24px">Projects</h2><div class="co-hscroll reveal">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="co-card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:800;color:#431407;font-size:.95rem">${p.link?`<a href="${p.link}" target="_blank" style="color:#431407;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#f59e0b;font-size:.8rem;font-weight:700">★ ${p.stars}</span>`:''}</div><p style="color:#7c2d12;font-size:.82rem;line-height:1.65;margin-bottom:12px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span style="font-size:.72rem;color:#c2410c;background:#ffedd5;padding:3px 10px;border-radius:6px;font-weight:600">${t}</span>`).join('')}</div></div>`).join('')}</div></section>`:''}
           ${githubActivityHtml(d,'#fff','#ffedd5','#ea580c','#7c2d12')}
           ${d.education.length?`<section id="co-education" style="margin-bottom:48px"><h2 class="reveal" style="font-size:1.6rem;font-weight:900;color:#431407;margin-bottom:20px">Education</h2>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="tilt-card reveal" style="background:#fff;border:2px solid #ffedd5;border-radius:14px;padding:20px;margin-bottom:12px"><div style="font-weight:800;color:#431407">${e.degree}</div><div style="color:#ea580c;font-size:.88rem">${e.institution}</div><div style="color:#fed7aa;font-size:.78rem;margin-top:2px">${e.period}</div></div>`).join('')}</section>`:''}
-          <section id="co-contact" class="reveal" style="text-align:center;padding:48px;background:linear-gradient(135deg,#ef4444,#f97316);border-radius:24px;margin-bottom:24px"><h2 style="font-size:2rem;font-weight:900;color:#fff;margin-bottom:12px">Ready to work together?</h2><a href="mailto:${d.email}" style="display:inline-block;background:#fff;color:#c2410c;padding:14px 40px;border-radius:50px;text-decoration:none;font-weight:900;font-size:.95rem;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">${d.email}</a></section>
+          <section id="co-contact" class="reveal" style="text-align:center;padding:48px;background:linear-gradient(135deg,#ef4444,#f97316);border-radius:24px;margin-bottom:24px"><h2 style="font-size:2rem;font-weight:900;color:#fff;margin-bottom:12px">Ready to work together?</h2><a href="${gmailLink(d.email)}" style="display:inline-block;background:#fff;color:#c2410c;padding:14px 40px;border-radius:50px;text-decoration:none;font-weight:900;font-size:.95rem;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">${d.email}</a></section>
         </div></div>`);
 
     // ── ARCTIC ─ Ice-clean frosted glass, crystal geometric accents ───────────
@@ -1627,7 +1652,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
               <p style="color:#155e75;font-size:.9rem;line-height:1.8;max-width:460px">${d.bio}</p>
               <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
                 ${d.github?`<a href="${d.github}" target="_blank" style="background:#0891b2;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.85rem">GitHub</a>`:''}
-                ${d.email?`<a href="mailto:${d.email}" style="border:2px solid #0891b2;color:#0891b2;padding:8px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.85rem">${d.email}</a>`:''}
+                ${d.email?`<a href="${gmailLink(d.email)}" style="border:2px solid #0891b2;color:#0891b2;padding:8px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.85rem">${d.email}</a>`:''}
               </div>
             </div>
           </div>
@@ -1638,7 +1663,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           ${d.projects.length?`<section id="ar-projects" style="margin-bottom:56px"><h2 class="reveal" style="font-size:1.4rem;font-weight:700;color:#0c4a6e;margin-bottom:20px">Projects</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="ar-frost tilt-card reveal"><div style="display:flex;justify-content:space-between;margin-bottom:8px;padding:18px 18px 0"><span style="font-weight:700;color:#0c4a6e">${p.link?`<a href="${p.link}" target="_blank" style="color:#0c4a6e;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#f59e0b;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#155e75;font-size:.83rem;line-height:1.65;margin-bottom:12px;padding:0 18px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px;padding:0 18px 18px">${p.tech.map((t:string)=>`<span style="font-size:.72rem;color:#0891b2;background:rgba(6,182,212,.1);padding:3px 10px;border-radius:6px;font-weight:600">${t}</span>`).join('')}</div></div>`).join('')}</div></section>`:''}
           ${githubActivityHtml(d,'rgba(255,255,255,.55)','rgba(6,182,212,.2)','#0891b2','#155e75')}
           ${d.education.length?`<section id="ar-education" style="margin-bottom:40px"><h2 class="reveal" style="font-size:1.4rem;font-weight:700;color:#0c4a6e;margin-bottom:16px">Education</h2>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="ar-card reveal"><div style="font-weight:700;color:#0c4a6e">${e.degree}</div><div style="color:#0891b2;font-size:.88rem">${e.institution}</div><div style="color:#7dd3fc;font-size:.78rem;margin-top:2px">${e.period}</div></div>`).join('')}</section>`:''}
-          <section id="ar-contact" class="ar-frost reveal" style="text-align:center;padding:40px;margin-bottom:24px"><h2 style="font-size:1.5rem;font-weight:700;color:#0c4a6e;margin-bottom:12px">Let's Connect ❄️</h2><a href="mailto:${d.email}" style="display:inline-block;background:#0891b2;color:#fff;padding:12px 32px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.9rem;transition:transform .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">${d.email}</a><p style="color:#155e75;font-size:.85rem;margin-top:10px">${d.location}</p></section>
+          <section id="ar-contact" class="ar-frost reveal" style="text-align:center;padding:40px;margin-bottom:24px"><h2 style="font-size:1.5rem;font-weight:700;color:#0c4a6e;margin-bottom:12px">Let's Connect ❄️</h2><a href="${gmailLink(d.email)}" style="display:inline-block;background:#0891b2;color:#fff;padding:12px 32px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.9rem;transition:transform .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">${d.email}</a><p style="color:#155e75;font-size:.85rem;margin-top:10px">${d.location}</p></section>
         </div></div>`);
 
     // ── MOCHA ─ Two-column cozy, fixed stats sidebar, warm coffee ────────────
@@ -1674,7 +1699,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             ${d.skills.length?`<div id="mo-skills"><p style="font-size:.6rem;text-transform:uppercase;letter-spacing:2px;color:rgba(212,165,116,.4);margin-bottom:10px">Skills</p><div style="display:flex;flex-wrap:wrap;gap:5px">${d.skills.map((s:string)=>`<span class="skill-tag" style="font-size:.72rem;color:#d4a574;background:rgba(212,165,116,.08);border:1px solid rgba(212,165,116,.15);padding:4px 11px;border-radius:6px">${s}</span>`).join('')}</div></div>`:''}
             <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(212,165,116,.1)">
               <p style="font-size:.6rem;text-transform:uppercase;letter-spacing:2px;color:rgba(212,165,116,.4);margin-bottom:8px">Contact</p>
-              <a href="mailto:${d.email}" style="color:#d4a574;font-size:.78rem;display:block;text-decoration:none;margin-bottom:4px;word-break:break-all">${d.email}</a>
+              <a href="${gmailLink(d.email)}" style="color:#d4a574;font-size:.78rem;display:block;text-decoration:none;margin-bottom:4px;word-break:break-all">${d.email}</a>
               <p style="color:#8a6e5a;font-size:.75rem">${d.location}</p>
             </div>
           </aside>
@@ -1688,7 +1713,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             ${d.projects.length?`<section id="mo-projects" style="margin-bottom:52px"><h2 class="reveal" style="font-family:'Playfair Display',serif;color:#d4a574;font-size:1.5rem;margin-bottom:24px;font-style:italic">Projects ☕</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="mo-card tilt-card reveal"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700;color:#e5d3c0;font-size:.95rem">${p.link?`<a href="${p.link}" target="_blank" style="color:#e5d3c0;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#fbbf24;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#8a6e5a;font-size:.83rem;line-height:1.65;margin-bottom:10px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span style="font-size:.7rem;color:#d4a574;background:rgba(212,165,116,.08);padding:3px 10px;border-radius:6px">${t}</span>`).join('')}</div></div>`).join('')}</div></section>`:''}
             ${githubActivityHtml(d,'rgba(212,165,116,.06)','rgba(212,165,116,.15)','#d4a574','#8a6e5a')}
             ${d.education.length?`<section id="mo-education" style="margin-bottom:40px"><h2 class="reveal" style="font-family:'Playfair Display',serif;color:#d4a574;font-size:1.5rem;margin-bottom:20px;font-style:italic">Education</h2>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="mo-card reveal"><div style="font-weight:700;color:#e5d3c0">${e.degree}</div><div style="color:#d4a574;font-size:.88rem">${e.institution}</div><div style="color:rgba(212,165,116,.4);font-size:.78rem">${e.period}</div></div>`).join('')}</section>`:''}
-            <section id="mo-contact" class="reveal" style="padding:32px;background:rgba(212,165,116,.06);border:1px solid rgba(212,165,116,.12);border-radius:16px;text-align:center;margin-bottom:24px"><h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;color:#d4a574;margin-bottom:12px;font-style:italic">Let's chat ☕</h2><a href="mailto:${d.email}" style="color:#d4a574;font-size:.95rem;text-decoration:none;border-bottom:1px solid rgba(212,165,116,.3)">${d.email}</a></section>
+            <section id="mo-contact" class="reveal" style="padding:32px;background:rgba(212,165,116,.06);border:1px solid rgba(212,165,116,.12);border-radius:16px;text-align:center;margin-bottom:24px"><h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;color:#d4a574;margin-bottom:12px;font-style:italic">Let's chat ☕</h2><a href="${gmailLink(d.email)}" style="color:#d4a574;font-size:.95rem;text-decoration:none;border-bottom:1px solid rgba(212,165,116,.3)">${d.email}</a></section>
           </main>
         </div></div>`);
 
@@ -1722,7 +1747,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             <p style="color:#9d4c7a;font-size:.92rem;line-height:1.9;max-width:420px;font-weight:300">${d.bio}</p>
             <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
               ${d.github?`<a href="${d.github}" target="_blank" style="background:#be185d;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.85rem">GitHub ↗</a>`:''}
-              ${d.email?`<a href="mailto:${d.email}" style="border:2px solid #fbcfe8;color:#be185d;padding:8px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem">${d.email}</a>`:''}
+              ${d.email?`<a href="${gmailLink(d.email)}" style="border:2px solid #fbcfe8;color:#be185d;padding:8px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem">${d.email}</a>`:''}
             </div>
           </div>
           <div style="background:linear-gradient(160deg,#fce7f3,#fbcfe8,#f9a8d4);display:flex;align-items:center;justify-content:center;padding:48px;position:relative;overflow:hidden">
@@ -1736,7 +1761,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           ${d.projects.length?`<section id="sk-projects" style="margin-bottom:60px;position:relative;padding-top:20px"><div class="sk-section-num">03</div><h2 class="reveal" style="font-size:1.4rem;font-weight:700;color:#9d174d;margin-bottom:8px;position:relative">プロジェクト · Projects</h2><div style="width:40px;height:2px;background:#ec4899;margin-bottom:24px"></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="sk-card tilt-card reveal"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700;color:#3d1c2f">${p.link?`<a href="${p.link}" target="_blank" style="color:#3d1c2f;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#f59e0b;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#9d4c7a;font-size:.83rem;line-height:1.65;margin-bottom:10px;font-weight:300">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span class="sk-tag" style="font-size:.7rem">${t}</span>`).join('')}</div></div>`).join('')}</div></section>`:''}
           ${githubActivityHtml(d,'#fff','#fbcfe8','#be185d','#9d4c7a')}
           ${d.education.length?`<section id="sk-education" style="margin-bottom:48px;position:relative;padding-top:20px"><div class="sk-section-num">04</div><h2 class="reveal" style="font-size:1.4rem;font-weight:700;color:#9d174d;margin-bottom:8px;position:relative">学歴 · Education</h2><div style="width:40px;height:2px;background:#ec4899;margin-bottom:24px"></div>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="sk-card reveal"><div style="font-weight:700;color:#3d1c2f">${e.degree}</div><div style="color:#be185d;font-size:.88rem">${e.institution}</div><div style="color:rgba(236,72,153,.4);font-size:.78rem;margin-top:2px">${e.period}</div></div>`).join('')}</section>`:''}
-          <section id="sk-contact" class="reveal" style="text-align:center;padding:48px;background:linear-gradient(135deg,#fce7f3,#fbcfe8);border-radius:20px;margin-bottom:24px"><p style="font-size:2rem;margin-bottom:12px">🌸</p><h2 style="font-size:1.6rem;font-weight:700;color:#9d174d;margin-bottom:8px">Get in Touch</h2><p style="color:#be185d;font-size:.88rem;margin-bottom:20px">お気軽にご連絡ください</p><a href="mailto:${d.email}" style="display:inline-block;background:#be185d;color:#fff;padding:12px 32px;border-radius:50px;text-decoration:none;font-weight:700;transition:transform .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">${d.email}</a></section>
+          <section id="sk-contact" class="reveal" style="text-align:center;padding:48px;background:linear-gradient(135deg,#fce7f3,#fbcfe8);border-radius:20px;margin-bottom:24px"><p style="font-size:2rem;margin-bottom:12px">🌸</p><h2 style="font-size:1.6rem;font-weight:700;color:#9d174d;margin-bottom:8px">Get in Touch</h2><p style="color:#be185d;font-size:.88rem;margin-bottom:20px">お気軽にご連絡ください</p><a href="${gmailLink(d.email)}" style="display:inline-block;background:#be185d;color:#fff;padding:12px 32px;border-radius:50px;text-decoration:none;font-weight:700;transition:transform .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">${d.email}</a></section>
         </div></div>`);
 
     // ── GRAPHITE ─ Industrial full-width, monospace, sharp ───────────────────
@@ -1770,7 +1795,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
               <p style="color:#71717a;font-size:.9rem;line-height:1.8;max-width:460px;font-weight:300">${d.bio}</p>
               <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
                 ${d.github?`<a href="${d.github}" target="_blank" style="background:#e4e4e7;color:#111113;padding:10px 24px;border-radius:4px;text-decoration:none;font-weight:700;font-size:.82rem;font-family:'IBM Plex Mono',monospace">git clone</a>`:''}
-                ${d.email?`<a href="mailto:${d.email}" style="border:1px solid #27272a;color:#a1a1aa;padding:10px 24px;border-radius:4px;text-decoration:none;font-size:.82rem;font-family:'IBM Plex Mono',monospace;transition:all .2s" onmouseover="this.style.borderColor='#e4e4e7';this.style.color='#e4e4e7'" onmouseout="this.style.borderColor='#27272a';this.style.color='#a1a1aa'">contact</a>`:''}
+                ${d.email?`<a href="${gmailLink(d.email)}" style="border:1px solid #27272a;color:#a1a1aa;padding:10px 24px;border-radius:4px;text-decoration:none;font-size:.82rem;font-family:'IBM Plex Mono',monospace;transition:all .2s" onmouseover="this.style.borderColor='#e4e4e7';this.style.color='#e4e4e7'" onmouseout="this.style.borderColor='#27272a';this.style.color='#a1a1aa'">contact</a>`:''}
               </div>
             </div>
             <div style="flex-shrink:0;width:120px;height:120px;border-radius:6px;overflow:hidden;border:1px solid #3f3f46"><img src="${d.avatar}" style="width:100%;height:100%;object-fit:cover"></div>
@@ -1781,7 +1806,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
         ${d.projects.length?`<section id="gr-projects" class="gr-sec" style="position:relative;padding-top:56px"><div class="gr-num">03</div><div class="gr-divider"></div><p style="font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:3px;color:#52525b;margin-bottom:8px;position:relative">PROJECTS</p><h2 class="reveal" style="font-size:2rem;font-weight:700;color:#fafafa;margin-bottom:28px;letter-spacing:-1px;position:relative">Built Things</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="gr-card tilt-card reveal"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700;color:#fafafa;font-size:.92rem">${p.link?`<a href="${p.link}" target="_blank" style="color:#fafafa;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#fbbf24;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#71717a;font-size:.82rem;line-height:1.65;margin-bottom:10px;font-weight:300">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span style="font-size:.7rem;color:#a1a1aa;background:#18181b;border:1px solid #27272a;padding:3px 10px;border-radius:4px;font-family:'IBM Plex Mono',monospace">${t}</span>`).join('')}</div></div>`).join('')}</div></section>`:''}
         <section class="gr-sec" style="position:relative;padding-top:56px"><div class="gr-divider"></div>${githubActivityHtml(d,'#1c1c1f','#3f3f46','#e4e4e7','#71717a')}${leetcodeHtml(d,'#1c1c1f','#3f3f46','#e4e4e7','#71717a')}</section>
         ${d.education.length?`<section class="gr-sec" style="padding-top:0"><p style="font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:3px;color:#52525b;margin-bottom:16px">EDUCATION</p>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="gr-card reveal"><div style="font-weight:700;color:#fafafa">${e.degree}</div><div style="color:#a1a1aa;font-family:'IBM Plex Mono',monospace;font-size:.8rem">${e.institution}</div><div style="color:#52525b;font-family:'IBM Plex Mono',monospace;font-size:.72rem">${e.period}</div></div>`).join('')}</section>`:''}
-        <section id="gr-contact" class="gr-sec" style="padding-top:0;padding-bottom:80px"><div class="gr-divider"></div><div class="reveal" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;background:#1c1c1f;border:1px solid #27272a;border-radius:8px;padding:32px"><div><p style="font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:#52525b;margin-bottom:8px">CONTACT</p><h2 style="font-size:1.5rem;font-weight:700;color:#fafafa;margin-bottom:4px">Let's build something.</h2><p style="color:#71717a;font-size:.85rem">${d.location}</p></div><a href="mailto:${d.email}" style="background:#e4e4e7;color:#111113;padding:14px 32px;border-radius:4px;text-decoration:none;font-weight:700;font-size:.88rem;font-family:'IBM Plex Mono',monospace;white-space:nowrap">${d.email}</a></div></section>
+        <section id="gr-contact" class="gr-sec" style="padding-top:0;padding-bottom:80px"><div class="gr-divider"></div><div class="reveal" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;background:#1c1c1f;border:1px solid #27272a;border-radius:8px;padding:32px"><div><p style="font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:#52525b;margin-bottom:8px">CONTACT</p><h2 style="font-size:1.5rem;font-weight:700;color:#fafafa;margin-bottom:4px">Let's build something.</h2><p style="color:#71717a;font-size:.85rem">${d.location}</p></div><a href="${gmailLink(d.email)}" style="background:#e4e4e7;color:#111113;padding:14px 32px;border-radius:4px;text-decoration:none;font-weight:700;font-size:.88rem;font-family:'IBM Plex Mono',monospace;white-space:nowrap">${d.email}</a></div></section>
         </div>`);
 
     // ── EMERALD ─ Luxury alternating wide sections ────────────────────────────
@@ -1816,7 +1841,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
               <p style="color:#4ade80;font-size:.9rem;line-height:1.85;font-style:italic;opacity:.75">"${d.bio}"</p>
               <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
                 ${d.github?`<a href="${d.github}" target="_blank" style="background:#10b981;color:#021a0a;padding:11px 28px;border-radius:8px;text-decoration:none;font-weight:800;font-size:.88rem">GitHub</a>`:''}
-                ${d.email?`<a href="mailto:${d.email}" style="border:2px solid rgba(16,185,129,.4);color:#10b981;padding:9px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.88rem">${d.email}</a>`:''}
+                ${d.email?`<a href="${gmailLink(d.email)}" style="border:2px solid rgba(16,185,129,.4);color:#10b981;padding:9px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.88rem">${d.email}</a>`:''}
               </div>
             </div>
             <div style="text-align:center"><div style="width:160px;height:160px;border-radius:50%;overflow:hidden;margin:0 auto 24px;border:2px solid rgba(16,185,129,.4);box-shadow:0 0 0 8px rgba(16,185,129,.06)"><img src="${d.avatar}" style="width:100%;height:100%;object-fit:cover"></div><p style="color:rgba(16,185,129,.5);font-size:.72rem;letter-spacing:2px;text-transform:uppercase">${d.location}</p></div>
@@ -1827,7 +1852,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
         ${d.projects.length?`<section id="em-projects" class="em-sec em-alt-bg"><div class="em-inner"><p class="reveal" style="font-size:.65rem;text-transform:uppercase;letter-spacing:4px;color:rgba(16,185,129,.4);margin-bottom:8px">Works</p><h2 class="reveal" style="font-family:'Merriweather',serif;font-size:2rem;color:#f0fdf4;margin-bottom:8px">Projects</h2><div class="em-rule reveal"></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="em-card tilt-card reveal"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700;color:#f0fdf4;font-family:'Merriweather',serif">${p.link?`<a href="${p.link}" target="_blank" style="color:#f0fdf4;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#fbbf24;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#4ade80;font-size:.85rem;line-height:1.65;margin-bottom:12px;opacity:.75">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:6px">${p.tech.map((t:string)=>`<span style="font-size:.72rem;color:#10b981;background:rgba(16,185,129,.1);padding:3px 10px;border-radius:6px;font-weight:600">${t}</span>`).join('')}</div></div>`).join('')}</div></div></section>`:''}
         <section class="em-sec"><div class="em-inner">${githubActivityHtml(d,'rgba(16,185,129,.05)','rgba(16,185,129,.18)','#10b981','#4ade80')}</div></section>
         ${d.education.length?`<section id="em-education" class="em-sec em-alt-bg"><div class="em-inner"><p class="reveal" style="font-size:.65rem;text-transform:uppercase;letter-spacing:4px;color:rgba(16,185,129,.4);margin-bottom:8px">Formation</p><h2 class="reveal" style="font-family:'Merriweather',serif;font-size:2rem;color:#f0fdf4;margin-bottom:8px">Education</h2><div class="em-rule reveal"></div>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="em-card tilt-card reveal" style="margin-bottom:12px"><div style="font-family:'Merriweather',serif;font-weight:700;color:#f0fdf4">${e.degree}</div><div style="color:#10b981;font-size:.88rem">${e.institution}</div><div style="color:rgba(16,185,129,.4);font-size:.78rem;margin-top:2px">${e.period}</div></div>`).join('')}</div></section>`:''}
-        <section id="em-contact" class="em-sec" style="text-align:center"><div class="em-inner"><div class="reveal" style="max-width:600px;margin:0 auto;padding:48px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:20px"><h2 style="font-family:'Merriweather',serif;font-size:2rem;color:#f0fdf4;margin-bottom:12px">Get In Touch</h2><p style="color:#4ade80;font-size:.9rem;margin-bottom:24px;opacity:.7">${d.email} · ${d.location}</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a href="mailto:${d.email}" style="background:#10b981;color:#021a0a;padding:12px 32px;border-radius:50px;text-decoration:none;font-weight:800;font-size:.9rem">Email me</a>${d.github?`<a href="${d.github}" target="_blank" style="border:2px solid rgba(16,185,129,.3);color:#10b981;padding:10px 32px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.9rem">GitHub</a>`:''}</div></div></div></section>
+        <section id="em-contact" class="em-sec" style="text-align:center"><div class="em-inner"><div class="reveal" style="max-width:600px;margin:0 auto;padding:48px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:20px"><h2 style="font-family:'Merriweather',serif;font-size:2rem;color:#f0fdf4;margin-bottom:12px">Get In Touch</h2><p style="color:#4ade80;font-size:.9rem;margin-bottom:24px;opacity:.7">${d.email} · ${d.location}</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a href="${gmailLink(d.email)}" style="background:#10b981;color:#021a0a;padding:12px 32px;border-radius:50px;text-decoration:none;font-weight:800;font-size:.9rem">Email me</a>${d.github?`<a href="${d.github}" target="_blank" style="border:2px solid rgba(16,185,129,.3);color:#10b981;padding:10px 32px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.9rem">GitHub</a>`:''}</div></div></div></section>
         </div>`);
 
     // ── ROYAL ─ Scroll-snap regal chambers with side dot nav ─────────────────
@@ -1872,7 +1897,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             <div class="ry-rule"><span style="font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:4px;color:rgba(129,140,248,.4)">CONTACT</span></div>
             <div style="font-size:1.5rem;margin-bottom:16px">♔</div>
             <h2 style="font-family:'Cinzel',serif;font-size:2.5rem;color:#e0e7ff;margin-bottom:20px;letter-spacing:3px">Say Hello.</h2>
-            <a href="mailto:${d.email}" style="display:inline-block;background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;padding:14px 40px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.92rem;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(129,140,248,.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">${d.email}</a>
+            <a href="${gmailLink(d.email)}" style="display:inline-block;background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;padding:14px 40px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.92rem;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(129,140,248,.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">${d.email}</a>
             <p style="color:#a5b4fc;margin-top:12px;font-size:.85rem">${d.location}</p>
             ${d.education.length?`<div style="margin-top:28px;border-top:1px solid rgba(129,140,248,.1);padding-top:20px">${d.education.map((e:{degree:string,institution:string,period:string})=>`<p style="color:#a5b4fc;font-size:.83rem"><strong style="color:#a5b4fc">${e.degree}</strong> · ${e.institution}</p>`).join('')}</div>`:''}
           </div>
@@ -1914,7 +1939,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             <p style="color:#475569;max-width:460px;margin:0 auto;line-height:1.85;font-size:.92rem">${d.bio}</p>
             <div style="display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap">
               ${d.github?`<a href="${d.github}" target="_blank" style="border:1px solid rgba(249,115,22,.4);color:#f97316;padding:11px 28px;border-radius:8px;text-decoration:none;font-size:.85rem;font-weight:700;transition:all .2s" onmouseover="this.style.background='rgba(249,115,22,.1)'" onmouseout="this.style.background='transparent'">GitHub</a>`:''}
-              ${d.email?`<a href="mailto:${d.email}" style="background:rgba(249,115,22,.15);color:#fb923c;padding:11px 28px;border-radius:8px;text-decoration:none;font-size:.85rem;font-weight:700;border:1px solid rgba(249,115,22,.2)">${d.email}</a>`:''}
+              ${d.email?`<a href="${gmailLink(d.email)}" style="background:rgba(249,115,22,.15);color:#fb923c;padding:11px 28px;border-radius:8px;text-decoration:none;font-size:.85rem;font-weight:700;border:1px solid rgba(249,115,22,.2)">${d.email}</a>`:''}
             </div>
           </div>
           <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(249,115,22,.3);font-size:.65rem;letter-spacing:2px;animation:float 2s ease-in-out infinite">▼ IGNITE</div>
@@ -1928,7 +1953,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             <p style="font-size:.65rem;letter-spacing:5px;color:rgba(249,115,22,.5);margin-bottom:16px;font-weight:700">OPEN CHANNEL</p>
             <h2 style="font-size:clamp(2rem,5vw,3rem);font-weight:900;color:#e2e8f0;margin-bottom:8px;letter-spacing:-1px">Let's launch 🚀</h2>
             <p style="color:#475569;margin-bottom:28px;font-size:.9rem">${d.location}</p>
-            <a href="mailto:${d.email}" style="display:inline-block;background:linear-gradient(135deg,#f97316,#fb923c);color:#fff;padding:14px 40px;border-radius:8px;text-decoration:none;font-weight:800;font-size:.95rem;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(249,115,22,.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">${d.email}</a>
+            <a href="${gmailLink(d.email)}" style="display:inline-block;background:linear-gradient(135deg,#f97316,#fb923c);color:#fff;padding:14px 40px;border-radius:8px;text-decoration:none;font-weight:800;font-size:.95rem;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(249,115,22,.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">${d.email}</a>
             <div style="display:flex;gap:12px;justify-content:center;margin-top:16px">
               ${d.github?`<a href="${d.github}" target="_blank" style="color:rgba(249,115,22,.5);text-decoration:none;font-size:.82rem;transition:color .2s" onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='rgba(249,115,22,.5)'">GitHub ↗</a>`:''}
               ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="color:rgba(249,115,22,.5);text-decoration:none;font-size:.82rem;transition:color .2s" onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='rgba(249,115,22,.5)'">LinkedIn ↗</a>`:''}

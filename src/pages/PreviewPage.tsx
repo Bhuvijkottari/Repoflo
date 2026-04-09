@@ -362,9 +362,9 @@ const handleDownloadPDF = () => {
       {!hideNavbar && <Navbar />}
       <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
       
-      <div className="pt-20 pb-16 container mx-auto px-4">
+      <div className="pt-20 pb-16 container mx-auto px-2 sm:px-4">
         {/* Top bar */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
           <div className="flex items-center gap-3 flex-wrap">
             <Button
               size="sm"
@@ -448,7 +448,7 @@ const handleDownloadPDF = () => {
               className="w-full max-w-5xl"
             >
               <div className={`bg-card rounded-2xl shadow-card-hover overflow-hidden transition-all duration-500 ${
-                viewMode === "mobile" && !isMobile ? "w-[390px] h-[844px] mx-auto" : "w-full h-[80vh]"
+                viewMode === "mobile" && !isMobile ? "w-[390px] h-[844px] mx-auto" : isMobile ? "w-full h-[75vh]" : "w-full h-[80vh]"
               }`}>
                 <div className="bg-secondary/50 px-4 py-2 flex items-center gap-2 border-b border-border">
                   <div className="flex gap-1.5">

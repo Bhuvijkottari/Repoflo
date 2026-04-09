@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
-import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, ServerCrash, X, Monitor, Linkedin } from "lucide-react";
+import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, ServerCrash, X, Monitor } from "lucide-react";
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogAction,
@@ -52,7 +52,6 @@ const GeneratePage = () => {
     return unsub;
   }, []);
   const [githubUrl, setGithubUrl] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [nameWarning, setNameWarning] = useState("");
@@ -138,10 +137,6 @@ const GeneratePage = () => {
           }
         }
         setNameWarning("");
-      }
-      // Merge LinkedIn URL if provided by user
-      if (linkedinUrl.trim()) {
-        finalData.linkedin = linkedinUrl.trim();
       }
       setStatus("Building your portfolio...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
@@ -325,21 +320,6 @@ const GeneratePage = () => {
                 <CheckCircle2 className="w-5 h-5 text-[#3fc4e7] flex-shrink-0" />
               </motion.div>
             )}
-          </div>
-
-          {/* LinkedIn URL */}
-          <div className="space-y-3">
-            <Label className="font-display font-semibold flex items-center gap-2 text-white">
-              <Linkedin className="w-5 h-5 text-[#3fc4e7]" /> LinkedIn Profile URL —{" "}
-              <span className="text-[#b8c7e0] font-normal text-xs">optional, shown in portfolio</span>
-            </Label>
-            <Input
-              type="url"
-              placeholder="https://linkedin.com/in/yourprofile"
-              value={linkedinUrl}
-              onChange={(e) => setLinkedinUrl(e.target.value)}
-              className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
-            />
           </div>
 
           {/* Resume Upload */}
