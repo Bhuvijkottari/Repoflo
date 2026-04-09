@@ -142,7 +142,7 @@ const Index = () => {
 
           </motion.div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4 max-w-5xl mx-auto">
             {[
               { name: "Minimal", image: "minimal" },
               { name: "Bold Dark", image: "bold" },
@@ -166,19 +166,18 @@ const Index = () => {
             ].map((theme, i) => (
               <motion.div
                 key={theme.name}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.03 }}
-                whileHover={{ y: -6 }}
+                transition={{ delay: Math.min(i * 0.02, 0.3) }}
                 className="group cursor-pointer"
               >
                 <Link to="/themes">
-                  <div className="h-28 rounded-xl overflow-hidden mb-2 shadow-lg border border-[#3fc4e7]/20">
-                    <img src={getThemeImage(theme.image)} alt={theme.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <div className="h-20 sm:h-28 rounded-xl overflow-hidden mb-1 sm:mb-2 shadow-lg border border-[#3fc4e7]/20">
+                    <img src={getThemeImage(theme.image)} alt={theme.name} loading="lazy" className="w-full h-full object-cover" />
                   </div>
 
-                  <p className="text-xs font-display font-medium text-white text-center group-hover:text-[#69d2f1] transition-colors">
+                  <p className="text-[10px] sm:text-xs font-display font-medium text-white text-center group-hover:text-[#69d2f1] transition-colors">
                     {theme.name}
                   </p>
 

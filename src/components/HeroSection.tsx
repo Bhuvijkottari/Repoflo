@@ -39,34 +39,10 @@ const HeroSection = () => {
   return (
     <section className="relative min-h-screen overflow-hidden flex items-center pt-16 bg-[#0b1f3a]">
       
-      {/* Animated background blobs */}
-      <motion.div
-        animate={{ scale: [1, 1.2, 1], opacity: [0.04, 0.1, 0.04] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-20 right-0 w-[500px] h-[500px] rounded-full bg-[#3fc4e7]/10 blur-3xl"
-      />
-
-      <motion.div
-        animate={{ scale: [1, 1.3, 1], opacity: [0.03, 0.08, 0.03] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-20 left-0 w-96 h-96 rounded-full bg-[#69d2f1]/10 blur-3xl"
-      />
-
-      <motion.div
-        animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full bg-[#3fc4e7]/10 blur-3xl"
-      />
-
-      {/* Grid pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.015]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-        }}
-      />
+      {/* Static background blobs — no infinite animations for performance */}
+      <div className="absolute top-20 right-0 w-[500px] h-[500px] rounded-full bg-[#3fc4e7]/8 blur-2xl" />
+      <div className="absolute bottom-20 left-0 w-96 h-96 rounded-full bg-[#69d2f1]/8 blur-2xl" />
+      <div className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full bg-[#3fc4e7]/6 blur-2xl" />
 
       <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center relative z-10">
 
@@ -208,22 +184,10 @@ const HeroSection = () => {
       </div>
 
       {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2"
-      >
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2">
         <span className="text-xs text-[#b8c7e0] font-body">Scroll to explore</span>
-
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ChevronDown className="w-5 h-5 text-[#b8c7e0]" />
-        </motion.div>
-
-      </motion.div>
+        <ChevronDown className="w-5 h-5 text-[#b8c7e0] animate-bounce" />
+      </div>
 
     </section>
   );

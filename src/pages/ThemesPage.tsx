@@ -95,50 +95,46 @@ const ThemesPage = () => {
         </motion.div>
 
         {/* ── Theme Grid ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 max-w-6xl mx-auto">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4 max-w-6xl mx-auto">
           {themes.map((theme, i) => (
             <motion.div
               key={theme.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              transition={{ delay: Math.min(i * 0.02, 0.3) }}
               onClick={() => setSelected(theme.id)}
-              className={`relative bg-[#132f52] rounded-xl overflow-hidden cursor-pointer transition-all duration-300 border-2 ${
+              className={`relative bg-[#132f52] rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border-2 active:scale-[0.97] ${
                 selected === theme.id
                   ? "border-[#3fc4e7] shadow-lg shadow-[#3fc4e7]/20 ring-2 ring-[#3fc4e7]/25"
-                  : "border-[#3fc4e7]/15 hover:border-[#3fc4e7]/40 hover:shadow-lg hover:shadow-[#3fc4e7]/10"
+                  : "border-[#3fc4e7]/15 hover:border-[#3fc4e7]/40"
               }`}
             >
               {/* Thumbnail */}
-              <div className="h-16 sm:h-20 overflow-hidden">
+              <div className="h-20 sm:h-24 overflow-hidden">
                 <img
                   src={themeImages[theme.image]}
                   alt={theme.name}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  loading="lazy"
+                  className="w-full h-full object-cover"
                 />
               </div>
 
               {/* Selected checkmark */}
               {selected === theme.id && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-[#3fc4e7] flex items-center justify-center shadow-md"
-                >
-                  <Check className="w-3.5 h-3.5 text-black" />
-                </motion.div>
+                <div className="absolute top-1.5 right-1.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#3fc4e7] flex items-center justify-center shadow-md">
+                  <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
+                </div>
               )}
 
               {/* Card body */}
-              <div className="p-3 sm:p-4">
-                <h3 className="font-display font-semibold text-white text-sm mb-1 truncate">{theme.name}</h3>
-                <p className="text-[10px] sm:text-xs text-[#b8c7e0] font-body line-clamp-2 mb-2 sm:mb-3 h-7 sm:h-8 leading-relaxed">
+              <div className="p-2 sm:p-4">
+                <h3 className="font-display font-semibold text-white text-xs sm:text-sm mb-0.5 sm:mb-1 truncate">{theme.name}</h3>
+                <p className="text-[9px] sm:text-xs text-[#b8c7e0] font-body line-clamp-2 mb-1.5 sm:mb-3 leading-relaxed hidden sm:block">
                   {theme.description}
                 </p>
                 <button
                   onClick={(e) => { e.stopPropagation(); setPreviewTheme(theme.id); }}
-                  className="w-full h-7 sm:h-8 text-xs font-semibold font-body rounded-lg
+                  className="w-full h-6 sm:h-8 text-[10px] sm:text-xs font-semibold font-body rounded-lg
                              bg-[#3fc4e7]/12 text-[#69d2f1] border border-[#3fc4e7]/25
                              hover:bg-[#3fc4e7]/22 hover:border-[#3fc4e7]/50
                              flex items-center justify-center gap-1 transition-all duration-200"
@@ -202,49 +198,45 @@ const ThemesPage = () => {
       {/* ── Preview Modal ── */}
       {previewTheme && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/80 flex flex-col"
           onClick={() => setPreviewTheme(null)}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#132f52] border border-[#3fc4e7]/20 rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] overflow-hidden flex flex-col"
+          {/* Modal header — compact on mobile */}
+          <div
+            className="flex items-center justify-between px-3 sm:px-5 py-3 bg-[#132f52] border-b border-[#3fc4e7]/15 flex-shrink-0"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#3fc4e7]/15">
-              <span className="font-display font-semibold text-white">
-                Preview: {themes.find((t) => t.id === previewTheme)?.name}
-              </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => { setSelected(previewTheme); setPreviewTheme(null); }}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold font-display
-                             bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black
-                             hover:opacity-90 transition-opacity"
-                >
-                  <Check className="w-4 h-4" /> Select This Theme
-                </button>
-                <button
-                  onClick={() => setPreviewTheme(null)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold font-body
-                             text-[#b8c7e0] border border-[#3fc4e7]/20
-                             hover:bg-[#3fc4e7]/10 hover:text-white transition-all duration-200"
-                >
-                  Close
-                </button>
-              </div>
+            <span className="font-display font-semibold text-white text-sm sm:text-base truncate mr-2">
+              {themes.find((t) => t.id === previewTheme)?.name}
+            </span>
+            <div className="flex gap-2 flex-shrink-0">
+              <button
+                onClick={() => { setSelected(previewTheme); setPreviewTheme(null); }}
+                className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold font-display
+                           bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black
+                           hover:opacity-90 transition-opacity"
+              >
+                <Check className="w-3.5 h-3.5" /> Select
+              </button>
+              <button
+                onClick={() => setPreviewTheme(null)}
+                className="flex items-center gap-1 px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold font-body
+                           text-[#b8c7e0] border border-[#3fc4e7]/20
+                           hover:bg-[#3fc4e7]/10 hover:text-white transition-all duration-200"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
+          </div>
 
-            {/* iframe */}
-            <div className="flex-1 overflow-hidden">
-              <iframe
-                srcDoc={getThemeHtml(previewTheme, dummyPreviewData)}
-                className="w-full h-full border-0"
-                title="Theme Preview"
-              />
-            </div>
-          </motion.div>
+          {/* iframe — full remaining height */}
+          <div className="flex-1 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <iframe
+              srcDoc={getThemeHtml(previewTheme, dummyPreviewData)}
+              className="w-full h-full border-0"
+              title="Theme Preview"
+            />
+          </div>
         </div>
       )}
     </div>
