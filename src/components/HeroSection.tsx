@@ -4,36 +4,19 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Github, Palette, Zap, Star, Users, ChevronDown, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroShapes from "@/assets/hero-shapes.png";
-import { incrementVisitorCount, getVisitorCount, db } from "@/lib/firebase";
-import { doc, onSnapshot } from "firebase/firestore";
+import { incrementVisitorCount, getVisitorCount } from "@/lib/firebase";
 
 const HeroSection = () => {
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
   useEffect(() => {
-    // Increment visitor count (fire and forget — onSnapshot will pick up the result)
-    incrementVisitorCount().catch(() => {});
-
-    // Real-time listener — always the source of truth for display
-    const unsub = onSnapshot(
-      doc(db, "site_stats", "visitors"),
-      (snap) => {
-        if (snap.exists()) {
-          setVisitorCount(snap.data().count || 0);
-        }
-      },
-      () => {
-        // If listener fails, try a one-time read
-        getVisitorCount().then((count) => setVisitorCount(count || 0));
-      }
-    );
-
-    // Timeout fallback — if nothing resolved in 5s, show at least 1
-    const timeout = setTimeout(() => {
-      setVisitorCount((prev) => prev === null ? 1 : prev);
-    }, 5000);
-
-    return () => { unsub(); clearTimeout(timeout); };
+    // Atomic increment — returns the exact new count
+    incrementVisitorCount()
+      .then((count) => setVisitorCount(count))
+      .catch(() => {
+        // Fallback: just read current value
+        getVisitorCount().then((count) => setVisitorCount(count || 1));
+      });
   }, []);
 
   return (

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, updateDoc, increment, getDoc, setDoc, onSnapshot, where, deleteDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, updateDoc, increment, getDoc, setDoc, onSnapshot, where, deleteDoc, runTransaction } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
 
 const firebaseConfig = {
@@ -65,16 +65,22 @@ export function subscribeFeedbacks(
 export async function incrementVisitorCount(): Promise<number> {
   const ref = doc(db, "site_stats", "visitors");
   try {
-    // Use setDoc with merge so it works whether doc exists or not
-    await setDoc(ref, { count: increment(1) }, { merge: true });
-    const snap = await getDoc(ref);
-    return snap.exists() ? (snap.data().count || 1) : 1;
+    // Atomic transaction: read current count, increment, return new value
+    const newCount = await runTransaction(db, async (transaction) => {
+      const snap = await transaction.get(ref);
+      const current = snap.exists() ? (snap.data().count || 0) : 0;
+      const updated = current + 1;
+      transaction.set(ref, { count: updated }, { merge: true });
+      return updated;
+    });
+    return newCount;
   } catch (err) {
-    console.warn("Visitor counter error:", err);
-    // Try read-only fallback
+    console.warn("Visitor counter transaction error:", err);
+    // Fallback: try non-transactional increment
     try {
+      await setDoc(ref, { count: increment(1) }, { merge: true });
       const snap = await getDoc(ref);
-      return snap.exists() ? (snap.data().count || 0) : 0;
+      return snap.exists() ? (snap.data().count || 1) : 1;
     } catch {
       return 0;
     }
