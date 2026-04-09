@@ -4,24 +4,36 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Github, Palette, Zap, Star, Users, ChevronDown, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroShapes from "@/assets/hero-shapes.png";
-import { incrementVisitorCount, db } from "@/lib/firebase";
+import { incrementVisitorCount, getVisitorCount, db } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 
 const HeroSection = () => {
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
   useEffect(() => {
-    // Increment on mount
-    incrementVisitorCount().then(setVisitorCount).catch(() => {});
-    // Subscribe for real-time count updates
+    let settled = false;
+
+    // Try increment first
+    incrementVisitorCount()
+      .then((count) => { if (!settled) { settled = true; setVisitorCount(count); } })
+      .catch(() => {
+        // If increment fails, try read-only
+        getVisitorCount().then((count) => { if (!settled) { settled = true; setVisitorCount(count || 1); } });
+      });
+
+    // Real-time listener
     const unsub = onSnapshot(
       doc(db, "site_stats", "visitors"),
       (snap) => {
-        if (snap.exists()) setVisitorCount(snap.data().count || 0);
+        if (snap.exists()) { settled = true; setVisitorCount(snap.data().count || 0); }
       },
-      () => {} // ignore listener errors silently
+      () => {} // listener errors handled by increment/read fallback
     );
-    return unsub;
+
+    // Timeout fallback — if nothing resolved in 4s, show at least 1
+    const timeout = setTimeout(() => { if (!settled) { settled = true; setVisitorCount(1); } }, 4000);
+
+    return () => { unsub(); clearTimeout(timeout); };
   }, []);
 
   return (

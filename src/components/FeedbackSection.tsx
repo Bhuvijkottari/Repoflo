@@ -25,11 +25,15 @@ const FeedbackSection = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    let didLoad = false;
     const unsubscribe = subscribeFeedbacks(20, (data) => {
+      didLoad = true;
       setFeedbacks(data);
       setLoading(false);
     });
-    return () => unsubscribe();
+    // Timeout fallback — stop showing spinner after 5s even if Firestore is slow/blocked
+    const timeout = setTimeout(() => { if (!didLoad) setLoading(false); }, 5000);
+    return () => { unsubscribe(); clearTimeout(timeout); };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
