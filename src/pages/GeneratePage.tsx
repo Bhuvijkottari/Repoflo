@@ -394,42 +394,29 @@ const GeneratePage = () => {
           </label>
 
           {/* Submit */}
-          {isProcessing ? (
-            <div className="w-full rounded-xl bg-[#0b1f3a] border border-[#3fc4e7]/25 p-4 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#3fc4e7]/15 flex items-center justify-center flex-shrink-0">
-                  <Loader2 className="w-4 h-4 animate-spin text-[#3fc4e7]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-display font-semibold">{status || "Processing..."}</p>
-                  <p className="text-[#b8c7e0]/60 text-xs font-body mt-0.5">This may take a few seconds</p>
-                </div>
-              </div>
-              <div className="h-1.5 w-full bg-[#132f52] rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] rounded-full"
-                  initial={{ width: "5%" }}
-                  animate={{ width: status.includes("Reading") ? "45%" : status.includes("Building") ? "80%" : "15%" }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                />
-              </div>
-            </div>
-          ) : (
-            <motion.div whileHover={{ scale: termsAccepted ? 1.02 : 1 }} whileTap={{ scale: termsAccepted ? 0.98 : 1 }}>
-              <button
-                type="submit"
-                disabled={!githubData || githubFetching || !termsAccepted || !!nameWarning}
-                className="w-full h-13 py-3.5 rounded-xl text-base font-bold font-display
-                           bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black
-                           hover:opacity-90 active:scale-[0.98] transition-all duration-200
-                           shadow-lg shadow-[#3fc4e7]/20
-                           disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
-                           flex items-center justify-center gap-2 w-full"
-              >
-                Generate Portfolio <ArrowRight className="w-5 h-5" />
-              </button>
-            </motion.div>
-          )}
+          <motion.div whileHover={{ scale: termsAccepted ? 1.02 : 1 }} whileTap={{ scale: termsAccepted ? 0.98 : 1 }}>
+            <button
+              type="submit"
+              disabled={!githubData || isProcessing || githubFetching || !termsAccepted || !!nameWarning}
+              className="w-full h-13 py-3.5 rounded-xl text-base font-bold font-display
+                         bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black
+                         hover:opacity-90 active:scale-[0.98] transition-all duration-200
+                         shadow-lg shadow-[#3fc4e7]/20
+                         disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
+                         flex items-center justify-center gap-2 w-full"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  {status || "Processing..."}
+                </>
+              ) : (
+                <>
+                  Generate Portfolio <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          </motion.div>
 
         </motion.form>
       </div>
