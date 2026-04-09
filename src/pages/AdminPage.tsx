@@ -19,8 +19,10 @@ import {
   updateRecruiterEmail,
   deleteRecruiter,
   RecruiterProfile,
+  getAdminUsers,
+  PRIMARY_ADMIN,
+  signOutUser,
 } from "@/lib/firebase";
-import { signOutUser } from "@/lib/firebase";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -33,6 +35,11 @@ const AdminPage = () => {
   const [newRecruiterLevel, setNewRecruiterLevel] = useState("1");
   const [loadingRecruiters, setLoadingRecruiters] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [adminEmails, setAdminEmails] = useState<string[]>([PRIMARY_ADMIN]);
+
+  useEffect(() => {
+    getAdminUsers().then((users) => setAdminEmails(users.map((u) => u.email.toLowerCase())));
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -165,10 +172,7 @@ const AdminPage = () => {
     );
   }
 
-  const isAdmin =
-    user?.email === 'skanda0402@gmail.com' ||
-    user?.email === 'cadithya110@gmail.com' ||
-    user?.email === 'bhuvijkottari@gmail.com';
+  const isAdmin = adminEmails.includes(user?.email?.toLowerCase() || "");
 
   if (!user) {
     return (

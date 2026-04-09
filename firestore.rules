@@ -1,0 +1,106 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── HELPER FUNCTIONS ───────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      // Primary admin always allowed
+      return isSignedIn() && request.auth.token.email == 'cadithya110@gmail.com';
+    }
+
+    // ─── SITE STATS (visitor counter) ───────────────────────────────────
+    // Anyone can read; anyone can increment count (no auth required for public counter)
+    match /site_stats/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ─── FEEDBACKS ──────────────────────────────────────────────────────
+    // Anyone can submit feedback; anyone can read (public testimonials)
+    // Only admins can delete
+    match /feedbacks/{feedbackId} {
+      allow read: if true;
+      allow create: if true;
+      allow delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // ─── PORTFOLIO USAGE TRACKING ───────────────────────────────────────
+    // Anyone can create (tracked on portfolio generation); only admins can read
+    match /portfolio_usage/{docId} {
+      allow create: if true;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ─── GEMINI USAGE TRACKING ──────────────────────────────────────────
+    // Anyone can create (tracked on API call); admins and signed-in users can read (for daily limit check)
+    match /gemini_usage/{docId} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if false;
+    }
+
+    // ─── ADMIN SETTINGS ─────────────────────────────────────────────────
+    // Config (site settings) readable by all (needed for maintenance gate)
+    // Admin users list and config writable only by admin
+    match /admin_settings/config {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /admin_settings/admin_users {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ─── RECRUITERS ─────────────────────────────────────────────────────
+    // Signed-in users can read their own profile; admins can read/write all
+    match /recruiters/{email} {
+      allow read: if isSignedIn() && (request.auth.token.email == email || isAdmin());
+      allow create: if isSignedIn() && request.auth.token.email == email;
+      allow update: if isSignedIn() && (request.auth.token.email == email || isAdmin());
+      allow delete: if isAdmin();
+
+      // Recruiter history subcollection
+      match /history/{historyId} {
+        allow read, write: if isSignedIn() && (request.auth.token.email == email || isAdmin());
+      }
+    }
+
+    // ─── RECRUITER REQUESTS ─────────────────────────────────────────────
+    // Users can create/read their own request; admins can read/update all
+    match /recruiter_requests/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ─── CANDIDATES ─────────────────────────────────────────────────────
+    // Signed-in recruiters can create and read candidates they own; admins can do everything
+    match /candidates/{candidateId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    // ─── SUPPORT TICKETS ────────────────────────────────────────────────
+    // Signed-in users can create; admins can read/update/delete
+    match /support_tickets/{ticketId} {
+      allow create: if isSignedIn();
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // ─── DEFAULT: deny everything else ──────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

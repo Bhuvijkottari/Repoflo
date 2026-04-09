@@ -205,7 +205,7 @@ const Index = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
 
-            <Link to="/adminProtectedRoutes/auth/signin" className="flex items-center gap-2 group" title="Admin">
+            <Link to="/" className="flex items-center gap-2 group">
               <img
                 src={logo}
                 alt=""

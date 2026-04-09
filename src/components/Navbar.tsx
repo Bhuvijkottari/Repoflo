@@ -1,17 +1,22 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
 import logo from "@/favicon/IMG-20260403-WA0058.jpg";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const [showRepolyn, setShowRepolyn] = useState(false);
 
   const handleFeedbackClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -51,6 +56,7 @@ const Navbar = () => {
   };
 
   return (
+    <>
     <motion.nav
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -89,17 +95,15 @@ const Navbar = () => {
 
         <div className="flex items-center gap-3">
 
-          <motion.a
-            href="https://www.repolyn.site"
-            target="_blank"
-            rel="noopener noreferrer"
+          <motion.button
+            onClick={() => setShowRepolyn(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold font-body border border-[#a78bfa]/40 text-[#c4b5fd] hover:bg-[#3fc4e7] hover:border-[#3fc4e7] hover:text-black transition-all duration-200"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse" />
             Try Repolyn
-          </motion.a>
+          </motion.button>
 
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -152,16 +156,13 @@ const Navbar = () => {
                   ))}
 
                   <div className="mt-4 px-4 flex flex-col gap-2">
-                    <a
-                      href="https://www.repolyn.site"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setOpen(false)}
+                    <button
+                      onClick={() => { setOpen(false); setShowRepolyn(true); }}
                       className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold font-body border border-[#a78bfa]/40 text-[#c4b5fd] hover:bg-[#3fc4e7] hover:border-[#3fc4e7] hover:text-black transition-all"
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse" />
                       Try Repolyn
-                    </a>
+                    </button>
                     <Button
                       variant="cta"
                       className="w-full rounded-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
@@ -180,6 +181,32 @@ const Navbar = () => {
 
       </div>
     </motion.nav>
+
+    {/* Repolyn Coming Soon Dialog */}
+    <AlertDialog open={showRepolyn} onOpenChange={setShowRepolyn}>
+      <AlertDialogContent className="bg-[#132f52] border-[#a78bfa]/30 text-white max-w-sm">
+        <AlertDialogHeader>
+          <div className="flex justify-center mb-2">
+            <Rocket className="w-12 h-12 text-[#a78bfa]" />
+          </div>
+          <AlertDialogTitle className="text-center text-white font-display text-xl">
+            Repolyn is Coming Soon!
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-center text-[#b8c7e0] font-body text-sm leading-relaxed">
+            We're cooking up something amazing! Repolyn will help you analyze and understand repositories like never before. Stay tuned — it'll be worth the wait!
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="sm:justify-center">
+          <AlertDialogAction
+            className="rounded-full px-8 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] text-black font-bold font-display"
+            onClick={() => setShowRepolyn(false)}
+          >
+            Got it!
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 

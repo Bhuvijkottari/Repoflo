@@ -4,13 +4,24 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Github, Palette, Zap, Star, Users, ChevronDown, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroShapes from "@/assets/hero-shapes.png";
-import { incrementVisitorCount } from "@/lib/firebase";
+import { incrementVisitorCount, db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 
 const HeroSection = () => {
-  const [visitorCount, setVisitorCount] = useState(0);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
   useEffect(() => {
+    // Increment on mount
     incrementVisitorCount().then(setVisitorCount).catch(() => {});
+    // Subscribe for real-time count updates
+    const unsub = onSnapshot(
+      doc(db, "site_stats", "visitors"),
+      (snap) => {
+        if (snap.exists()) setVisitorCount(snap.data().count || 0);
+      },
+      () => {} // ignore listener errors silently
+    );
+    return unsub;
   }, []);
 
   return (
@@ -151,7 +162,7 @@ const HeroSection = () => {
             {[
               { icon: <Zap className="w-4 h-4 text-[#3fc4e7]" />, value: "20+", label: "Themes" },
               { icon: <Star className="w-4 h-4 text-[#3fc4e7]" />, value: "AI", label: "Powered" },
-              { icon: <Users className="w-4 h-4 text-[#3fc4e7]" />, value: visitorCount > 0 ? visitorCount.toLocaleString() : "—", label: "Visitors" },
+              { icon: <Users className="w-4 h-4 text-[#3fc4e7]" />, value: visitorCount !== null ? (visitorCount > 0 ? visitorCount.toLocaleString() : "0") : "...", label: "Visitors" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}

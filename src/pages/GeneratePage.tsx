@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
-import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, ServerCrash, X } from "lucide-react";
+import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, ServerCrash, X, Monitor, Linkedin } from "lucide-react";
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 /* ── name validation helpers ─────────────────────────────────────────── */
 const shareAtLeast3Chars = (a: string, b: string): boolean => {
@@ -48,6 +52,7 @@ const GeneratePage = () => {
     return unsub;
   }, []);
   const [githubUrl, setGithubUrl] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [nameWarning, setNameWarning] = useState("");
@@ -56,6 +61,14 @@ const GeneratePage = () => {
   const [githubData, setGithubData] = useState<PortfolioData | null>(null);
   const [githubFetching, setGithubFetching] = useState(false);
   const [githubError, setGithubError] = useState("");
+  const [showScreenWarning, setShowScreenWarning] = useState(false);
+
+  // Show screen-size warning on small devices
+  useEffect(() => {
+    if (window.innerWidth < 1024) {
+      setShowScreenWarning(true);
+    }
+  }, []);
 
   useEffect(() => {
     const theme = sessionStorage.getItem("selectedTheme");
@@ -91,7 +104,7 @@ const GeneratePage = () => {
     try {
       let finalData: PortfolioData = { ...githubData };
       if (resumeFile) {
-        setStatus("AI is parsing your resume...");
+        setStatus("Reading resume and extracting data...");
         const formData = new FormData();
         formData.append("resume", resumeFile);
         formData.append("githubData", JSON.stringify(githubData));
@@ -126,7 +139,11 @@ const GeneratePage = () => {
         }
         setNameWarning("");
       }
-      setStatus("Generating portfolio...");
+      // Merge LinkedIn URL if provided by user
+      if (linkedinUrl.trim()) {
+        finalData.linkedin = linkedinUrl.trim();
+      }
+      setStatus("Building your portfolio...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
       // Track for admin dashboard
       trackPortfolioGeneration({
@@ -200,6 +217,32 @@ const GeneratePage = () => {
   return (
     <div className="min-h-screen bg-[#0b1f3a] text-white">
       <Navbar />
+
+      {/* Screen size warning for mobile/tablet users */}
+      <AlertDialog open={showScreenWarning} onOpenChange={setShowScreenWarning}>
+        <AlertDialogContent className="bg-[#132f52] border-[#3fc4e7]/30 text-white max-w-md">
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-2">
+              <Monitor className="w-12 h-12 text-[#3fc4e7]" />
+            </div>
+            <AlertDialogTitle className="text-center text-white font-display text-xl">
+              Best Viewed on a Larger Screen
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-[#b8c7e0] font-body text-sm leading-relaxed">
+              For the best portfolio generation and preview experience, we recommend using a <span className="text-white font-semibold">laptop or desktop</span>.
+              Some themes may not display optimally on smaller screens.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogAction
+              className="rounded-full px-8 bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold font-display"
+              onClick={() => setShowScreenWarning(false)}
+            >
+              Continue Anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="pt-24 pb-16 container mx-auto px-4 max-w-xl">
 
@@ -284,6 +327,21 @@ const GeneratePage = () => {
             )}
           </div>
 
+          {/* LinkedIn URL */}
+          <div className="space-y-3">
+            <Label className="font-display font-semibold flex items-center gap-2 text-white">
+              <Linkedin className="w-5 h-5 text-[#3fc4e7]" /> LinkedIn Profile URL —{" "}
+              <span className="text-[#b8c7e0] font-normal text-xs">optional, shown in portfolio</span>
+            </Label>
+            <Input
+              type="url"
+              placeholder="https://linkedin.com/in/yourprofile"
+              value={linkedinUrl}
+              onChange={(e) => setLinkedinUrl(e.target.value)}
+              className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+            />
+          </div>
+
           {/* Resume Upload */}
           <div className="space-y-3">
             <Label className="font-display font-semibold flex items-center gap-2 text-white">
@@ -356,29 +414,42 @@ const GeneratePage = () => {
           </label>
 
           {/* Submit */}
-          <motion.div whileHover={{ scale: termsAccepted ? 1.02 : 1 }} whileTap={{ scale: termsAccepted ? 0.98 : 1 }}>
-            <button
-              type="submit"
-              disabled={!githubData || isProcessing || githubFetching || !termsAccepted || !!nameWarning}
-              className="w-full h-13 py-3.5 rounded-xl text-base font-bold font-display
-                         bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black
-                         hover:opacity-90 active:scale-[0.98] transition-all duration-200
-                         shadow-lg shadow-[#3fc4e7]/20
-                         disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
-                         flex items-center justify-center gap-2 w-full"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  {status || "Processing..."}
-                </>
-              ) : (
-                <>
-                  Generate Portfolio <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </button>
-          </motion.div>
+          {isProcessing ? (
+            <div className="w-full rounded-xl bg-[#0b1f3a] border border-[#3fc4e7]/25 p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#3fc4e7]/15 flex items-center justify-center flex-shrink-0">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#3fc4e7]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-display font-semibold">{status || "Processing..."}</p>
+                  <p className="text-[#b8c7e0]/60 text-xs font-body mt-0.5">This may take a few seconds</p>
+                </div>
+              </div>
+              <div className="h-1.5 w-full bg-[#132f52] rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] rounded-full"
+                  initial={{ width: "5%" }}
+                  animate={{ width: status.includes("Reading") ? "45%" : status.includes("Building") ? "80%" : "15%" }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                />
+              </div>
+            </div>
+          ) : (
+            <motion.div whileHover={{ scale: termsAccepted ? 1.02 : 1 }} whileTap={{ scale: termsAccepted ? 0.98 : 1 }}>
+              <button
+                type="submit"
+                disabled={!githubData || githubFetching || !termsAccepted || !!nameWarning}
+                className="w-full h-13 py-3.5 rounded-xl text-base font-bold font-display
+                           bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black
+                           hover:opacity-90 active:scale-[0.98] transition-all duration-200
+                           shadow-lg shadow-[#3fc4e7]/20
+                           disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
+                           flex items-center justify-center gap-2 w-full"
+              >
+                Generate Portfolio <ArrowRight className="w-5 h-5" />
+              </button>
+            </motion.div>
+          )}
 
         </motion.form>
       </div>

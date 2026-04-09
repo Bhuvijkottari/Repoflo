@@ -87,6 +87,12 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
         setAnalysis(JSON.parse(savedAnalysis));
         sessionStorage.removeItem("savedAnalysis");
       }
+      // Restore cached analysis (from findExistingCandidate) — skip re-running
+      const cachedAnalysis = sessionStorage.getItem("cachedAnalysis");
+      if (cachedAnalysis) {
+        setAnalysis(JSON.parse(cachedAnalysis));
+        sessionStorage.removeItem("cachedAnalysis");
+      }
     } catch {}
   }, []);
 

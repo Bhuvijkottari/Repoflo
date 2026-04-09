@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+dotenv.config();
 
 import express from "express";
 import cors from "cors";
@@ -363,47 +363,51 @@ app.post("/api/analyze-candidate", async (req, res) => {
     const { portfolioData, requiredTechStack, experienceLevel } = req.body;
     if (!portfolioData) return res.status(400).json({ error: "No portfolio data provided" });
 
-    // Trim portfolio data to reduce prompt size and speed up response
+    // Prepare portfolio data for analysis
     const trimmed = {
       name: portfolioData.name, title: portfolioData.title, bio: portfolioData.bio,
-      skills: portfolioData.skills?.slice(0, 15),
-      experience: portfolioData.experience?.slice(0, 5),
-      education: portfolioData.education?.slice(0, 3),
-      projects: portfolioData.projects?.slice(0, 6).map((p) => ({
-        name: p.name, description: p.description?.substring(0, 150),
-        tech: p.tech?.slice(0, 6), stars: p.stars, isAiGenerated: p.isAiGenerated,
+      skills: portfolioData.skills?.slice(0, 20),
+      experience: portfolioData.experience?.slice(0, 8),
+      education: portfolioData.education?.slice(0, 5),
+      projects: portfolioData.projects?.slice(0, 8).map((p) => ({
+        name: p.name, description: p.description?.substring(0, 300),
+        tech: p.tech?.slice(0, 8), stars: p.stars, forks: p.forks, isAiGenerated: p.isAiGenerated, lastUpdated: p.lastUpdated,
       })),
       githubStats: portfolioData.githubStats ? {
         totalCommits: portfolioData.githubStats.totalCommits,
         publicRepos: portfolioData.githubStats.publicRepos,
         followers: portfolioData.githubStats.followers,
+        following: portfolioData.githubStats.following,
+        totalStars: portfolioData.githubStats.totalStars,
         pullRequests: portfolioData.githubStats.pullRequests,
         contributionStreak: portfolioData.githubStats.contributionStreak,
-        topLanguages: portfolioData.githubStats.topLanguages?.slice(0, 5),
+        topLanguages: portfolioData.githubStats.topLanguages?.slice(0, 6),
         aiGeneratedContent: portfolioData.githubStats.aiGeneratedContent,
+        aiDetectedRepos: portfolioData.githubStats.aiDetectedRepos,
         daysOnGithub: portfolioData.githubStats.daysOnGithub,
+        ownedRepos: portfolioData.githubStats.ownedRepos,
+        forkedRepos: portfolioData.githubStats.forkedRepos,
+        recentCollaborations: portfolioData.githubStats.recentCollaborations,
       } : null,
       leetcodeStats: portfolioData.leetcodeStats,
     };
 
-    const prompt = `You are an expert technical recruiter and ATS analyst. Analyze this candidate's profile and provide a hiring recommendation.
+    const prompt = `You are a senior technical recruiter with 15+ years of hiring experience and an expert ATS analyst. Provide a THOROUGH and DETAILED analysis of this candidate.
 
 CANDIDATE DATA:
 ${JSON.stringify(trimmed)}
 
-Analyze based on:
-1. GitHub activity (commits, repos, languages, contributions, collaboration)
-2. Technical skills breadth and depth
-3. Work experience relevance and progression
-4. Education background
-5. Project quality and impact
-6. Overall profile completeness
-7. LeetCode performance (if available)
-8. ATS Resume Analysis (keywords, format, skills match)
-${requiredTechStack?.length ? `9. Required Tech Stack: ${requiredTechStack.join(", ")}. Include "techStackMatch" with matched/missing arrays.` : ""}
-${experienceLevel ? `10. Experience Level Required: "${experienceLevel}". Include "experienceLevelMatch": { "required": "${experienceLevel}", "assessed": "level", "isMatch": true/false, "explanation": "..." }.` : ""}
-
-If a project has "No description provided", infer what it likely does from its name and tech stack.
+ANALYSIS REQUIREMENTS — be detailed and specific, not generic:
+1. GitHub activity: Evaluate commit frequency, repo count, language diversity, collaboration patterns, contribution streak, and account age. Mention specific numbers.
+2. Technical skills: Assess breadth vs depth. Identify primary stack, secondary skills, and gaps.
+3. Work experience: Evaluate career progression, company quality, role scope, and years of experience.
+4. Education: Assess relevance, institution quality, and degree level.
+5. Project quality: Evaluate each project individually — complexity, real-world impact, tech choices, star count. For projects with "No description provided", write a detailed inferred description (2-3 sentences) based on the project name, tech stack, and stars.
+6. AI-generated content: Flag any AI-detected repos and factor into the assessment.
+7. LeetCode performance (if available): Analyze problem-solving ability, difficulty distribution, contest rating.
+8. ATS Resume Analysis: Score keywords, formatting, experience depth, education, and skills coverage.
+${requiredTechStack?.length ? `9. Required Tech Stack: ${requiredTechStack.join(", ")}. Include "techStackMatch" with "matched" and "missing" arrays and a brief explanation.` : ""}
+${experienceLevel ? `10. Experience Level Required: "${experienceLevel}". Include "experienceLevelMatch": { "required": "${experienceLevel}", "assessed": "assessed level", "isMatch": true/false, "explanation": "detailed reasoning" }.` : ""}
 
 SCORING (0-100 overallScore):
 - Below 50: "DO NOT CONSIDER"
@@ -413,14 +417,52 @@ SCORING (0-100 overallScore):
 - 80-90: "GOOD"
 - 90-100: "EXCEPTIONAL"
 
-Return ONLY valid compact JSON (no spaces/newlines, keep all text fields SHORT — max 15 words each):
-{"overallScore":number,"verdict":"DO NOT CONSIDER|MILD CHANCE|MODERATE|AVERAGE|GOOD|EXCEPTIONAL","atsScore":{"overall":number,"keywordScore":number,"formatScore":number,"experienceScore":number,"educationScore":number,"skillsScore":number,"suggestions":["tip1","tip2"]},"summary":"1-2 sentence summary","strengths":["s1","s2","s3"],"concerns":["c1","c2"],"githubInsights":{"activityLevel":"short","codeQuality":"short","consistency":"short","collaboration":"short"},"leetcodeInsights":{"problemSolvingLevel":"short","difficultyBalance":"short","contestPerformance":"short","summary":"short"},"technicalAssessment":{"primaryStack":"stack","experienceLevel":"Junior/Mid/Senior/Staff","specializations":["a1"]},"inferredProjectDescriptions":{},"hiringNotes":"2 sentence max"}`;
+Return ONLY valid JSON with this structure:
+{
+  "overallScore": number,
+  "verdict": "DO NOT CONSIDER|MILD CHANCE|MODERATE|AVERAGE|GOOD|EXCEPTIONAL",
+  "atsScore": {
+    "overall": number,
+    "keywordScore": number,
+    "formatScore": number,
+    "experienceScore": number,
+    "educationScore": number,
+    "skillsScore": number,
+    "suggestions": ["detailed suggestion 1", "detailed suggestion 2", "detailed suggestion 3"]
+  },
+  "summary": "3-4 sentence comprehensive summary of the candidate covering strengths, experience level, and overall fit",
+  "strengths": ["detailed strength 1 with specifics", "detailed strength 2", "detailed strength 3", "detailed strength 4"],
+  "concerns": ["detailed concern 1 with reasoning", "detailed concern 2", "detailed concern 3"],
+  "githubInsights": {
+    "activityLevel": "detailed assessment with numbers (e.g. X commits over Y days)",
+    "codeQuality": "assessment based on project complexity, tech diversity, and repo structure",
+    "consistency": "analysis of contribution patterns, streak, and regularity",
+    "collaboration": "assessment of PRs, collaborations, and community involvement"
+  },
+  "leetcodeInsights": {
+    "problemSolvingLevel": "detailed assessment or N/A",
+    "difficultyBalance": "breakdown of easy/medium/hard or N/A",
+    "contestPerformance": "rating and contest analysis or N/A",
+    "summary": "overall DSA capability assessment"
+  },
+  "technicalAssessment": {
+    "primaryStack": "primary technology stack",
+    "experienceLevel": "Junior/Mid/Senior/Staff with reasoning",
+    "specializations": ["specialization1", "specialization2"]
+  },
+  "inferredProjectDescriptions": {
+    "projectName": "2-3 sentence detailed description inferred from name, tech stack, and context"
+  },
+  "hiringNotes": "5-7 sentence detailed hiring manager notes covering: (1) overall impression, (2) what role/team this candidate would fit best, (3) interview focus areas, (4) potential red flags or standout qualities, (5) compensation/level recommendation"
+}
+
+IMPORTANT: Be specific and reference actual data. Avoid generic phrases like "good developer" — cite specific repos, commit counts, technologies, and patterns. Every field should contain meaningful, actionable insight.`;
 
     let content;
     try {
       console.log("[analyze] prompt chars:", prompt.length, "| sending to Gemini...");
       const t0 = Date.now();
-      content = await geminiText(prompt, GEMINI_URL, 1500);
+      content = await geminiText(prompt, GEMINI_URL, 4096);
       console.log("[analyze] Gemini responded in", Date.now()-t0, "ms | content chars:", content.length);
     } catch (e) {
       console.error("Gemini analyze error:", e.message);

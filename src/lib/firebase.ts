@@ -69,9 +69,15 @@ export async function incrementVisitorCount(): Promise<number> {
     await setDoc(ref, { count: increment(1) }, { merge: true });
     const snap = await getDoc(ref);
     return snap.exists() ? (snap.data().count || 1) : 1;
-  } catch {
-    // Firestore not set up yet — return 0 silently
-    return 0;
+  } catch (err) {
+    console.warn("Visitor counter error:", err);
+    // Try read-only fallback
+    try {
+      const snap = await getDoc(ref);
+      return snap.exists() ? (snap.data().count || 0) : 0;
+    } catch {
+      return 0;
+    }
   }
 }
 
@@ -361,6 +367,8 @@ export interface CandidateData {
   analysis: any;
   htmlReport?: string;
   recruiterEmail: string;
+  requiredTechStack?: string[];
+  experienceLevel?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -369,6 +377,7 @@ export const storeCandidateAnalysis = async (candidate: Omit<CandidateData, 'id'
   try {
     const candidateData: CandidateData = {
       ...candidate,
+      githubUsername: (candidate.githubUsername || "").toLowerCase(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -424,6 +433,55 @@ export const fetchCandidatesByRecruiter = async (recruiterEmail: string): Promis
   } catch (error) {
     console.error("Error fetching candidates by recruiter:", error);
     return [];
+  }
+};
+
+/**
+ * Find an existing candidate by GitHub username and optional LeetCode username.
+ * Returns the latest matching candidate or null.
+ * If leetcodeUsername is provided and differs from stored, returns null (new fields = re-analyze).
+ * If requiredTechStack or experienceLevel differ from stored, returns null (new prefs = re-analyze).
+ */
+export const findExistingCandidate = async (
+  githubUsername: string,
+  recruiterEmail: string,
+  leetcodeUsername?: string,
+  requiredTechStack?: string[],
+  experienceLevel?: string,
+): Promise<CandidateData | null> => {
+  try {
+    if (!githubUsername) return null;
+    const q = query(
+      collection(db, "candidates"),
+      where("githubUsername", "==", githubUsername.toLowerCase()),
+      where("recruiterEmail", "==", recruiterEmail),
+      orderBy("createdAt", "desc"),
+      limit(1)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    const candidate = { id: snap.docs[0].id, ...snap.docs[0].data() } as CandidateData;
+
+    // If the candidate has no analysis yet, treat as not found
+    if (!candidate.analysis) return null;
+
+    // If LeetCode was added or changed, must re-analyze
+    const storedLeetcode = (candidate.leetcodeUsername || "").toLowerCase().trim();
+    const newLeetcode = (leetcodeUsername || "").toLowerCase().trim();
+    if (newLeetcode !== storedLeetcode) return null;
+
+    // If recruiter preferences changed, must re-analyze
+    const storedTech = (candidate as any).requiredTechStack || [];
+    const storedLevel = (candidate as any).experienceLevel || "";
+    const newTech = requiredTechStack || [];
+    const newLevel = experienceLevel || "";
+    if (JSON.stringify(storedTech.sort()) !== JSON.stringify([...newTech].sort())) return null;
+    if (storedLevel !== newLevel) return null;
+
+    return candidate;
+  } catch (error) {
+    console.error("Error finding existing candidate:", error);
+    return null;
   }
 };
 
@@ -631,6 +689,7 @@ export const approveRecruiterRequest = async (uid: string, packageId: string): P
 
   // Sync old recruiters collection so checkRecruiterLimit works
   const reqSnap = await getDoc(doc(db, "recruiter_requests", uid));
+  if (!reqSnap.exists()) return;
   const email = reqSnap.data()?.email;
   if (email) {
     const level = pkg.limit === -1 ? 3 : pkg.limit === 100 ? 3 : pkg.limit === 50 ? 2 : 1;

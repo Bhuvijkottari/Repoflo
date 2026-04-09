@@ -16,8 +16,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   signInWithGoogle, signOutUser, updateRecruiterUsage, incrementRecruiterRequestUsage,
   checkRecruiterLimit, addRecruiterHistory, fetchRecruiterHistory,
-  storeCandidateAnalysis, subscribeRecruiterRequest, RecruiterRequest,
-  submitSupportTicket,
+  storeCandidateAnalysis, findExistingCandidate, subscribeRecruiterRequest, RecruiterRequest,
+  submitSupportTicket, subscribeSiteSettings, SiteSettings,
 } from "@/lib/firebase";
 import { sanitizeSupportMessage, sanitizeEmail, sanitizeText } from "@/lib/sanitize";
 import TechStackInput from "@/components/TechStackInput";
@@ -99,6 +99,12 @@ const RecruiterPage = () => {
   const [supportMsg, setSupportMsg] = useState("");
   const [supportSending, setSupportSending] = useState(false);
   const [supportSent, setSupportSent] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({ portfolioEnabled: true, recruiterEnabled: true });
+
+  useEffect(() => {
+    const unsub = subscribeSiteSettings(setSiteSettings);
+    return unsub;
+  }, []);
 
   // Subscribe to recruiter request status
   useEffect(() => {
@@ -277,7 +283,7 @@ useEffect(() => {
       }
 
       if (resumeFile) {
-        setStatus("AI is parsing your resume...");
+        setStatus("Reading resume and extracting data...");
         const formData = new FormData();
         formData.append("resume", resumeFile);
         formData.append("githubData", JSON.stringify(githubData));
@@ -331,20 +337,56 @@ useEffect(() => {
         // ── END VALIDATION ───────────────────────────────────────────
       }
 
-      setStatus("Generating analysis...");
+      setStatus("Looking up previous analyses...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
-      await updateRecruiterUsage(user.email!);
-      await incrementRecruiterRequestUsage(user.uid);
+
+      // ── Check if this candidate was already analyzed with same inputs ──
+      const ghUsername = extractGithubUser(githubUrl);
+      const existingCandidate = await findExistingCandidate(
+        ghUsername,
+        user.email!,
+        leetcodeData?.username,
+        requiredTechStack,
+        experienceLevel,
+      );
+
+      if (existingCandidate?.analysis) {
+        // Use cached result — no Gemini call needed, no usage counted
+        sessionStorage.setItem("candidateId", existingCandidate.id || "");
+        // Update portfolioData with cached analysis for PreviewPage
+        sessionStorage.setItem("portfolioData", JSON.stringify({
+          ...finalData,
+          ...existingCandidate.portfolioData,
+          avatar: finalData.avatar || existingCandidate.portfolioData?.avatar,
+          githubStats: finalData.githubStats,
+          leetcodeStats: finalData.leetcodeStats,
+        }));
+        sessionStorage.setItem("cachedAnalysis", JSON.stringify(existingCandidate.analysis));
+        navigate(`/recruiter?preview=1`);
+        return;
+      }
+
+      // ── No cached result — run fresh analysis ──
+      setStatus("Running AI-powered candidate analysis...");
+      // Track usage in parallel — don't block analysis if tracking fails
+      Promise.all([
+        updateRecruiterUsage(user.email!).catch((e) => console.warn("Usage tracking failed:", e)),
+        incrementRecruiterRequestUsage(user.uid).catch((e) => console.warn("Request usage tracking failed:", e)),
+      ]);
 
       const candidateId = await storeCandidateAnalysis({
-        githubUsername: githubData.githubStats?.username || "",
+        githubUsername: ghUsername,
         ...(leetcodeData?.username ? { leetcodeUsername: leetcodeData.username } : {}),
         name: githubData.name,
+        email: finalData.email || "",
         portfolioData: finalData,
         analysis: null,
         recruiterEmail: user.email!,
+        requiredTechStack,
+        experienceLevel,
       });
       sessionStorage.setItem("candidateId", candidateId);
+      sessionStorage.removeItem("cachedAnalysis");
 
       const historyId = await addRecruiterHistory(user.email!, {
         portfolioData: finalData,
@@ -372,6 +414,24 @@ useEffect(() => {
   }
 
   if (showPreview) return <PreviewPage overrideThemeId="recruiter" />;
+
+  /* ── recruiter portal maintenance gate ── */
+  if (!siteSettings.recruiterEnabled) {
+    return (
+      <div className="min-h-screen bg-[#0b1f3a] text-white flex flex-col items-center justify-center px-4">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-md">
+          <div className="text-7xl mb-6">🛠️</div>
+          <h1 className="font-display text-3xl font-bold text-white mb-4">Under Maintenance</h1>
+          <p className="text-[#b8c7e0] font-body text-lg mb-8 leading-relaxed">
+            The recruiter portal is temporarily unavailable. We're working hard to improve things — check back soon!
+          </p>
+          <Button onClick={() => navigate("/")} className="rounded-full px-8 bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold">
+            Back to Home
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   /* ── not signed in → send to landing to sign in properly ── */
   if (!user) {
@@ -483,12 +543,28 @@ useEffect(() => {
                   : score >= 60 ? "text-amber-400 bg-amber-500/10 border-amber-500/25"
                   : score != null ? "text-red-400 bg-red-500/10 border-red-500/25"
                   : "text-[#b8c7e0] bg-[#b8c7e0]/10 border-[#b8c7e0]/20";
+                const hasLeetcode = !!h.portfolioData?.leetcodeStats;
+                const hasResume = h.portfolioData?.experience?.length > 0 || h.portfolioData?.education?.length > 0;
+                const hasTechStack = h.analysis?.techStackMatch || h.analysis?.experienceLevelMatch;
                 return (
                 <NavyCard key={idx} className="flex items-center justify-between p-4 hover:border-[#3fc4e7]/35 transition-colors gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-white text-sm font-display truncate">
-                      {h.portfolioData.name || "Unnamed"}
-                    </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold text-white text-sm font-display truncate">
+                        {h.portfolioData.name || "Unnamed"}
+                      </p>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {hasLeetcode && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400 border border-purple-500/25">+ LeetCode</span>
+                        )}
+                        {hasResume && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#3fc4e7]/15 text-[#69d2f1] border border-[#3fc4e7]/25">+ Resume</span>
+                        )}
+                        {hasTechStack && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/25">+ Filters</span>
+                        )}
+                      </div>
+                    </div>
                     <p className="text-xs text-[#b8c7e0] font-body mt-0.5">
                       {new Date(h.createdAt).toLocaleString()}
                     </p>
@@ -691,23 +767,36 @@ useEffect(() => {
           )}
 
           {/* Submit */}
-          <Button
-            type="submit"
-            disabled={isProcessing || !githubData || !resumeFile || !!nameWarning}
-            className="w-full h-13 py-3.5 text-base font-bold rounded-xl bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black hover:opacity-90 transition-opacity shadow-lg disabled:opacity-40 font-display"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                {status || "Processing..."}
-              </>
-            ) : (
-              <>
-                <ArrowRight className="w-5 h-5 mr-2" />
-                Generate Analysis Report
-              </>
-            )}
-          </Button>
+          {isProcessing ? (
+            <div className="w-full rounded-xl bg-[#0b1f3a] border border-[#3fc4e7]/25 p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#3fc4e7]/15 flex items-center justify-center flex-shrink-0">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#3fc4e7]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-display font-semibold">{status || "Processing..."}</p>
+                  <p className="text-[#b8c7e0]/60 text-xs font-body mt-0.5">This may take a few seconds</p>
+                </div>
+              </div>
+              <div className="h-1.5 w-full bg-[#132f52] rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] rounded-full"
+                  initial={{ width: "5%" }}
+                  animate={{ width: status.includes("Looking up") ? "20%" : status.includes("Reading") ? "50%" : status.includes("Running") ? "75%" : "90%" }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                />
+              </div>
+            </div>
+          ) : (
+            <Button
+              type="submit"
+              disabled={!githubData || !resumeFile || !!nameWarning}
+              className="w-full h-13 py-3.5 text-base font-bold rounded-xl bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black hover:opacity-90 transition-opacity shadow-lg disabled:opacity-40 font-display"
+            >
+              <ArrowRight className="w-5 h-5 mr-2" />
+              Generate Analysis Report
+            </Button>
+          )}
         </motion.form>
       </div>
 

@@ -18,6 +18,7 @@ import {
   fetchFeedbacks, deleteFeedback,
   fetchPortfolioUsage, PortfolioUsageEntry,
   fetchGeminiUsageToday, GeminiUsageToday,
+  getVisitorCount,
   PACKAGES, getAdminUsers, addAdminUser, removeAdminUser, AdminUser,
   fetchSupportTickets, resolveSupportTicket, deleteSupportTicket, SupportTicket,
 } from "@/lib/firebase";
@@ -224,6 +225,7 @@ const AdminDashboardPage = () => {
   const [actionLoading, setActionLoading] = useState<string>("");
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
+  const [visitorCount, setVisitorCount] = useState(0);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [adminUserError, setAdminUserError] = useState("");
   const [adminUserLoading, setAdminUserLoading] = useState(false);
@@ -237,13 +239,14 @@ const AdminDashboardPage = () => {
 
   const loadAll = useCallback(async () => {
     setLoading(true);
-    const [reqs, fbs, usage, admins, tickets, gemini] = await Promise.all([
+    const [reqs, fbs, usage, admins, tickets, gemini, visitors] = await Promise.all([
       getAllRecruiterRequests(),
       fetchFeedbacks(100),
       fetchPortfolioUsage(),
       getAdminUsers(),
       fetchSupportTickets(),
       fetchGeminiUsageToday(),
+      getVisitorCount(),
     ]);
     setAdminUsers(admins);
     setSupportTickets(tickets);
@@ -251,6 +254,7 @@ const AdminDashboardPage = () => {
     setFeedbacks(fbs);
     setPortfolioUsage(usage);
     setGeminiUsage(gemini);
+    setVisitorCount(visitors);
     // default approve package = their requested package
     const pkgMap: Record<string, string> = {};
     reqs.forEach((r) => { pkgMap[r.uid] = r.packageId; });
@@ -389,8 +393,9 @@ const AdminDashboardPage = () => {
             {activeTab === "overview" && (
               <div className="space-y-6">
                 {/* Stats grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
                   {[
+                    { label: "Site Visitors", value: visitorCount.toLocaleString(), icon: Eye, color: "text-[#69d2f1]", bg: "bg-[#69d2f1]/10" },
                     { label: "Pending Requests", value: pending.length, icon: Clock, color: "text-amber-400", bg: "bg-amber-500/10" },
                     { label: "Active Recruiters", value: approved.length, icon: Users, color: "text-emerald-400", bg: "bg-emerald-500/10" },
                     { label: "Portfolios Generated", value: portfolioUsage.length, icon: GitBranch, color: "text-[#3fc4e7]", bg: "bg-[#3fc4e7]/10" },
