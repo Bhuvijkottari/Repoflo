@@ -11,27 +11,27 @@ const HeroSection = () => {
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
   useEffect(() => {
-    let settled = false;
+    // Increment visitor count (fire and forget — onSnapshot will pick up the result)
+    incrementVisitorCount().catch(() => {});
 
-    // Try increment first
-    incrementVisitorCount()
-      .then((count) => { if (!settled) { settled = true; setVisitorCount(count); } })
-      .catch(() => {
-        // If increment fails, try read-only
-        getVisitorCount().then((count) => { if (!settled) { settled = true; setVisitorCount(count || 1); } });
-      });
-
-    // Real-time listener
+    // Real-time listener — always the source of truth for display
     const unsub = onSnapshot(
       doc(db, "site_stats", "visitors"),
       (snap) => {
-        if (snap.exists()) { settled = true; setVisitorCount(snap.data().count || 0); }
+        if (snap.exists()) {
+          setVisitorCount(snap.data().count || 0);
+        }
       },
-      () => {} // listener errors handled by increment/read fallback
+      () => {
+        // If listener fails, try a one-time read
+        getVisitorCount().then((count) => setVisitorCount(count || 0));
+      }
     );
 
-    // Timeout fallback — if nothing resolved in 4s, show at least 1
-    const timeout = setTimeout(() => { if (!settled) { settled = true; setVisitorCount(1); } }, 4000);
+    // Timeout fallback — if nothing resolved in 5s, show at least 1
+    const timeout = setTimeout(() => {
+      setVisitorCount((prev) => prev === null ? 1 : prev);
+    }, 5000);
 
     return () => { unsub(); clearTimeout(timeout); };
   }, []);
