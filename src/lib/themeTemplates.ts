@@ -660,6 +660,12 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
               </div>
             </section>`:''}
 
+            ${d.education.length?`
+            <section id="education" style="margin-bottom:60px">
+              <p class="reveal" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#bbb;margin-bottom:20px">Education</p>
+              ${d.education.map(e=>`<div class="reveal" style="padding:16px 0;border-top:1px solid #eee"><div style="font-weight:700;font-size:.95rem">${e.degree}</div><div style="color:#555;font-size:.88rem">${e.institution}</div><div style="color:#bbb;font-size:.78rem;margin-top:2px">${e.period}</div></div>`).join('')}
+            </section>`:''}
+
             ${d.experience.length?`
             <section id="experience" style="margin-bottom:60px">
               <p class="reveal" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#bbb;margin-bottom:28px">Experience</p>
@@ -698,15 +704,10 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             ${githubActivityHtml(d,'#fff','#eee','#111','#777')}
             ${leetcodeHtml(d,'#fff','#eee','#111','#777')}
 
-            ${d.education.length?`
-            <section id="education" style="margin-bottom:60px">
-              <p class="reveal" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#bbb;margin-bottom:20px">Education</p>
-              ${d.education.map(e=>`<div class="reveal" style="padding:16px 0;border-top:1px solid #eee"><div style="font-weight:700;font-size:.95rem">${e.degree}</div><div style="color:#555;font-size:.88rem">${e.institution}</div><div style="color:#bbb;font-size:.78rem;margin-top:2px">${e.period}</div></div>`).join('')}
-            </section>`:''}
-
             <section id="contact" style="margin-bottom:40px;padding:28px;background:#fff;border:1px solid #eee;border-radius:12px" class="reveal">
               <p style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#bbb;margin-bottom:12px">Contact</p>
               <a href="${gmailLink(d.email)}" style="font-size:1.1rem;font-weight:600;color:#111;text-decoration:none;display:block;margin-bottom:4px">${d.email}</a>
+              ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="font-size:.88rem;color:#555;text-decoration:none;display:block;margin-bottom:4px">LinkedIn ↗</a>`:''}
               <p style="color:#888;font-size:.88rem">${d.location}</p>
             </section>
           </main>
@@ -794,11 +795,22 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           </section>`:''}
 
           <!-- NUMBERED SECTIONS -->
+          ${d.education.length?`
+          <section id="education" style="padding:80px 40px;border-bottom:1px solid rgba(168,85,247,.08)">
+            <div style="max-width:960px;margin:0 auto">
+              <div style="position:relative;margin-bottom:40px">
+                <span class="sec-num">01</span>
+                <p class="reveal" style="font-family:'Syne Mono',monospace;font-size:.7rem;letter-spacing:4px;color:rgba(168,85,247,.6);margin-bottom:8px">EDUCATION</p>
+              </div>
+              ${d.education.map(e=>`<div class="reveal" style="padding:24px 0;border-top:1px solid rgba(255,255,255,.06)"><div style="font-weight:700;font-size:1.1rem">${e.degree}</div><div style="color:#a855f7;font-size:.9rem">${e.institution}</div><div style="color:rgba(255,255,255,.3);font-size:.78rem;font-family:'Syne Mono',monospace;margin-top:4px">${e.period}</div></div>`).join('')}
+            </div>
+          </section>`:''}
+
           ${d.experience.length?`
           <section id="experience" class="bold-sec" style="padding:80px 40px;border-bottom:1px solid rgba(168,85,247,.08)">
             <div style="max-width:960px;margin:0 auto">
               <div style="position:relative;margin-bottom:48px">
-                <span class="sec-num">01</span>
+                <span class="sec-num">02</span>
                 <p class="reveal" style="font-family:'Syne Mono',monospace;font-size:.7rem;letter-spacing:4px;color:rgba(168,85,247,.6);margin-bottom:8px">EXPERIENCE</p>
                 <h2 class="reveal" style="font-size:2.5rem;font-weight:800;letter-spacing:-1.5px">Where I've worked</h2>
               </div>
@@ -822,7 +834,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <section id="projects" style="padding:80px 40px;border-bottom:1px solid rgba(168,85,247,.08)">
             <div style="max-width:960px;margin:0 auto">
               <div style="position:relative;margin-bottom:48px">
-                <span class="sec-num">02</span>
+                <span class="sec-num">03</span>
                 <p class="reveal" style="font-family:'Syne Mono',monospace;font-size:.7rem;letter-spacing:4px;color:rgba(168,85,247,.6);margin-bottom:8px">PROJECTS</p>
                 <h2 class="reveal" style="font-size:2.5rem;font-weight:800;letter-spacing:-1.5px">Things I've built</h2>
               </div>
@@ -841,17 +853,6 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           </section>`:''}
 
           ${githubActivityHtml(d,'rgba(255,255,255,.03)','rgba(168,85,247,.12)','#a855f7','rgba(255,255,255,.4)')}
-
-          ${d.education.length?`
-          <section id="education" style="padding:80px 40px;border-bottom:1px solid rgba(168,85,247,.08)">
-            <div style="max-width:960px;margin:0 auto">
-              <div style="position:relative;margin-bottom:40px">
-                <span class="sec-num">03</span>
-                <p class="reveal" style="font-family:'Syne Mono',monospace;font-size:.7rem;letter-spacing:4px;color:rgba(168,85,247,.6);margin-bottom:8px">EDUCATION</p>
-              </div>
-              ${d.education.map(e=>`<div class="reveal" style="padding:24px 0;border-top:1px solid rgba(255,255,255,.06)"><div style="font-weight:700;font-size:1.1rem">${e.degree}</div><div style="color:#a855f7;font-size:.9rem">${e.institution}</div><div style="color:rgba(255,255,255,.3);font-size:.78rem;font-family:'Syne Mono',monospace;margin-top:4px">${e.period}</div></div>`).join('')}
-            </div>
-          </section>`:''}
 
           <!-- CONTACT FULL-WIDTH -->
           <section id="contact" style="padding:100px 40px;text-align:center;position:relative;overflow:hidden">
@@ -1252,6 +1253,22 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             </div>
           </section>`:''}
 
+          <!-- EDUCATION -->
+          ${d.education.length?`
+          <section id="education" style="padding:100px 0">
+            <div style="max-width:900px;margin:0 auto;padding:0 60px;text-align:center">
+              <p class="reveal" style="font-size:.65rem;letter-spacing:5px;text-transform:uppercase;color:rgba(201,168,76,.5);margin-bottom:12px">Formation</p>
+              <div class="eln-rule reveal"></div>
+              <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:#e8e4df;margin-bottom:48px">Education</h2>
+              ${d.education.map(e=>`
+              <div class="reveal" style="padding:32px 40px;border:1px solid rgba(201,168,76,.1);border-radius:4px;display:inline-block;text-align:center;min-width:300px">
+                <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:400;color:#e8e4df;margin-bottom:6px">${e.degree}</div>
+                <div style="color:#c9a84c;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">${e.institution}</div>
+                <div style="color:rgba(201,168,76,.3);font-size:.75rem;letter-spacing:2px">${e.period}</div>
+              </div>`).join('')}
+            </div>
+          </section>`:''}
+
           <!-- EXPERIENCE: alternating two-column rows with large decor number -->
           ${d.experience.length?`
           <section id="experience" style="padding:100px 0">
@@ -1301,22 +1318,6 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           </section>`:''}
 
           ${githubActivityHtml(d,'rgba(201,168,76,.03)','rgba(201,168,76,.12)','#c9a84c','#5a554e')}
-
-          <!-- EDUCATION -->
-          ${d.education.length?`
-          <section id="education" style="padding:100px 0">
-            <div style="max-width:900px;margin:0 auto;padding:0 60px;text-align:center">
-              <p class="reveal" style="font-size:.65rem;letter-spacing:5px;text-transform:uppercase;color:rgba(201,168,76,.5);margin-bottom:12px">Formation</p>
-              <div class="eln-rule reveal"></div>
-              <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:#e8e4df;margin-bottom:48px">Education</h2>
-              ${d.education.map(e=>`
-              <div class="reveal" style="padding:32px 40px;border:1px solid rgba(201,168,76,.1);border-radius:4px;display:inline-block;text-align:center;min-width:300px">
-                <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:400;color:#e8e4df;margin-bottom:6px">${e.degree}</div>
-                <div style="color:#c9a84c;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">${e.institution}</div>
-                <div style="color:rgba(201,168,76,.3);font-size:.75rem;letter-spacing:2px">${e.period}</div>
-              </div>`).join('')}
-            </div>
-          </section>`:''}
 
           <!-- CONTACT: centered full-width, minimal -->
           <section id="contact" style="padding:120px 40px;text-align:center;border-top:1px solid rgba(201,168,76,.08)">
@@ -1386,14 +1387,19 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(0,255,255,.3);font-size:.65rem;letter-spacing:3px;animation:float 2s ease-in-out infinite">▼ SCROLL</div>
         </section>
         ${d.skills.length?`<section id="skills" class="snap" style="padding:80px 40px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:3"><div style="max-width:900px;margin:0 auto;width:100%"><p style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:4px;color:rgba(0,255,255,.5);margin-bottom:8px">01 SKILLS.EXE</p><h2 style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#0ff;margin-bottom:40px">Tech Stack</h2><div style="display:flex;flex-wrap:wrap;gap:10px">${d.skills.map((s:string)=>`<span class="skill-tag neon-border" style="color:#0ff;background:rgba(0,255,255,.05);padding:10px 20px;border-radius:4px;font-size:.82rem;letter-spacing:1px">${s}</span>`).join('')}</div></div></section>`:''}
-        ${d.experience.length?`<section id="experience" class="snap" style="padding:80px 40px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:3"><div style="max-width:900px;margin:0 auto;width:100%"><p style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:4px;color:rgba(0,255,255,.5);margin-bottom:8px">02 WORK.LOG</p><h2 style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#0ff;margin-bottom:40px">Experience</h2>${d.experience.map((e:{role:string,company:string,period:string,description:string})=>`<div class="neon-border reveal" style="border-radius:8px;padding:24px;margin-bottom:16px;background:rgba(0,255,255,.02)"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px"><div><div style="color:#0ff;font-size:.95rem;font-weight:700;font-family:'Orbitron',sans-serif">${e.role}</div><div style="color:#f0f;font-size:.82rem;margin-top:2px">${e.company}</div></div><div style="color:rgba(0,255,255,.4);font-size:.72rem">${e.period}</div></div><p style="color:#666;font-size:.85rem;line-height:1.75">${e.description}</p></div>`).join('')}</div></section>`:''}
-        ${d.projects.length?`<section id="projects" class="snap" style="padding:80px 40px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:3"><div style="max-width:900px;margin:0 auto;width:100%"><p style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:4px;color:rgba(0,255,255,.5);margin-bottom:8px">03 PROJECTS.DIR</p><h2 style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#0ff;margin-bottom:40px">Projects</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="neon-border tilt-card reveal" style="border-radius:8px;padding:22px;background:rgba(0,255,255,.02)"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:#0ff;font-family:'Orbitron',sans-serif;font-size:.85rem">${p.link?`<a href="${p.link}" target="_blank" style="color:#0ff;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#fbbf24;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#555;font-size:.8rem;line-height:1.65;margin-bottom:12px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:6px">${p.tech.map((t:string)=>`<span style="font-size:.7rem;color:#f0f;background:rgba(255,0,255,.08);padding:3px 10px;border-radius:4px">${t}</span>`).join('')}</div></div>`).join('')}</div></div></section>`:''}
+        ${d.education.length?`<section id="education" class="snap" style="padding:80px 40px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:3"><div style="max-width:900px;margin:0 auto;width:100%"><p style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:4px;color:rgba(0,255,255,.5);margin-bottom:8px">02 EDUCATION.DAT</p><h2 style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#0ff;margin-bottom:40px">Education</h2>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="neon-border reveal" style="border-radius:8px;padding:24px;margin-bottom:16px;background:rgba(0,255,255,.02)"><div style="color:#0ff;font-size:.95rem;font-weight:700;font-family:'Orbitron',sans-serif">${e.degree}</div><div style="color:#f0f;font-size:.82rem;margin-top:2px">${e.institution}</div><div style="color:rgba(0,255,255,.4);font-size:.72rem;margin-top:4px">${e.period}</div></div>`).join('')}</div></section>`:''}
+        ${d.experience.length?`<section id="experience" class="snap" style="padding:80px 40px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:3"><div style="max-width:900px;margin:0 auto;width:100%"><p style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:4px;color:rgba(0,255,255,.5);margin-bottom:8px">03 WORK.LOG</p><h2 style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#0ff;margin-bottom:40px">Experience</h2>${d.experience.map((e:{role:string,company:string,period:string,description:string})=>`<div class="neon-border reveal" style="border-radius:8px;padding:24px;margin-bottom:16px;background:rgba(0,255,255,.02)"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px"><div><div style="color:#0ff;font-size:.95rem;font-weight:700;font-family:'Orbitron',sans-serif">${e.role}</div><div style="color:#f0f;font-size:.82rem;margin-top:2px">${e.company}</div></div><div style="color:rgba(0,255,255,.4);font-size:.72rem">${e.period}</div></div><p style="color:#666;font-size:.85rem;line-height:1.75">${e.description}</p></div>`).join('')}</div></section>`:''}
+        ${d.projects.length?`<section id="projects" class="snap" style="padding:80px 40px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:3"><div style="max-width:900px;margin:0 auto;width:100%"><p style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:4px;color:rgba(0,255,255,.5);margin-bottom:8px">04 PROJECTS.DIR</p><h2 style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#0ff;margin-bottom:40px">Projects</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="neon-border tilt-card reveal" style="border-radius:8px;padding:22px;background:rgba(0,255,255,.02)"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:#0ff;font-family:'Orbitron',sans-serif;font-size:.85rem">${p.link?`<a href="${p.link}" target="_blank" style="color:#0ff;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#fbbf24;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#555;font-size:.8rem;line-height:1.65;margin-bottom:12px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:6px">${p.tech.map((t:string)=>`<span style="font-size:.7rem;color:#f0f;background:rgba(255,0,255,.08);padding:3px 10px;border-radius:4px">${t}</span>`).join('')}</div></div>`).join('')}</div></div></section>`:''}
+        ${githubActivityHtml(d,'rgba(0,255,255,.04)','rgba(0,255,255,.15)','#0ff','#555')}
+        ${leetcodeHtml(d,'rgba(0,255,255,.04)','rgba(0,255,255,.15)','#0ff','#555')}
         <section id="contact" class="snap" style="padding:80px 40px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;z-index:3">
-          <p style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:4px;color:rgba(0,255,255,.5);margin-bottom:8px">04 CONTACT.SH</p>
+          <p style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:4px;color:rgba(0,255,255,.5);margin-bottom:8px">05 CONTACT.SH</p>
           <h2 style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#0ff;margin-bottom:12px">Initialize Contact</h2>
-          ${githubActivityHtml(d,'rgba(0,255,255,.04)','rgba(0,255,255,.15)','#0ff','#555')}
-          ${leetcodeHtml(d,'rgba(0,255,255,.04)','rgba(0,255,255,.15)','#0ff','#555')}
           <a href="${gmailLink(d.email)}" style="display:inline-block;margin-top:20px;border:1px solid #0ff;color:#0ff;padding:14px 40px;border-radius:4px;text-decoration:none;font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:3px;transition:all .2s" onmouseover="this.style.background='rgba(0,255,255,.1)';this.style.boxShadow='0 0 30px rgba(0,255,255,.2)'" onmouseout="this.style.background='transparent';this.style.boxShadow='none'">SEND MESSAGE</a>
+          <div style="display:flex;gap:16px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+            ${d.github?`<a href="${d.github}" target="_blank" style="border:1px solid rgba(0,255,255,.4);color:#0ff;padding:10px 24px;border-radius:4px;text-decoration:none;font-size:.8rem;letter-spacing:2px;transition:all .2s" onmouseover="this.style.background='rgba(0,255,255,.1)'" onmouseout="this.style.background='transparent'">GITHUB</a>`:''}
+            ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="border:1px solid rgba(255,0,255,.4);color:#f0f;padding:10px 24px;border-radius:4px;text-decoration:none;font-size:.8rem;letter-spacing:2px;transition:all .2s" onmouseover="this.style.background='rgba(255,0,255,.1)'" onmouseout="this.style.background='transparent'">LINKEDIN</a>`:''}
+          </div>
         </section>
         </div>`);
 
@@ -1435,11 +1441,11 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             </div>
           </aside>
           <main class="ocean-right">
+            ${d.education.length?`<section id="education" style="margin-bottom:56px"><p style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#0284c7;margin-bottom:8px">Education</p>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="ocean-card reveal"><div style="font-weight:800;color:#0c4a6e;font-size:1rem">${e.degree}</div><div style="color:#0284c7;font-size:.88rem">${e.institution}</div><div style="color:#7dd3fc;font-size:.78rem;margin-top:3px">${e.period}</div></div>`).join('')}</section>`:''}
             ${d.experience.length?`<section id="experience" style="margin-bottom:56px"><p style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#0284c7;margin-bottom:8px">Experience</p><h2 class="reveal" style="font-size:1.6rem;font-weight:900;color:#0c4a6e;margin-bottom:24px">Where I've worked</h2>${d.experience.map((e:{role:string,company:string,period:string,description:string})=>`<div class="ocean-card tilt-card reveal"><div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:6px"><div><div style="font-weight:800;font-size:1rem;color:#0c4a6e">${e.role}</div><div style="color:#0284c7;font-size:.88rem;font-weight:600">${e.company}</div></div><span style="font-size:.72rem;color:#7dd3fc;background:#e0f2fe;padding:3px 10px;border-radius:50px;white-space:nowrap">${e.period}</span></div><p style="color:#64748b;font-size:.88rem;line-height:1.75">${e.description}</p></div>`).join('')}</section>`:''}
             ${d.projects.length?`<section id="projects" style="margin-bottom:56px"><p style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#0284c7;margin-bottom:8px">Projects</p><h2 class="reveal" style="font-size:1.6rem;font-weight:900;color:#0c4a6e;margin-bottom:24px">Things I've built</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="ocean-card tilt-card reveal"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:800;color:#0c4a6e;font-size:.95rem">${p.link?`<a href="${p.link}" target="_blank" style="color:#0c4a6e;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#f59e0b;font-size:.82rem;font-weight:700">★ ${p.stars}</span>`:''}</div><p style="color:#64748b;font-size:.85rem;line-height:1.65;margin-bottom:12px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span style="font-size:.72rem;color:#0369a1;background:#e0f2fe;padding:3px 10px;border-radius:50px;font-weight:600">${t}</span>`).join('')}</div></div>`).join('')}</div></section>`:''}
             ${githubActivityHtml(d,'#fff','#e0f2fe','#0284c7','#64748b')}
             ${leetcodeHtml(d,'#fff','#e0f2fe','#0284c7','#64748b')}
-            ${d.education.length?`<section id="education" style="margin-bottom:40px"><p style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#0284c7;margin-bottom:8px">Education</p>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="ocean-card reveal"><div style="font-weight:800;color:#0c4a6e;font-size:1rem">${e.degree}</div><div style="color:#0284c7;font-size:.88rem">${e.institution}</div><div style="color:#7dd3fc;font-size:.78rem;margin-top:3px">${e.period}</div></div>`).join('')}</section>`:''}
           </main>
         </div>`);
 
@@ -1533,11 +1539,11 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
         </section>
         <div style="max-width:960px;margin:0 auto;padding:60px 40px">
           ${d.skills.length?`<section id="skills" style="margin-bottom:64px"><h2 class="reveal" style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:28px">Skills 🌿</h2><div class="reveal" style="display:flex;flex-wrap:wrap;gap:8px">${d.skills.map((s:string)=>`<span class="skill-tag" style="background:rgba(52,211,153,.08);border:1.5px solid rgba(52,211,153,.2);color:#86efac;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:500">${s}</span>`).join('')}</div></section>`:''}
+          ${d.education.length?`<section id="education" style="margin-bottom:64px"><h2 class="reveal" style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:20px">Education</h2>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="f-card reveal"><div style="font-weight:700;color:#f0fdf4">${e.degree}</div><div style="color:#34d399;font-size:.88rem">${e.institution}</div><div style="color:rgba(52,211,153,.4);font-size:.78rem;margin-top:2px">${e.period}</div></div>`).join('')}</section>`:''}
           ${d.experience.length?`<section id="experience" style="margin-bottom:64px"><h2 class="reveal" style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:32px">Experience</h2><div style="position:relative;padding-left:28px"><div class="f-tl-line"></div>${d.experience.map((e:{role:string,company:string,period:string,description:string})=>`<div class="f-card reveal" style="position:relative"><div class="f-tl-dot" style="left:-33px"></div><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px"><div><div style="font-weight:700;font-size:1rem;color:#f0fdf4">${e.role}</div><div style="color:#34d399;font-size:.85rem;margin-top:1px">${e.company}</div></div><span style="font-size:.72rem;color:rgba(52,211,153,.5)">${e.period}</span></div><p style="color:#6ee7b7;font-size:.88rem;line-height:1.75">${e.description}</p></div>`).join('')}</div></section>`:''}
           ${d.projects.length?`<section id="projects" style="margin-bottom:64px"><h2 class="reveal" style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:28px">Projects</h2><div class="f-proj-grid">${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="f-card tilt-card reveal"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700;color:#f0fdf4">${p.link?`<a href="${p.link}" target="_blank" style="color:#f0fdf4;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#fbbf24;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#6ee7b7;font-size:.85rem;line-height:1.65;margin-bottom:12px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span style="font-size:.72rem;color:#34d399;background:rgba(52,211,153,.08);padding:3px 10px;border-radius:6px">${t}</span>`).join('')}</div></div>`).join('')}</div></section>`:''}
           ${githubActivityHtml(d,'rgba(52,211,153,.05)','rgba(52,211,153,.15)','#34d399','#6ee7b7')}
-          ${d.education.length?`<section id="education" style="margin-bottom:48px"><h2 class="reveal" style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:20px">Education</h2>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="f-card reveal"><div style="font-weight:700;color:#f0fdf4">${e.degree}</div><div style="color:#34d399;font-size:.88rem">${e.institution}</div><div style="color:rgba(52,211,153,.4);font-size:.78rem;margin-top:2px">${e.period}</div></div>`).join('')}</section>`:''}
-          <section id="contact" class="reveal" style="text-align:center;padding:40px 0;border-top:1px solid rgba(52,211,153,.1)"><h2 style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:16px">Get in Touch</h2><a href="${gmailLink(d.email)}" style="color:#34d399;font-size:1rem;text-decoration:none;border-bottom:1px solid rgba(52,211,153,.3)">${d.email}</a><p style="color:#6ee7b7;font-size:.88rem;margin-top:8px">${d.location}</p></section>
+          <section id="contact" class="reveal" style="text-align:center;padding:40px 0;border-top:1px solid rgba(52,211,153,.1)"><h2 style="font-family:'Lora',serif;color:#34d399;font-size:1.6rem;margin-bottom:16px">Get in Touch</h2><a href="${gmailLink(d.email)}" style="color:#34d399;font-size:1rem;text-decoration:none;border-bottom:1px solid rgba(52,211,153,.3)">${d.email}</a><p style="color:#6ee7b7;font-size:.88rem;margin-top:8px">${d.location}</p><div style="display:flex;gap:12px;justify-content:center;margin-top:16px">${d.github?`<a href="${d.github}" target="_blank" style="color:#34d399;text-decoration:none;font-size:.85rem;border-bottom:1px solid rgba(52,211,153,.3)">GitHub</a>`:''} ${d.linkedin?`<a href="${d.linkedin}" target="_blank" style="color:#34d399;text-decoration:none;font-size:.85rem;border-bottom:1px solid rgba(52,211,153,.3)">LinkedIn</a>`:''}</div></section>
         </div></div>`);
 
     // ── CHERRY ─ Asymmetric two-col, petal canvas, dark crimson ──────────────
@@ -1583,11 +1589,11 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
             </div>
           </div>
           <div class="ch-right" style="flex:1">
+            ${d.education.length?`<section id="ch-education" style="margin-bottom:52px"><h2 class="reveal" style="font-family:'Playfair Display',serif;color:#f43f5e;font-size:1.5rem;margin-bottom:20px;font-style:italic">Education</h2>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="ch-card reveal"><div style="font-weight:700;color:#fecdd3">${e.degree}</div><div style="color:#f43f5e;font-size:.88rem">${e.institution}</div><div style="color:rgba(244,63,94,.4);font-size:.78rem">${e.period}</div></div>`).join('')}</section>`:''}
             ${d.experience.length?`<section id="ch-experience" style="margin-bottom:52px"><h2 class="reveal" style="font-family:'Playfair Display',serif;color:#f43f5e;font-size:1.5rem;margin-bottom:24px;font-style:italic">Experience</h2>${d.experience.map((e:{role:string,company:string,period:string,description:string})=>`<div class="ch-card tilt-card reveal"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px"><div><div style="font-weight:700;color:#fff">${e.role}</div><div style="color:#f43f5e;font-size:.85rem">${e.company}</div></div><span style="font-size:.72rem;color:rgba(244,63,94,.5)">${e.period}</span></div><p style="color:#9f7580;font-size:.87rem;line-height:1.75">${e.description}</p></div>`).join('')}</section>`:''}
             ${d.projects.length?`<section id="ch-projects" style="margin-bottom:52px"><h2 class="reveal" style="font-family:'Playfair Display',serif;color:#f43f5e;font-size:1.5rem;margin-bottom:24px;font-style:italic">Projects</h2>${d.projects.map((p:{name:string,description:string,tech:string[],stars:number,link:string})=>`<div class="ch-card tilt-card reveal"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700;color:#fecdd3">${p.link?`<a href="${p.link}" target="_blank" style="color:#fecdd3;text-decoration:none">${p.name}</a>`:p.name}</span>${p.stars?`<span style="color:#fbbf24;font-size:.8rem">★ ${p.stars}</span>`:''}</div><p style="color:#9f7580;font-size:.85rem;line-height:1.65;margin-bottom:10px">${p.description}</p><div style="display:flex;flex-wrap:wrap;gap:5px">${p.tech.map((t:string)=>`<span class="ch-tag" style="font-size:.7rem">${t}</span>`).join('')}</div></div>`).join('')}</section>`:''}
             ${githubActivityHtml(d,'rgba(244,63,94,.05)','rgba(244,63,94,.15)','#f43f5e','#9f7580')}
             ${leetcodeHtml(d,'rgba(244,63,94,.05)','rgba(244,63,94,.15)','#f43f5e','#9f7580')}
-            ${d.education.length?`<section id="ch-education" style="margin-bottom:40px"><h2 class="reveal" style="font-family:'Playfair Display',serif;color:#f43f5e;font-size:1.5rem;margin-bottom:20px;font-style:italic">Education</h2>${d.education.map((e:{degree:string,institution:string,period:string})=>`<div class="ch-card reveal"><div style="font-weight:700;color:#fecdd3">${e.degree}</div><div style="color:#f43f5e;font-size:.88rem">${e.institution}</div><div style="color:rgba(244,63,94,.4);font-size:.78rem">${e.period}</div></div>`).join('')}</section>`:''}
           </div>
         </div>
         </div></div>`);
