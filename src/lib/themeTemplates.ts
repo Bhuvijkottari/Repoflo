@@ -338,7 +338,22 @@ const gridCanvas = (lineColor='rgba(0,255,255,', bgOpacity='.08') => `
 // ─── Styles ───────────────────────────────────────────────────────────────
 const responsiveStyles = `
 @media(max-width:768px){
+  /* ── Universal nav: hide links, show hamburger on all themes ── */
   .nav-links{display:none!important}.nav-hamburger{display:block!important}
+  /* Hide nav links in ALL custom themed headers */
+  .bold-nav,
+  .neon-nav>div:last-child,
+  .f-nav nav,.ch-nav nav,.lv-nav nav,.co-nav nav,
+  .ar-nav nav,.mo-nav nav,.sk-nav nav,.gr-nav nav,
+  .em-nav nav,.rk-mission-nav nav,
+  header>nav,
+  header>div:last-child>nav,
+  header [style*="display:flex"][style*="gap:24px"],
+  header [style*="display:flex"][style*="gap:4px"],
+  header [style*="display:flex"][style*="gap:2px"]{display:none!important}
+  /* Make headers compact on mobile */
+  header{padding:10px 16px!important}
+
   h1{font-size:1.7rem!important;word-break:break-word!important}
   h2{font-size:1.15rem!important}
   .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
@@ -346,19 +361,13 @@ const responsiveStyles = `
   .project-card{padding:16px!important}
   body>div>div{padding-left:16px!important;padding-right:16px!important}
   section{padding:32px 0!important}
-  /* Fix flex layouts that break on mobile */
   [style*="display:flex"][style*="gap"]{flex-wrap:wrap!important}
   [style*="grid-template-columns:repeat(3"]{grid-template-columns:1fr!important}
   [style*="grid-template-columns:repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
-  /* Contact links */
   a[style*="padding:14px 36px"],a[style*="padding:14px 48px"],a[style*="padding:16px 48px"]{padding:12px 24px!important;font-size:.88rem!important}
-  /* Avatar sizing */
   img[style*="border-radius:50%"]{max-width:100px!important;max-height:100px!important}
-  /* Skill tags wrap */
   .skill-tag{font-size:.78rem!important;padding:6px 12px!important}
-  /* Fix overflow */
   pre,code{overflow-x:auto!important;white-space:pre-wrap!important;word-break:break-word!important}
-  /* Fix wide text */
   p,div,span,a{word-break:break-word!important;overflow-wrap:break-word!important}
 }
 @media(max-width:480px){
@@ -368,7 +377,6 @@ const responsiveStyles = `
   body{font-size:14px!important}
   section{padding:24px 0!important}
   .project-card{padding:14px!important}
-  /* Stack buttons vertically */
   [style*="display:flex"][style*="gap"]:not(nav *){flex-direction:column!important;align-items:stretch!important}
 }`;
 

@@ -1,23 +1,9 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github, Palette, Zap, Star, Users, ChevronDown, Sparkles } from "lucide-react";
+import { ArrowRight, Github, Zap, Star, ChevronDown, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroShapes from "@/assets/hero-shapes.png";
-import { incrementVisitorCount, getVisitorCount } from "@/lib/firebase";
-
 const HeroSection = () => {
-  const [visitorCount, setVisitorCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    // Atomic increment — returns the exact new count
-    incrementVisitorCount()
-      .then((count) => setVisitorCount(count))
-      .catch(() => {
-        // Fallback: just read current value
-        getVisitorCount().then((count) => setVisitorCount(count || 1));
-      });
-  }, []);
 
   return (
     <section className="relative min-h-screen overflow-hidden flex items-center pt-16 bg-[#0b1f3a]">
@@ -133,7 +119,6 @@ const HeroSection = () => {
             {[
               { icon: <Zap className="w-4 h-4 text-[#3fc4e7]" />, value: "20+", label: "Themes" },
               { icon: <Star className="w-4 h-4 text-[#3fc4e7]" />, value: "AI", label: "Powered" },
-              { icon: <Users className="w-4 h-4 text-[#3fc4e7]" />, value: visitorCount !== null ? (visitorCount > 0 ? visitorCount.toLocaleString() : "0") : "...", label: "Visitors" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
