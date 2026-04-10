@@ -52,7 +52,6 @@ const themes = [
   { id: "coral", name: "Coral Reef", description: "Vibrant coral and warm red tones", image: "coral" },
   { id: "emerald", name: "Emerald Luxe", description: "Rich emerald greens with gold touches", image: "emerald" },
   { id: "sakura", name: "Sakura Pink", description: "Japanese-inspired soft pink design", image: "sakura" },
-  { id: "bold", name: "Bold Dark", description: "Eye-catching dark theme with purple gradients", image: "bold" },
   { id: "ocean", name: "Ocean Breeze", description: "Cool ocean blues with fluid layouts", image: "ocean" },
   { id: "cherry", name: "Cherry Blossom", description: "Soft pink theme with delicate aesthetics", image: "cherry" },
   { id: "lavender", name: "Lavender Dream", description: "Soft violet gradients with calming tones", image: "lavender" },
@@ -63,6 +62,7 @@ const themes = [
   { id: "royal", name: "Royal Purple", description: "Regal purple tones with luxurious feel", image: "royal" },
   { id: "neon", name: "Neon Cyber", description: "Futuristic neon glows on dark background", image: "neon" },
   { id: "rocket", name: "Launch Pad", description: "Space-inspired dark theme with starry vibes", image: "rocket" },
+  { id: "bold", name: "Bold Dark", description: "Eye-catching dark theme with purple gradients — best on laptop", image: "bold", laptopOnly: true },
   { id: "creative", name: "Creative Warm", description: "Artistic warm palette — best on laptop", image: "creative", laptopOnly: true },
 ] as const;
 

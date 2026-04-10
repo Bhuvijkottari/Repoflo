@@ -152,7 +152,6 @@ const Index = () => {
               { name: "Coral", image: "coral" },
               { name: "Emerald", image: "emerald" },
               { name: "Sakura", image: "sakura" },
-              { name: "Bold Dark", image: "bold" },
               { name: "Ocean", image: "ocean" },
               { name: "Cherry", image: "cherry" },
               { name: "Lavender", image: "lavender" },
@@ -163,6 +162,7 @@ const Index = () => {
               { name: "Royal", image: "royal" },
               { name: "Neon Cyber", image: "neon" },
               { name: "Rocket", image: "rocket" },
+              { name: "Bold Dark", image: "bold" },
               { name: "Creative", image: "creative" },
             ].map((theme, i) => (
               <motion.div
