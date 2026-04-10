@@ -44,25 +44,26 @@ const themeImages: Record<string, string> = {
 };
 
 const themes = [
+  // Best on mobile first — these themes stack and render perfectly on all screen sizes
   { id: "minimal", name: "Minimal", description: "Clean, whitespace-focused design with elegant typography", image: "minimal" },
-  { id: "bold", name: "Bold Dark", description: "Eye-catching dark theme with purple gradients", image: "bold" },
   { id: "creative", name: "Creative Warm", description: "Artistic warm palette with playful layouts", image: "creative" },
-  { id: "developer", name: "Developer Terminal", description: "Terminal-inspired design for code-first devs", image: "terminal" },
-  { id: "elegant", name: "Elegant Luxe", description: "Sophisticated dark design with gold accents", image: "elegant" },
-  { id: "neon", name: "Neon Cyber", description: "Futuristic neon glows on dark background", image: "neon" },
-  { id: "ocean", name: "Ocean Breeze", description: "Cool ocean blues with fluid layouts", image: "ocean" },
-  { id: "sunset", name: "Sunset Glow", description: "Warm sunset gradients with soft tones", image: "sunset" },
   { id: "forest", name: "Forest Green", description: "Natural earth tones with green accents", image: "forest" },
+  { id: "arctic", name: "Arctic Frost", description: "Icy cool blues with frosted glass effects", image: "arctic" },
+  { id: "graphite", name: "Graphite Steel", description: "Industrial steel gray with sharp edges", image: "steel" },
+  { id: "coral", name: "Coral Reef", description: "Vibrant coral and warm red tones", image: "coral" },
+  { id: "emerald", name: "Emerald Luxe", description: "Rich emerald greens with gold touches", image: "emerald" },
+  { id: "sakura", name: "Sakura Pink", description: "Japanese-inspired soft pink design", image: "sakura" },
+  { id: "bold", name: "Bold Dark", description: "Eye-catching dark theme with purple gradients", image: "bold" },
+  { id: "ocean", name: "Ocean Breeze", description: "Cool ocean blues with fluid layouts", image: "ocean" },
   { id: "cherry", name: "Cherry Blossom", description: "Soft pink theme with delicate aesthetics", image: "cherry" },
   { id: "lavender", name: "Lavender Dream", description: "Soft violet gradients with calming tones", image: "lavender" },
-  { id: "midnight", name: "Midnight Blue", description: "Deep midnight blues with starlight accents", image: "midnight" },
-  { id: "coral", name: "Coral Reef", description: "Vibrant coral and warm red tones", image: "coral" },
-  { id: "arctic", name: "Arctic Frost", description: "Icy cool blues with frosted glass effects", image: "arctic" },
   { id: "mocha", name: "Mocha Brown", description: "Rich coffee tones with warm contrast", image: "mocha" },
-  { id: "sakura", name: "Sakura Pink", description: "Japanese-inspired soft pink design", image: "sakura" },
-  { id: "graphite", name: "Graphite Steel", description: "Industrial steel gray with sharp edges", image: "steel" },
-  { id: "emerald", name: "Emerald Luxe", description: "Rich emerald greens with gold touches", image: "emerald" },
+  { id: "elegant", name: "Elegant Luxe", description: "Sophisticated dark design with gold accents", image: "elegant" },
+  { id: "sunset", name: "Sunset Glow", description: "Warm sunset gradients with soft tones", image: "sunset" },
+  { id: "midnight", name: "Midnight Blue", description: "Deep midnight blues with starlight accents", image: "midnight" },
   { id: "royal", name: "Royal Purple", description: "Regal purple tones with luxurious feel", image: "royal" },
+  { id: "developer", name: "Developer Terminal", description: "Terminal-inspired design for code-first devs", image: "terminal" },
+  { id: "neon", name: "Neon Cyber", description: "Futuristic neon glows on dark background", image: "neon" },
   { id: "rocket", name: "Launch Pad", description: "Space-inspired dark theme with starry vibes", image: "rocket" },
 ];
 
