@@ -20,18 +20,12 @@ const nav = (bg: string, text: string, accent: string, personName: string, links
     "Contact",
   ].filter(Boolean) as string[] : (links || ["About", "Skills", "Experience", "Projects", "Education", "Contact"]);
   return `<style>
-    @media(max-width:700px){.nav-links{display:none!important}.nav-hamburger{display:block!important}}
-    .nav-mobile-open{display:flex!important}
+    @media(max-width:768px){.nav-links{display:none!important}}
     nav,nav *{box-sizing:border-box}
   </style>
   <nav style="position:sticky;top:0;z-index:100;background:${bg};padding:8px 20px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);width:100%;box-sizing:border-box;border-bottom:1px solid ${accent}22">
     <a href="#about" style="font-weight:800;font-size:.95rem;color:${accent};text-decoration:none;letter-spacing:.5px">${personName.split(' ')[0]}</a>
     <div class="nav-links" style="display:flex;gap:4px;align-items:center">${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth'})" style="color:${text};text-decoration:none;font-size:.78rem;padding:5px 10px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='${accent}';this.style.background='${accent}18'" onmouseout="this.style.color='${text}';this.style.background='transparent'">${l}</a>`).join('')}</div>
-    <button class="nav-hamburger" onclick="document.querySelector('.nav-mobile-menu').classList.toggle('nav-mobile-open')" style="display:none;background:none;border:none;color:${text};font-size:1.4rem;cursor:pointer;padding:4px">&#9776;</button>
-    <div class="nav-mobile-menu" style="display:none;position:fixed;inset:0;background:${bg};z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:32px;backdrop-filter:blur(24px)">
-      <button onclick="this.parentElement.classList.remove('nav-mobile-open')" style="position:absolute;top:20px;right:24px;background:none;border:none;color:${text};font-size:2rem;cursor:pointer">&times;</button>
-      ${autoLinks.map(l => `<a href="#${l.toLowerCase()}" onclick="event.preventDefault();this.closest('.nav-mobile-menu').classList.remove('nav-mobile-open');document.getElementById('${l.toLowerCase()}')?.scrollIntoView({behavior:'smooth'})" style="color:${text};text-decoration:none;font-size:1.3rem;font-weight:600" onmouseover="this.style.color='${accent}'" onmouseout="this.style.color='${text}'">${l}</a>`).join('')}
-    </div>
   </nav>`;
 };
 
