@@ -356,6 +356,29 @@ const responsiveStyles = `
   /* Make headers compact on mobile */
   header{padding:10px 16px!important}
 
+  /* ── Force ALL split layouts to single column ── */
+  /* Grid splits */
+  [style*="grid-template-columns:1fr 380px"],
+  [style*="grid-template-columns:1fr 360px"],
+  [style*="grid-template-columns:280px 1fr"],
+  [style*="grid-template-columns:300px 1fr"],
+  .forest-hero-grid,.bold-hero,.hero-grid{grid-template-columns:1fr!important}
+  /* Flex splits with fixed-width children */
+  .ocean-split,.ch-split,.mo-split{flex-direction:column!important}
+  .ocean-left,.ch-left,.mo-sidebar{width:100%!important;position:relative!important;height:auto!important;top:auto!important;max-height:none!important}
+  .ocean-right,.ch-right,.mo-main{border-left:none!important}
+  /* VS Code theme */
+  .vsc-root{flex-direction:column!important;height:auto!important;overflow:visible!important}
+  .vsc-activity{display:none!important}
+  .vsc-sidebar{width:100%!important;height:auto!important;max-height:200px!important;border-right:none!important;border-bottom:1px solid #11111b!important}
+  .vsc-editor{padding:16px!important}
+  .vsc-main{overflow:visible!important}
+  /* Any fixed-width sidebar */
+  [style*="width:300px"][style*="flex-shrink:0"],
+  [style*="width:360px"][style*="flex-shrink:0"],
+  [style*="width:280px"][style*="flex-shrink:0"],
+  [style*="width:220px"][style*="flex-shrink:0"]{width:100%!important;position:relative!important;height:auto!important}
+
   h1{font-size:1.7rem!important;word-break:break-word!important}
   h2{font-size:1.15rem!important}
   .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
@@ -488,45 +511,60 @@ document.addEventListener('DOMContentLoaded',function(){
       var hdrBg=hdr?getComputedStyle(hdr).backgroundColor:'rgba(0,0,0,0.95)';
       var hdrCol=hdr?getComputedStyle(hdr).color:'#fff';
 
-      // Create hamburger button
+      // Create 3-line hamburger button
       var btn=document.createElement('button');
-      btn.innerHTML='&#9776;';
       btn.id='mob-ham';
-      btn.style.cssText='position:fixed;top:12px;right:12px;z-index:9999;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:1.4rem;width:40px;height:40px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center';
+      btn.innerHTML='<svg width="20" height="16" viewBox="0 0 20 16" fill="none"><rect width="20" height="2" rx="1" fill="white"/><rect y="7" width="20" height="2" rx="1" fill="white"/><rect y="14" width="20" height="2" rx="1" fill="white"/></svg>';
+      btn.style.cssText='position:fixed;top:14px;right:14px;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);color:#fff;width:44px;height:44px;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,0.3);transition:transform 0.2s';
+      btn.ontouchstart=function(){btn.style.transform='scale(0.9)';};
+      btn.ontouchend=function(){btn.style.transform='scale(1)';};
 
-      // Create sidebar overlay
+      // Dark overlay
+      var overlay=document.createElement('div');
+      overlay.id='mob-overlay';
+      overlay.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity 0.3s ease';
+
+      // Sidebar
       var sidebar=document.createElement('div');
       sidebar.id='mob-sidebar';
-      sidebar.style.cssText='position:fixed;top:0;right:-280px;width:260px;height:100%;z-index:10000;background:rgba(10,10,20,0.97);backdrop-filter:blur(20px);transition:right 0.3s ease;padding:70px 24px 40px;overflow-y:auto;border-left:1px solid rgba(255,255,255,0.1)';
+      sidebar.style.cssText='position:fixed;top:0;right:0;width:270px;height:100%;z-index:10000;background:rgba(8,8,18,0.98);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);padding:0;overflow-y:auto;border-left:1px solid rgba(255,255,255,0.08)';
 
-      // Close button
+      // Sidebar header
+      var sideHdr=document.createElement('div');
+      sideHdr.style.cssText='padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between';
+      sideHdr.innerHTML='<span style="color:rgba(255,255,255,0.5);font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;font-weight:600">Menu</span>';
       var closeBtn=document.createElement('button');
-      closeBtn.innerHTML='&times;';
-      closeBtn.style.cssText='position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;opacity:0.6';
-      closeBtn.onclick=function(){sidebar.style.right='-280px';};
-      sidebar.appendChild(closeBtn);
+      closeBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>';
+      closeBtn.style.cssText='background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center';
+      var closeSidebar=function(){sidebar.style.transform='translateX(100%)';overlay.style.opacity='0';overlay.style.pointerEvents='none';};
+      closeBtn.onclick=closeSidebar;
+      sideHdr.appendChild(closeBtn);
+      sidebar.appendChild(sideHdr);
 
-      // Add links
+      // Nav links container
+      var linksDiv=document.createElement('div');
+      linksDiv.style.cssText='padding:8px 16px';
       secs.forEach(function(s){
         var a=document.createElement('a');
         a.href='#'+s.id;
         a.textContent=s.label;
-        a.style.cssText='display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:1rem;font-weight:600;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.06);transition:color 0.2s';
-        a.onmouseover=function(){this.style.color='#69d2f1';};
-        a.onmouseout=function(){this.style.color='rgba(255,255,255,0.7)';};
-        a.onclick=function(e){e.preventDefault();sidebar.style.right='-280px';document.getElementById(s.id)?.scrollIntoView({behavior:'smooth'});};
-        sidebar.appendChild(a);
+        a.style.cssText='display:flex;align-items:center;color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.95rem;font-weight:500;padding:14px 12px;border-radius:10px;margin-bottom:2px;transition:all 0.2s';
+        a.ontouchstart=function(){this.style.background='rgba(255,255,255,0.06)';this.style.color='#fff';};
+        a.ontouchend=function(){var el=this;setTimeout(function(){el.style.background='transparent';el.style.color='rgba(255,255,255,0.65)';},300);};
+        a.onclick=function(e){e.preventDefault();closeSidebar();setTimeout(function(){document.getElementById(s.id)?.scrollIntoView({behavior:'smooth'});},300);};
+        linksDiv.appendChild(a);
       });
+      sidebar.appendChild(linksDiv);
 
-      btn.onclick=function(){
-        sidebar.style.right=sidebar.style.right==='0px'?'-280px':'0px';
+      btn.onclick=function(e){
+        e.stopPropagation();
+        var isOpen=sidebar.style.transform==='translateX(0px)'||sidebar.style.transform==='translateX(0%)';
+        if(isOpen){closeSidebar();}
+        else{sidebar.style.transform='translateX(0)';overlay.style.opacity='1';overlay.style.pointerEvents='auto';}
       };
+      overlay.onclick=closeSidebar;
 
-      // Close on outside click
-      document.addEventListener('click',function(e){
-        if(!sidebar.contains(e.target)&&e.target!==btn){sidebar.style.right='-280px';}
-      });
-
+      document.body.appendChild(overlay);
       document.body.appendChild(btn);
       document.body.appendChild(sidebar);
     }
