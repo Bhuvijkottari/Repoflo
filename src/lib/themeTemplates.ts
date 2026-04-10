@@ -614,9 +614,8 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
         '\'Inter\',sans-serif',
         `<style>
           @media(max-width:768px){
-            .sb-aside{position:static!important;width:100%!important;height:auto!important;flex-direction:row!important;flex-wrap:wrap!important;padding:20px!important;border-right:none!important;border-bottom:1px solid #e8e8e8!important}
-            .sb-main{margin-left:0!important;max-width:100%!important}
-            .sb-name{font-size:1.1rem!important}.sb-links{display:none!important}
+            .sb-aside{display:none!important}
+            .sb-main{margin-left:0!important;max-width:100%!important;padding:24px 16px!important}
           }
           .tl-dot{width:10px;height:10px;border-radius:50%;background:#111;position:absolute;left:-25px;top:6px;flex-shrink:0}
           .tl-line{position:absolute;left:calc(-25px + 4px);top:18px;bottom:-28px;width:2px;background:#eee}
@@ -885,7 +884,13 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
           .pop{animation:pop-in .7s cubic-bezier(.16,1,.3,1) both}
           .pop-1{animation-delay:.05s}.pop-2{animation-delay:.15s}.pop-3{animation-delay:.25s}.pop-4{animation-delay:.35s}
           .alt-row:nth-child(even) .alt-img{order:-1}
-          @media(max-width:768px){.bento-grid{grid-template-columns:1fr!important}.pill-nav{left:16px!important;right:16px!important;transform:none!important;width:auto!important}}
+          @media(max-width:768px){
+            .bento-grid{grid-template-columns:1fr!important}
+            .pill-nav{display:none!important}
+            #about.hero-grid{grid-template-columns:1fr!important}
+            #about.hero-grid>div:first-child{padding:80px 20px 30px!important}
+            #about.hero-grid>div:last-child{padding:30px 20px!important}
+          }
         </style>
         <div style="background:#fdf8f0;color:#1a0e00;min-height:100vh;position:relative">
 
