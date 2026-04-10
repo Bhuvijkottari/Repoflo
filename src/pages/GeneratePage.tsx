@@ -5,11 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
-import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, ServerCrash, X, Monitor } from "lucide-react";
-import {
-  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogAction,
-} from "@/components/ui/alert-dialog";
+import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, ServerCrash, X } from "lucide-react";
 
 /* ── name validation helpers ─────────────────────────────────────────── */
 const shareAtLeast3Chars = (a: string, b: string): boolean => {
@@ -60,14 +56,6 @@ const GeneratePage = () => {
   const [githubData, setGithubData] = useState<PortfolioData | null>(null);
   const [githubFetching, setGithubFetching] = useState(false);
   const [githubError, setGithubError] = useState("");
-  const [showScreenWarning, setShowScreenWarning] = useState(false);
-
-  // Show screen-size warning on small devices
-  useEffect(() => {
-    if (window.innerWidth < 1024) {
-      setShowScreenWarning(true);
-    }
-  }, []);
 
   useEffect(() => {
     const theme = sessionStorage.getItem("selectedTheme");
@@ -212,32 +200,6 @@ const GeneratePage = () => {
   return (
     <div className="min-h-screen bg-[#0b1f3a] text-white">
       <Navbar />
-
-      {/* Screen size warning for mobile/tablet users */}
-      <AlertDialog open={showScreenWarning} onOpenChange={setShowScreenWarning}>
-        <AlertDialogContent className="bg-[#132f52] border-[#3fc4e7]/30 text-white max-w-md">
-          <AlertDialogHeader>
-            <div className="flex justify-center mb-2">
-              <Monitor className="w-12 h-12 text-[#3fc4e7]" />
-            </div>
-            <AlertDialogTitle className="text-center text-white font-display text-xl">
-              Best Viewed on a Larger Screen
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-[#b8c7e0] font-body text-sm leading-relaxed">
-              For the best portfolio generation and preview experience, we recommend using a <span className="text-white font-semibold">laptop or desktop</span>.
-              Some themes may not display optimally on smaller screens.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="sm:justify-center">
-            <AlertDialogAction
-              className="rounded-full px-8 bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold font-display"
-              onClick={() => setShowScreenWarning(false)}
-            >
-              Continue Anyway
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <div className="pt-24 pb-16 container mx-auto px-4 max-w-xl">
 
