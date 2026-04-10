@@ -111,7 +111,6 @@ export function getEditorInjectionScript(): string {
   <button onclick="__editorChangeColor()" title="Text Color">Color</button>
   <button onclick="__editorAddLink()" title="Add Link">Link</button>
   <div class="__editor-sep"></div>
-  <button onclick="__editorAddImage()" title="Add Image">+Img</button>
   <button onclick="__editorAddText()" title="Add Text Block">+Text</button>
   <div class="__editor-sep"></div>
   <button onclick="__editorUndo()" title="Undo">Undo</button>
