@@ -320,8 +320,8 @@ const handleDownloadPDF = () => {
     setCleanHtml(finalHtml);
     setInlineEditing(false);
     setFinalized(true);
-    triggerDownload(finalHtml, `${sanitizedName}.html`);
-    toast({ title: "Portfolio Finalized! 🎉", description: `"${sanitizedName}.html" downloaded with all your edits.` });
+    triggerDownload(finalHtml, `${sanitizedName}-source.txt`, "text/plain");
+    toast({ title: "Portfolio Finalized! 🎉", description: `"${sanitizedName}-source.txt" downloaded — open in any text editor to copy the code.` });
   };
 
   const toggleInlineEditor = () => {
@@ -546,17 +546,13 @@ const handleDownloadPDF = () => {
           >
             <p className="font-display font-semibold text-white text-lg">Portfolio Finalized 🎉</p>
             <p className="text-sm text-[#b8c7e0] mt-1">
-              <code className="bg-[#0b1f3a] px-2 py-0.5 rounded text-xs text-[#69d2f1]">{sanitizedName}.html</code>
+              <code className="bg-[#0b1f3a] px-2 py-0.5 rounded text-xs text-[#69d2f1]">{sanitizedName}-source.txt</code>
               {" "}downloaded with all your edits.
             </p>
             <div className="flex gap-3 justify-center mt-4 flex-wrap">
-              <Button size="sm" onClick={handleDownload}
-                className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold hover:opacity-90">
-                <Download className="w-4 h-4 mr-1" /> Download HTML
-              </Button>
               <Button size="sm" onClick={handleDownloadCode}
-                className="bg-white text-black hover:bg-gray-100 font-bold">
-                <Code className="w-4 h-4 mr-1" /> Download Code
+                className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold hover:opacity-90">
+                <Code className="w-4 h-4 mr-1" /> Download Source Code
               </Button>
             </div>
             <p className="text-xs text-[#b8c7e0]/40 mt-2 font-body">Both files include all your edits</p>
