@@ -644,16 +644,27 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
         </style>
         <div style="background:#06030f;color:#fff;min-height:100vh">
 
+          <style>
+            @media(max-width:768px){
+              .bold-header{padding:12px 16px!important}
+              .bold-header .bold-nav{display:none!important}
+              .bold-hero{grid-template-columns:1fr!important;padding:0 16px 40px!important;padding-top:80px!important;min-height:auto!important}
+              .bold-hero h1{font-size:3rem!important;letter-spacing:-1px!important}
+              .bold-avatar{width:200px!important;margin:0 auto!important}
+              .bold-sec{padding:40px 16px!important}
+            }
+          </style>
+
           <!-- MINIMAL TOP BAR -->
-          <header style="position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(6,3,15,.8);backdrop-filter:blur(12px)">
+          <header class="bold-header" style="position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(6,3,15,.8);backdrop-filter:blur(12px)">
             <span style="font-family:'Syne Mono',monospace;font-size:.85rem;color:rgba(255,255,255,.4);letter-spacing:2px">${d.name.split(' ').map(w=>w[0]).join('')}</span>
-            <div style="display:flex;gap:24px">
+            <div class="bold-nav" style="display:flex;gap:24px">
               ${(['Skills','Experience','Projects','Contact']).map(s=>`<a href="#${s.toLowerCase()}" onclick="event.preventDefault();document.getElementById('${s.toLowerCase()}')?.scrollIntoView({behavior:'smooth'})" style="color:rgba(255,255,255,.4);text-decoration:none;font-size:.8rem;letter-spacing:1px;transition:color .2s" onmouseover="this.style.color='#c084fc'" onmouseout="this.style.color='rgba(255,255,255,.4)'">${s}</a>`).join('')}
             </div>
           </header>
 
           <!-- HERO: Big type + avatar split -->
-          <section id="about" style="min-height:100vh;display:grid;grid-template-columns:1fr 380px;align-items:flex-end;padding:0 40px 60px;padding-top:80px;position:relative;overflow:hidden;gap:40px" class="hero-grid">
+          <section id="about" class="bold-hero hero-grid" style="min-height:100vh;display:grid;grid-template-columns:1fr 380px;align-items:flex-end;padding:0 40px 60px;padding-top:80px;position:relative;overflow:hidden;gap:40px">
             <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 20% 60%,rgba(168,85,247,.08),transparent)"></div>
             <div style="position:relative;z-index:1;align-self:flex-end">
               <p class="fu fu-1" style="font-family:'Syne Mono',monospace;font-size:.75rem;color:rgba(168,85,247,.7);letter-spacing:4px;margin-bottom:20px">PORTFOLIO · ${new Date().getFullYear()}</p>
@@ -684,7 +695,7 @@ export const getThemeHtml = (themeId: string, customData?: PortfolioData): strin
 
           <!-- NUMBERED SECTIONS -->
           ${d.experience.length?`
-          <section id="experience" style="padding:80px 40px;border-bottom:1px solid rgba(168,85,247,.08)">
+          <section id="experience" class="bold-sec" style="padding:80px 40px;border-bottom:1px solid rgba(168,85,247,.08)">
             <div style="max-width:960px;margin:0 auto">
               <div style="position:relative;margin-bottom:48px">
                 <span class="sec-num">01</span>

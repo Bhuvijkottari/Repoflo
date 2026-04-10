@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { getThemeHtml } from "@/lib/themeTemplates";
 import { injectEditor, stripEditor } from "@/lib/editorInjection";
-import { Download, ArrowLeft, Smartphone, Monitor, Maximize, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye } from "lucide-react";
+import { Download, ArrowLeft, Smartphone, Monitor, Maximize, Pencil, Check, X, Trash2, Plus, Code, Loader2, FileText, Eye, Camera, Undo2 } from "lucide-react";
 import type { PortfolioData } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { downloadHtml, generateReportHtml, type CandidateAnalysis } from "@/lib/generateReport";
@@ -53,6 +53,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
   const [finalized, setFinalized] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [previousAvatar, setPreviousAvatar] = useState<string | null>(null);
 
   // Recruiter analysis state
   const [analysis, setAnalysis] = useState<CandidateAnalysis | null>(null);
@@ -242,14 +243,43 @@ const handleDownloadPDF = () => {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Save current avatar for undo
+    if (portfolioData?.avatar) setPreviousAvatar(portfolioData.avatar);
     const reader = new FileReader();
     reader.onload = (ev) => {
-      if (ev.target?.result) updateField("avatar", ev.target.result as string);
+      if (!ev.target?.result) return;
+      const img = new Image();
+      img.onload = () => {
+        // Auto-crop to square (center crop)
+        const size = Math.min(img.width, img.height);
+        const canvas = document.createElement("canvas");
+        canvas.width = 400;
+        canvas.height = 400;
+        const ctx = canvas.getContext("2d")!;
+        const sx = (img.width - size) / 2;
+        const sy = (img.height - size) / 2;
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, 400, 400);
+        updateField("avatar", canvas.toDataURL("image/jpeg", 0.9));
+      };
+      img.src = ev.target.result as string;
     };
     reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected
+    e.target.value = "";
   };
 
-  const removePhoto = () => updateField("avatar", "");
+  const undoPhoto = () => {
+    if (previousAvatar) {
+      updateField("avatar", previousAvatar);
+      setPreviousAvatar(null);
+      toast({ title: "Photo Restored", description: "Previous photo has been restored." });
+    }
+  };
+
+  const removePhoto = () => {
+    if (portfolioData?.avatar) setPreviousAvatar(portfolioData.avatar);
+    updateField("avatar", "");
+  };
 
   const personName = portfolioData?.name || "portfolio";
   const sanitizedName = personName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
@@ -396,6 +426,22 @@ const handleDownloadPDF = () => {
                       className="p-2 rounded-md text-[#b8c7e0] hover:text-white transition-colors"
                     ><Maximize className="w-4 h-4" /></button>
                   </div>
+                )}
+                <Button
+                  size="sm"
+                  onClick={() => photoInputRef.current?.click()}
+                  className="bg-[#132f52] text-[#b8c7e0] border border-[#3fc4e7]/30 hover:bg-[#3fc4e7]/12 hover:text-white hover:border-[#3fc4e7]/60 font-semibold"
+                >
+                  <Camera className="w-4 h-4 mr-1" /> Photo
+                </Button>
+                {previousAvatar && (
+                  <Button
+                    size="sm"
+                    onClick={undoPhoto}
+                    className="bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 font-semibold"
+                  >
+                    <Undo2 className="w-4 h-4 mr-1" /> Undo
+                  </Button>
                 )}
                 <Button
                   size="sm"
