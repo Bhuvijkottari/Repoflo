@@ -384,7 +384,10 @@ const responsiveStyles = `
   [style*="grid-template-columns:repeat(3"]{grid-template-columns:1fr!important}
   [style*="grid-template-columns:repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
   a[style*="padding:14px 36px"],a[style*="padding:14px 48px"],a[style*="padding:16px 48px"]{padding:12px 24px!important;font-size:.88rem!important}
-  img[style*="border-radius:50%"]{max-width:100px!important;max-height:100px!important}
+  /* Avatar photos: fit inside placeholder, never overflow */
+  img[style*="object-fit:cover"]{object-fit:cover!important;width:100%!important;height:100%!important}
+  [style*="border-radius:50%"][style*="overflow:hidden"]{max-width:120px!important;max-height:120px!important}
+  [style*="aspect-ratio:1"][style*="overflow:hidden"]{max-width:200px!important}
   .skill-tag{font-size:.78rem!important;padding:6px 12px!important}
   pre,code{overflow-x:auto!important;white-space:pre-wrap!important;word-break:break-word!important}
   p,div,span,a{word-break:break-word!important;overflow-wrap:break-word!important}
@@ -463,6 +466,23 @@ document.addEventListener('DOMContentLoaded',function(){
       co.unobserve(e.target);
     }});},{threshold:.5});
     co.observe(el);
+  });
+
+  // Click on avatar to change photo (sends message to parent iframe)
+  document.querySelectorAll('img[src]').forEach(function(img){
+    // Find avatar images (inside circular/rounded containers, typically first img or small ones)
+    var parent=img.parentElement;
+    if(!parent)return;
+    var ps=parent.style;
+    var isAvatar=ps.borderRadius&&(ps.borderRadius.includes('50%')||parseInt(ps.borderRadius)>=12)&&ps.overflow==='hidden'&&(ps.width||parent.style.aspectRatio);
+    if(!isAvatar)return;
+    img.style.cursor='pointer';
+    parent.style.cursor='pointer';
+    parent.title='Click to change photo';
+    parent.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      if(window.parent&&window.parent!==window){window.parent.postMessage({type:'__avatar_click'},'*');}
+    });
   });
 
   // 3D tilt on cards

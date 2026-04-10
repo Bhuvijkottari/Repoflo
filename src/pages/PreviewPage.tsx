@@ -117,6 +117,10 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
       if (e.data?.type === '__editor_update') {
         setCleanHtml(e.data.html);
       }
+      // Click on avatar inside iframe triggers photo upload
+      if (e.data?.type === '__avatar_click') {
+        photoInputRef.current?.click();
+      }
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
@@ -411,6 +415,13 @@ const handleDownloadPDF = () => {
           <div className="flex items-center gap-2 flex-wrap">
             {!isRecruiter && (
               <>
+                <Button
+                  size="sm"
+                  onClick={handleDownloadCode}
+                  className="bg-[#132f52] text-[#b8c7e0] border border-[#3fc4e7]/30 hover:bg-[#3fc4e7]/12 hover:text-white hover:border-[#3fc4e7]/60 font-semibold"
+                >
+                  <Code className="w-4 h-4 mr-1" /> Code
+                </Button>
                 {!isMobile && (
                   <div className="flex bg-[#132f52] border border-[#3fc4e7]/20 rounded-lg p-1">
                     <button
@@ -427,13 +438,6 @@ const handleDownloadPDF = () => {
                     ><Maximize className="w-4 h-4" /></button>
                   </div>
                 )}
-                <Button
-                  size="sm"
-                  onClick={() => photoInputRef.current?.click()}
-                  className="bg-[#132f52] text-[#b8c7e0] border border-[#3fc4e7]/30 hover:bg-[#3fc4e7]/12 hover:text-white hover:border-[#3fc4e7]/60 font-semibold"
-                >
-                  <Camera className="w-4 h-4 mr-1" /> Photo
-                </Button>
                 {previousAvatar && (
                   <Button
                     size="sm"
@@ -453,15 +457,6 @@ const handleDownloadPDF = () => {
                 >
                   {inlineEditing ? <><Eye className="w-4 h-4 mr-1" /> Exit Edit</> : <><Pencil className="w-4 h-4 mr-1" /> Edit</>}
                 </Button>
-                {!isMobile && (
-                  <Button
-                    size="sm"
-                    onClick={handleDownloadCode}
-                    className="bg-[#132f52] text-[#b8c7e0] border border-[#3fc4e7]/30 hover:bg-[#3fc4e7]/12 hover:text-white hover:border-[#3fc4e7]/60 font-semibold"
-                  >
-                    <Code className="w-4 h-4 mr-1" /> Code
-                  </Button>
-                )}
                 <Button
                   size="sm"
                   onClick={handleFinalize}
