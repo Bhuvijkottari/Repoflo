@@ -44,12 +44,11 @@ const themeImages: Record<string, string> = {
 };
 
 const themes = [
-  // Best on mobile first — these themes stack and render perfectly on all screen sizes
-  { id: "minimal", name: "Minimal", description: "Clean, whitespace-focused design with elegant typography", image: "minimal" },
-  { id: "creative", name: "Creative Warm", description: "Artistic warm palette with playful layouts", image: "creative" },
   { id: "forest", name: "Forest Green", description: "Natural earth tones with green accents", image: "forest" },
   { id: "arctic", name: "Arctic Frost", description: "Icy cool blues with frosted glass effects", image: "arctic" },
+  { id: "developer", name: "Developer Terminal", description: "Terminal-inspired design for code-first devs", image: "terminal" },
   { id: "graphite", name: "Graphite Steel", description: "Industrial steel gray with sharp edges", image: "steel" },
+  { id: "minimal", name: "Minimal", description: "Clean, whitespace-focused design with elegant typography", image: "minimal" },
   { id: "coral", name: "Coral Reef", description: "Vibrant coral and warm red tones", image: "coral" },
   { id: "emerald", name: "Emerald Luxe", description: "Rich emerald greens with gold touches", image: "emerald" },
   { id: "sakura", name: "Sakura Pink", description: "Japanese-inspired soft pink design", image: "sakura" },
@@ -62,10 +61,10 @@ const themes = [
   { id: "sunset", name: "Sunset Glow", description: "Warm sunset gradients with soft tones", image: "sunset" },
   { id: "midnight", name: "Midnight Blue", description: "Deep midnight blues with starlight accents", image: "midnight" },
   { id: "royal", name: "Royal Purple", description: "Regal purple tones with luxurious feel", image: "royal" },
-  { id: "developer", name: "Developer Terminal", description: "Terminal-inspired design for code-first devs", image: "terminal" },
   { id: "neon", name: "Neon Cyber", description: "Futuristic neon glows on dark background", image: "neon" },
   { id: "rocket", name: "Launch Pad", description: "Space-inspired dark theme with starry vibes", image: "rocket" },
-];
+  { id: "creative", name: "Creative Warm", description: "Artistic warm palette — best on laptop", image: "creative", laptopOnly: true },
+] as const;
 
 const ThemesPage = () => {
   const navigate = useNavigate();
@@ -133,7 +132,12 @@ const ThemesPage = () => {
 
               {/* Card body */}
               <div className="p-3 sm:p-4">
-                <h3 className="font-display font-semibold text-white text-sm mb-1 truncate">{theme.name}</h3>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <h3 className="font-display font-semibold text-white text-sm truncate">{theme.name}</h3>
+                  {'laptopOnly' in theme && theme.laptopOnly && (
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 flex-shrink-0">LAPTOP</span>
+                  )}
+                </div>
                 <p className="text-[10px] sm:text-xs text-[#b8c7e0] font-body line-clamp-2 mb-2 sm:mb-3 h-7 sm:h-8 leading-relaxed">
                   {theme.description}
                 </p>
