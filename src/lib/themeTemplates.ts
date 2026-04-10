@@ -465,8 +465,14 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>`;
 
+const mobileBanner = `<div style="display:none;background:linear-gradient(135deg,#0b1f3a,#132f52);color:#b8c7e0;text-align:center;padding:10px 16px;font-size:12px;font-family:system-ui,sans-serif;border-bottom:1px solid rgba(63,196,231,0.2)" id="mobile-banner">
+  <span style="color:#69d2f1;font-weight:600">Tip:</span> View on a larger screen for better effects
+  <button onclick="this.parentElement.style.display='none'" style="margin-left:12px;background:none;border:none;color:#69d2f1;font-size:16px;cursor:pointer;vertical-align:middle">&times;</button>
+</div>
+<script>if(window.innerWidth<768)document.getElementById('mobile-banner').style.display='block';</script>`;
+
 const wrapTheme = (fontImport: string, fontFamily: string, body: string) =>
-  `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.7;font-size:16px;overflow-x:hidden}</style></head><body>${body}${scrollScript}</body></html>`;
+  `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fontImport}<style>${baseStyle}body{font-family:${fontFamily};line-height:1.7;font-size:16px;overflow-x:hidden}</style></head><body>${mobileBanner}${body}${scrollScript}</body></html>`;
 
 // ─── Theme definitions ────────────────────────────────────────────────────
 export const getThemeHtml = (themeId: string, customData?: PortfolioData): string => {
