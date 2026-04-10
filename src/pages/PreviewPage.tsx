@@ -392,7 +392,7 @@ const handleDownloadPDF = () => {
       {!hideNavbar && <Navbar />}
       <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
       
-      <div className="pt-20 pb-16 container mx-auto px-2 sm:px-4">
+      <div className="pt-16 sm:pt-20 pb-4 sm:pb-16 container mx-auto px-1 sm:px-4">
         {/* Top bar */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
           <div className="flex items-center gap-3 flex-wrap">
@@ -493,24 +493,31 @@ const handleDownloadPDF = () => {
               transition={{ delay: 0.2 }}
               className="w-full max-w-5xl"
             >
-              <div className={`bg-card rounded-2xl shadow-card-hover overflow-hidden transition-all duration-500 ${
-                viewMode === "mobile" && !isMobile ? "w-[390px] h-[844px] mx-auto" : isMobile ? "w-full h-[75vh]" : "w-full h-[80vh]"
+              <div className={`bg-card overflow-hidden transition-all duration-500 ${
+                viewMode === "mobile" && !isMobile
+                  ? "w-[390px] h-[844px] mx-auto rounded-2xl shadow-card-hover"
+                  : isMobile
+                    ? "w-full h-[82vh] rounded-xl"
+                    : "w-full h-[80vh] rounded-2xl shadow-card-hover"
               }`}>
-                <div className="bg-secondary/50 px-4 py-2 flex items-center gap-2 border-b border-border">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-destructive/60" />
-                    <div className="w-3 h-3 rounded-full bg-accent/60" />
-                    <div className="w-3 h-3 rounded-full bg-primary/40" />
+                {/* Browser chrome — hide on phone for max space */}
+                {!isMobile && (
+                  <div className="bg-secondary/50 px-4 py-2 flex items-center gap-2 border-b border-border">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-destructive/60" />
+                      <div className="w-3 h-3 rounded-full bg-accent/60" />
+                      <div className="w-3 h-3 rounded-full bg-primary/40" />
+                    </div>
+                    <div className="flex-1 text-center text-xs text-muted-foreground font-body truncate">
+                      {inlineEditing && <span className="text-primary font-semibold ml-1">Editing</span>}
+                    </div>
                   </div>
-                  <div className="flex-1 text-center text-xs text-muted-foreground font-body truncate">
-                    {inlineEditing && <span className="text-primary font-semibold ml-1">Editing</span>}
-                  </div>
-                </div>
+                )}
                 <iframe
                   ref={iframeRef}
                   srcDoc={inlineEditing ? injectEditor(editableHtml) : editableHtml}
                   className="w-full border-0"
-                  style={{ height: "calc(100% - 36px)" }}
+                  style={{ height: isMobile ? "100%" : "calc(100% - 36px)" }}
                   title="Portfolio Preview"
                 />
               </div>
