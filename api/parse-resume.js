@@ -72,33 +72,23 @@ Extract and return ONLY valid JSON:
     if (parsed.error === "not_a_resume")
       return res.status(400).json({ error: `Not a resume: ${parsed.reason}` });
 
-    const github = parsedGithub;
-    if (parsed.name && github.name) {
-      const clean = (s) => s.toLowerCase().replace(/[^a-z]/g, "");
-      const gWords = (github.name + " " + (github.github || "")).split(/[\s\/]+/).map(clean).filter((w) => w.length >= 3);
-      const rWords = parsed.name.split(/\s+/).map(clean).filter((w) => w.length >= 3);
-      const match = gWords.some((gw) => rWords.some((rw) => gw === rw || gw.includes(rw) || rw.includes(gw)));
-      if (!match)
-        return res.status(400).json({ error: `Name mismatch: GitHub "${github.name}" vs resume "${parsed.name}". Please check they are the same person.` });
-    }
-
     return res.json({
-      name: parsed.name || github.name || "Developer",
-      title: parsed.title || github.title || "Software Developer",
-      bio: parsed.bio || github.bio || "",
-      avatar: github.avatar || "",
-      email: parsed.email || github.email || "",
+      name: parsed.name || parsedGithub.name || "Developer",
+      title: parsed.title || parsedGithub.title || "Software Developer",
+      bio: parsed.bio || parsedGithub.bio || "",
+      avatar: parsedGithub.avatar || "",
+      email: parsed.email || parsedGithub.email || "",
       phone: parsed.phone || "",
-      location: parsed.location || github.location || "",
-      github: github.github || "",
-      linkedin: parsed.linkedin || github.linkedin || "",
-      website: parsed.website || github.website || "",
-      skills: parsed.skills?.length ? parsed.skills : github.skills || [],
-      experience: parsed.experience?.length ? parsed.experience : github.experience || [],
-      education: parsed.education?.length ? parsed.education : github.education || [],
-      volunteering: parsed.volunteering?.length ? parsed.volunteering : github.volunteering || [],
-      projects: parsed.projects?.length ? parsed.projects : github.projects || [],
-      githubStats: github.githubStats || null,
+      location: parsed.location || parsedGithub.location || "",
+      github: parsedGithub.github || "",
+      linkedin: parsed.linkedin || parsedGithub.linkedin || "",
+      website: parsed.website || parsedGithub.website || "",
+      skills: parsed.skills?.length ? parsed.skills : parsedGithub.skills || [],
+      experience: parsed.experience?.length ? parsed.experience : parsedGithub.experience || [],
+      education: parsed.education?.length ? parsed.education : parsedGithub.education || [],
+      volunteering: parsed.volunteering?.length ? parsed.volunteering : parsedGithub.volunteering || [],
+      projects: parsed.projects?.length ? parsed.projects : parsedGithub.projects || [],
+      githubStats: parsedGithub.githubStats || null,
     });
   } catch (e) {
     return res.status(500).json({ error: e.message || "Unknown error" });

@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import type { CandidateAnalysis } from "@/lib/generateReport";
 import type { PortfolioData } from "@/lib/mockData";
-import { on } from "events";
 
 interface Props {
   analysis: CandidateAnalysis | null;

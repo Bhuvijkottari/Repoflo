@@ -37,19 +37,6 @@ const friendlyError = (e: any): string => {
   return msg || "Something went wrong. Please try again.";
 };
 
-/* ── name validation ─────────────────────────────────────────── */
-/** Returns true if at least one 3-char substring of `a` appears in `b` (case-insensitive) */
-const shareAtLeast3Chars = (a: string, b: string): boolean => {
-  if (!a || !b) return false;
-  const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const ca = clean(a), cb = clean(b);
-  if (ca.length < 3 || cb.length < 3) return false;
-  for (let i = 0; i <= ca.length - 3; i++) {
-    if (cb.includes(ca.slice(i, i + 3))) return true;
-  }
-  return false;
-};
-
 /** Extract GitHub username from a URL string */
 const extractGithubUser = (url: string) =>
   url?.match(/github\.com\/([^\/\?#\s]+)/i)?.[1]?.toLowerCase() || "";
@@ -133,11 +120,9 @@ const RecruiterPage = () => {
   const [requiredTechStack, setRequiredTechStack] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
   const [historyEntries, setHistoryEntries] = useState<any[]>([]);
-// ONLY the changed section is rewritten cleanly — rest of your file stays SAME
 
-const [debouncedGithubUrl, setDebouncedGithubUrl] = useState("");
-const [debouncedLeetcode, setDebouncedLeetcode] = useState("");
-const [nameWarning, setNameWarning] = useState("");
+  const [debouncedGithubUrl, setDebouncedGithubUrl] = useState("");
+  const [debouncedLeetcode, setDebouncedLeetcode] = useState("");
 
 /* ── GitHub Debounce ── */
 useEffect(() => {
@@ -167,7 +152,6 @@ useEffect(() => {
       if (data?.error) throw new Error(data.error);
 
       setGithubData(data);
-      setNameWarning(""); // cleared — full cross-check happens on submit
     } catch (e: any) {
       setGithubError(friendlyError(e));
       setGithubData(null);
@@ -265,21 +249,12 @@ useEffect(() => {
       let finalData: PortfolioData = { ...githubData, leetcodeStats: leetcodeData ?? null };
       sessionStorage.setItem("recruiterPrefs", JSON.stringify({ requiredTechStack, experienceLevel }));
 
-      // ── LeetCode name validation (optional field) ────────────────────────
-      if (leetcodeData?.username) {
-        const lcUser = leetcodeData.username.toLowerCase().replace(/[^a-z0-9]/g, "");
-        const ghName = (githubData.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-        const ghUser = extractGithubUser(githubUrl);
-        const matchesName = shareAtLeast3Chars(lcUser, ghName);
-        const matchesUser = shareAtLeast3Chars(lcUser, ghUser);
-        if (!matchesName && !matchesUser) {
-          setIsProcessing(false);
-          setStatus("");
-          setNameWarning(
-            `LeetCode username "${leetcodeData.username}" doesn't match the GitHub profile "${githubData.name}" (@${ghUser}). They must share at least 3 consecutive characters — please verify this LeetCode account belongs to the same candidate.`
-          );
-          return;
-        }
+      const githubUser = extractGithubUser(githubUrl);
+      const githubName = (githubData.name || "").trim();
+      const leetcodeUser = leetcodeData?.username?.trim() || "";
+
+      if (leetcodeUser) {
+        // frontend LeetCode/GitHub name matching validation removed
       }
 
       if (resumeFile) {
@@ -301,21 +276,14 @@ useEffect(() => {
 
         // ── NAME VALIDATION ──────────────────────────────────────────
         const resumeName: string = (data.name || "").trim();
-        const githubName: string = (githubData.name || "").trim();
         const githubUser: string = extractGithubUser(githubUrl);
 
-        // 1. Resume name must share ≥3 chars with GitHub display name OR username
         if (resumeName && githubName) {
-          const nameMatchesDisplay = shareAtLeast3Chars(resumeName, githubName);
-          const nameMatchesUsername = shareAtLeast3Chars(resumeName, githubUser);
-          if (!nameMatchesDisplay && !nameMatchesUsername) {
-            setIsProcessing(false);
-            setStatus("");
-            setNameWarning(
-              `Name mismatch: Resume says "${resumeName}" but GitHub shows "${githubName}" (@${githubUser}). They must share at least 3 consecutive characters — please verify you've entered the correct candidate's GitHub profile.`
-            );
-            return;
-          }
+          // frontend resume/GitHub name matching validation removed
+        }
+
+        if (resumeName && leetcodeUser) {
+          // frontend resume/LeetCode name matching validation removed
         }
 
         // 2. If resume contains a GitHub URL, it must match the one entered
@@ -326,14 +294,9 @@ useEffect(() => {
           if (resumeGhUser && enteredGhUser && resumeGhUser !== enteredGhUser) {
             setIsProcessing(false);
             setStatus("");
-            setNameWarning(
-              `GitHub mismatch: The resume lists GitHub as "@${resumeGhUser}" but you entered "@${enteredGhUser}". Please ensure the GitHub URL and resume belong to the same candidate.`
-            );
-            return;
+            // frontend GitHub URL matching validation removed
           }
         }
-
-        setNameWarning(""); // all checks passed
         // ── END VALIDATION ───────────────────────────────────────────
       }
 
@@ -744,27 +707,6 @@ useEffect(() => {
             </label>
           </NavyCard>
 
-          {/* Name mismatch warning */}
-          {nameWarning && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl"
-            >
-              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-amber-400 font-semibold text-sm font-display mb-1">Identity Mismatch Detected</p>
-                <p className="text-amber-300/80 text-xs font-body leading-relaxed">{nameWarning}</p>
-                <button
-                  type="button"
-                  onClick={() => setNameWarning("")}
-                  className="text-amber-400/60 text-xs mt-2 hover:text-amber-400 transition-colors font-body"
-                >
-                  Dismiss and try different inputs
-                </button>
-              </div>
-            </motion.div>
-          )}
 
           {/* Submit */}
           {isProcessing ? (
@@ -790,7 +732,7 @@ useEffect(() => {
           ) : (
             <Button
               type="submit"
-              disabled={!githubData || !resumeFile || !!nameWarning}
+              disabled={!githubData || !resumeFile}
               className="w-full h-13 py-3.5 text-base font-bold rounded-xl bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black hover:opacity-90 transition-opacity shadow-lg disabled:opacity-40 font-display"
             >
               <ArrowRight className="w-5 h-5 mr-2" />

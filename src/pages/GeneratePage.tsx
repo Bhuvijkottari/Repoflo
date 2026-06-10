@@ -7,20 +7,6 @@ import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle, Loader2, ServerCrash, X } from "lucide-react";
 
-/* ── name validation helpers ─────────────────────────────────────────── */
-const shareAtLeast3Chars = (a: string, b: string): boolean => {
-  if (!a || !b) return false;
-  const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const ca = clean(a), cb = clean(b);
-  if (ca.length < 3 || cb.length < 3) return false;
-  for (let i = 0; i <= ca.length - 3; i++) {
-    if (cb.includes(ca.slice(i, i + 3))) return true;
-  }
-  return false;
-};
-const extractGithubUser = (url: string) =>
-  url?.match(/github\.com\/([^\/\?#\s]+)/i)?.[1]?.toLowerCase() || "";
-
 const friendlyError = (e: any): string => {
   const msg: string = e?.message || String(e) || "";
   if (
@@ -50,7 +36,6 @@ const GeneratePage = () => {
   const [githubUrl, setGithubUrl] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [nameWarning, setNameWarning] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState("");
   const [githubData, setGithubData] = useState<PortfolioData | null>(null);
@@ -112,19 +97,7 @@ const GeneratePage = () => {
         const resumeName = (data.name || "").trim();
         const githubName = (githubData.name || "").trim();
         const githubUser = extractGithubUser(githubUrl);
-        if (resumeName && githubName) {
-          const matchesDisplay = shareAtLeast3Chars(resumeName, githubName);
-          const matchesUsername = shareAtLeast3Chars(resumeName, githubUser);
-          if (!matchesDisplay && !matchesUsername) {
-            setIsProcessing(false);
-            setStatus("");
-            setNameWarning(
-              `Name mismatch: your resume says "${resumeName}" but your GitHub profile shows "${githubName}" (@${githubUser}). They must share at least 3 consecutive characters — please make sure the resume belongs to this GitHub account.`
-            );
-            return;
-          }
-        }
-        setNameWarning("");
+        // frontend resume/GitHub name matching validation removed
       }
       setStatus("Building your portfolio...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
@@ -308,26 +281,6 @@ const GeneratePage = () => {
           </div>
 
           {/* Name mismatch warning */}
-          {nameWarning && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl"
-            >
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-red-400 font-semibold text-sm font-display mb-1">Resume & GitHub Mismatch</p>
-                <p className="text-red-300/80 text-xs font-body leading-relaxed">{nameWarning}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => { setNameWarning(""); setResumeFile(null); }}
-                className="text-red-400/60 hover:text-red-400 transition-colors flex-shrink-0"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </motion.div>
-          )}
 
           {/* Data Privacy & Terms */}
           <label className={`flex items-start gap-3 cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 ${termsAccepted ? 'border-[#3fc4e7]/40 bg-[#3fc4e7]/5' : 'border-amber-500/40 bg-amber-500/5'}`}>
@@ -359,7 +312,7 @@ const GeneratePage = () => {
           <motion.div whileHover={{ scale: termsAccepted ? 1.02 : 1 }} whileTap={{ scale: termsAccepted ? 0.98 : 1 }}>
             <button
               type="submit"
-              disabled={!githubData || isProcessing || githubFetching || !termsAccepted || !!nameWarning}
+              disabled={!githubData || isProcessing || githubFetching || !termsAccepted}
               className="w-full h-13 py-3.5 rounded-xl text-base font-bold font-display
                          bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black
                          hover:opacity-90 active:scale-[0.98] transition-all duration-200
