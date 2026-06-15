@@ -18,6 +18,7 @@ interface Props {
   onDownloadPDF: () => void;
   onGenerateReport: () => void;
   requiredTechStack?: string[];
+  selectedFields?: string[];
 }
 
 /* ── Animation preset ──────────────────────────────────── */
@@ -173,11 +174,22 @@ const StatPill = ({ icon: Icon, label, value }: { icon: any; label: string; valu
 
 /* ════════════════════════════════════════════════════════ */
 const RecruiterAnalysisPanel = ({
-  analysis, isAnalyzing, portfolioData, onReanalyze,onGenerateReport,onDownloadReport,onDownloadPDF, requiredTechStack = [],
+  analysis, isAnalyzing, portfolioData, onReanalyze, onGenerateReport, onDownloadReport, onDownloadPDF, requiredTechStack = [], selectedFields = [],
 }: Props) => {
   const d = portfolioData;
   const s = d.githubStats;
   const lc = d.leetcodeStats;
+
+  // Derive which sections to show — fall back to data presence for backwards compat
+  const fields = selectedFields.length > 0 ? selectedFields
+    : [
+        ...(s ? ["github"] : []),
+        ...(lc ? ["leetcode"] : []),
+        ...((d.experience?.length || d.education?.length) ? ["resume"] : []),
+      ];
+  const showGithub = fields.includes("github");
+  const showLeetcode = fields.includes("leetcode");
+  const showResume = fields.includes("resume");
 
   return (
     <div className="mt-8 space-y-5">
@@ -216,7 +228,12 @@ const RecruiterAnalysisPanel = ({
               <div className="text-center space-y-1">
                 <p className="font-semibold text-lg text-foreground">Analyzing candidate profile…</p>
                 <p className="text-sm text-muted-foreground">
-                  GitHub activity · ATS compatibility · LeetCode performance · Project authenticity
+                  {[
+                    showGithub && "GitHub activity",
+                    showResume && "ATS compatibility",
+                    showLeetcode && "LeetCode performance",
+                    showGithub && "Project authenticity",
+                  ].filter(Boolean).join(" · ")}
                 </p>
               </div>
             </div>
@@ -254,7 +271,7 @@ const RecruiterAnalysisPanel = ({
                 </div>
 
                 {/* ATS gauge */}
-                {analysis.atsScore ? (
+                {showResume && analysis.atsScore ? (
                   <div className="flex items-center justify-center p-8">
                     <CircularGauge
                       value={analysis.atsScore.overall} size={130} strokeWidth={12}
@@ -400,7 +417,7 @@ const RecruiterAnalysisPanel = ({
           )}
 
           {/* ══ ATS SCORE BREAKDOWN ═════════════════════════════ */}
-          {analysis.atsScore && (
+          {showResume && analysis.atsScore && (
             <motion.div {...fadeUp(0.1)}>
               <Card>
                 <CardHeader icon={Shield} title="ATS Resume Score Breakdown" subtitle="Applicant tracking system compatibility" />
@@ -433,7 +450,7 @@ const RecruiterAnalysisPanel = ({
           )}
 
           {/* ══ LEETCODE PERFORMANCE ════════════════════════════ */}
-          {(analysis.leetcodeInsights || lc) && (
+          {showLeetcode && (analysis.leetcodeInsights || lc) && (
             <motion.div {...fadeUp(0.1)}>
               <Card>
                 <CardHeader icon={Code2} title="LeetCode Performance" subtitle="Problem-solving track record" />
@@ -472,11 +489,12 @@ const RecruiterAnalysisPanel = ({
           )}
 
           {/* ══ GITHUB INSIGHTS ═════════════════════════════════ */}
+          {showGithub && analysis.githubInsights && (
           <motion.div {...fadeUp(0.1)}>
             <Card>
               <CardHeader icon={GitFork} title="GitHub Insights" subtitle="Activity & contribution patterns" />
               <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {analysis.githubInsights && Object.entries(analysis.githubInsights).map(([key, val]) => (
+                {Object.entries(analysis.githubInsights).map(([key, val]) => (
                   <div key={key} className="bg-secondary/30 rounded-xl p-4 space-y-1.5 border border-border/40 hover:border-border transition-colors">
                     <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
                       {key.replace(/([A-Z])/g, " $1").trim()}
@@ -487,8 +505,10 @@ const RecruiterAnalysisPanel = ({
               </div>
             </Card>
           </motion.div>
+          )}
 
           {/* ══ PROJECT AUTHENTICITY ════════════════════════════ */}
+          {showGithub && d.projects?.length > 0 && (
           <motion.div {...fadeUp(0.1)}>
             <Card>
               <CardHeader icon={Code2} title="Project Authenticity" subtitle="AI-generated code & originality signals" />
@@ -602,6 +622,7 @@ const RecruiterAnalysisPanel = ({
               </div>
             </Card>
           </motion.div>
+          )}
 
           {/* ══ TECHNICAL ASSESSMENT ════════════════════════════ */}
           <motion.div {...fadeUp(0.1)}>

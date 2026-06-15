@@ -97,6 +97,26 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow update, delete: if isAdmin();
     }
+    // ─── DRIVES ─────────────────────────────────────────────
+match /drives/{driveId} {
+
+  // Create drive
+  allow create: if isSignedIn();
+
+  // Recruiter can read own drives, admin can read all
+  allow read: if isSignedIn() &&
+    (
+      resource.data.recruiterEmail == request.auth.token.email
+      || isAdmin()
+    );
+
+  // Recruiter can update/delete own drives
+  allow update, delete: if isSignedIn() &&
+    (
+      resource.data.recruiterEmail == request.auth.token.email
+      || isAdmin()
+    );
+}
 
     // ─── DEFAULT: deny everything else ──────────────────────────────────
     match /{document=**} {

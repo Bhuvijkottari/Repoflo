@@ -6,12 +6,12 @@ export interface CandidateAnalysis {
   summary: string;
   strengths: string[];
   concerns: string[];
-  githubInsights: {
+  githubInsights?: {
     activityLevel: string;
     codeQuality: string;
     consistency: string;
     collaboration: string;
-  };
+  } | null;
   technicalAssessment: {
     primaryStack: string;
     experienceLevel: string;
@@ -58,8 +58,20 @@ const verdictLabel = (n: number) =>
 
 const langColors = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#ec4899", "#06b6d4"];
 
-export function generateReportHtml(data: PortfolioData, analysis: CandidateAnalysis): string {
-  const s = data.githubStats;
+export function generateReportHtml(data: PortfolioData, analysis: CandidateAnalysis, selectedFields: string[] = []): string {
+  // If selectedFields is empty, infer from available data (backwards compat)
+  const fields = selectedFields.length > 0 ? selectedFields
+    : [
+        ...(data.githubStats ? ["github"] : []),
+        ...(data.leetcodeStats ? ["leetcode"] : []),
+        ...((data.experience?.length || data.education?.length) ? ["resume"] : []),
+      ];
+
+  const showGithub = fields.includes("github");
+  const showLeetcode = fields.includes("leetcode");
+  const showResume = fields.includes("resume");
+
+  const s = showGithub ? data.githubStats : null;
   const date = new Date().toLocaleDateString("en-US", {
     year: "numeric", month: "long", day: "numeric",
   });
@@ -367,20 +379,20 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
   </div>
 
   <!-- ══ GITHUB INSIGHTS ══ -->
+  ${showGithub ? `
   <div class="no-break">
     <div class="sec-title">GitHub Insights</div>
     <div class="two-col" style="margin-bottom:${s ? "14px" : "0"}">
       <div class="info-card">
-        <div class="insight-row"><span class="lbl">Activity Level</span><span class="val">${analysis.githubInsights.activityLevel}</span></div>
-        <div class="insight-row"><span class="lbl">Code Quality</span><span class="val">${analysis.githubInsights.codeQuality}</span></div>
+        <div class="insight-row"><span class="lbl">Activity Level</span><span class="val">${analysis.githubInsights?.activityLevel ?? "N/A"}</span></div>
+        <div class="insight-row"><span class="lbl">Code Quality</span><span class="val">${analysis.githubInsights?.codeQuality ?? "N/A"}</span></div>
       </div>
       <div class="info-card">
-        <div class="insight-row"><span class="lbl">Consistency</span><span class="val">${analysis.githubInsights.consistency}</span></div>
-        <div class="insight-row"><span class="lbl">Collaboration</span><span class="val">${analysis.githubInsights.collaboration}</span></div>
+        <div class="insight-row"><span class="lbl">Consistency</span><span class="val">${analysis.githubInsights?.consistency ?? "N/A"}</span></div>
+        <div class="insight-row"><span class="lbl">Collaboration</span><span class="val">${analysis.githubInsights?.collaboration ?? "N/A"}</span></div>
       </div>
     </div>
     ${s ? `
-    <!-- GitHub stats row -->
     <div class="three-col" style="margin-bottom:12px">
       <div class="stat-card"><div class="val">${s.totalCommits.toLocaleString()}</div><div class="lbl">Commits</div></div>
       <div class="stat-card"><div class="val">${s.publicRepos}</div><div class="lbl">Public Repos</div></div>
@@ -396,18 +408,18 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
       <div class="card-label" style="margin-bottom:8px">Top Languages</div>
       ${langBar}
     </div>` : ""}
-    ${s.recentCollaborations?.length ? `
+    ${(s as any).recentCollaborations?.length ? `
     <div style="margin-top:10px;font-size:12px;color:#475569">
-      <strong>Recent Collaborations:</strong> ${s.recentCollaborations.join(" · ")}
+      <strong>Recent Collaborations:</strong> ${(s as any).recentCollaborations.join(" · ")}
     </div>` : ""}
     ${s.aiGeneratedContent > 0 ? `
     <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;padding:10px 14px;margin-top:10px;font-size:12px;color:#92400e">
       <strong>⚠ AI Content Detected:</strong> ${s.aiGeneratedContent} repo(s) may contain AI-generated code patterns.
-    </div>` : ""}` : `<p style="color:#94a3b8;font-size:12px">No GitHub data available.</p>`}
-  </div>
+    </div>` : ""}` : ""}
+  </div>` : ""}
 
   <!-- ══ ATS SCORE ══ -->
-  ${analysis.atsScore ? `
+  ${showResume && analysis.atsScore ? `
   <div class="no-break">
     <div class="sec-title">ATS Score Breakdown — ${analysis.atsScore.overall}% Overall</div>
     <div class="two-col">
@@ -421,7 +433,7 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
   </div>` : ""}
 
   <!-- ══ LEETCODE ══ -->
-  ${analysis.leetcodeInsights ? `
+  ${showLeetcode && analysis.leetcodeInsights ? `
   <div class="no-break">
     <div class="sec-title">LeetCode Insights</div>
     <div class="two-col">
@@ -437,14 +449,14 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
   </div>` : ""}
 
   <!-- ══ SKILLS ══ -->
-  ${data.skills.length ? `
+  ${data.skills?.length ? `
   <div class="no-break">
     <div class="sec-title">Skills</div>
     <div>${data.skills.map(sk => `<span class="tag">${sk}</span>`).join("")}</div>
   </div>` : ""}
 
   <!-- ══ EXPERIENCE ══ -->
-  ${data.experience.length ? `
+  ${showResume && data.experience?.length ? `
   <div class="no-break">
     <div class="sec-title">Work Experience</div>
     ${data.experience.map(e => `
@@ -456,7 +468,7 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
   </div>` : ""}
 
   <!-- ══ PROJECTS ══ -->
-  ${data.projects.length ? `
+  ${showGithub && data.projects?.length ? `
   <div class="no-break">
     <div class="sec-title">Projects</div>
     ${data.projects.map(p => `
@@ -471,7 +483,7 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
   </div>` : ""}
 
   <!-- ══ EDUCATION ══ -->
-  ${data.education.length ? `
+  ${data.education?.length ? `
   <div class="no-break">
     <div class="sec-title">Education</div>
     ${data.education.map(e => `

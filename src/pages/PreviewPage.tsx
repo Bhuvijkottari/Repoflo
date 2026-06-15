@@ -62,6 +62,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
   const [experienceLevel, setExperienceLevel] = useState<string>("");
   const [candidateId, setCandidateId] = useState<string | null>(null);
   const [historyId, setHistoryId] = useState<string | null>(null);
+  const [selectedFields, setSelectedFields] = useState<string[]>([]);
 
   const isRecruiter = themeId === "recruiter";
 
@@ -75,6 +76,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
         const parsed = JSON.parse(prefs);
         if (parsed.requiredTechStack?.length) setRequiredTechStack(parsed.requiredTechStack);
         if (parsed.experienceLevel) setExperienceLevel(parsed.experienceLevel);
+        if (parsed.selectedFields?.length) setSelectedFields(parsed.selectedFields);
       }
       // Load candidate ID for updating analysis
       const storedCandidateId = sessionStorage.getItem("candidateId");
@@ -144,13 +146,24 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
     if (!portfolioData) return;
     setIsAnalyzing(true);
     try {
+      // FIX 1: driveContext must be declared BEFORE the fetch call, not inside it
+      const driveContext = JSON.parse(
+        sessionStorage.getItem("driveContext") || "{}"
+      );
+
       const res = await fetch("/api/analyze-candidate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           portfolioData,
-          requiredTechStack: requiredTechStack.length > 0 ? requiredTechStack : undefined,
-          experienceLevel: experienceLevel || undefined,
+          requiredTechStack:
+            driveContext.requiredTechStack?.length > 0
+              ? driveContext.requiredTechStack
+              : undefined,
+          experienceLevel:
+            driveContext.experienceLevel || undefined,
+          selectedFields:
+            driveContext.selectedFields || [],
         }),
       });
       const data = await res.json();
@@ -159,7 +172,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
       trackGeminiCall("analyze-candidate");
 
       // Generate HTML report
-      const reportHtml = generateReportHtml(portfolioData, data as CandidateAnalysis);
+      const reportHtml = generateReportHtml(portfolioData, data as CandidateAnalysis, selectedFields);
 
       // Store/update candidate analysis in database
       if (candidateId && user?.email) {
@@ -176,66 +189,61 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
       setIsAnalyzing(false);
     }
   };
-const handleDownloadReport = () => {
-  const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-  const blob = new Blob([html], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${sanitizedName}-full-ui.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 150);
-  toast({ title: "Downloaded", description: "Report HTML downloaded" });
-};
-const handleGenerateReport = () => {
-  if (!portfolioData || !analysis) return;
 
-  const reportHtml = generateReportHtml(portfolioData, analysis);
-
-  // Create a temp container
-  const element = document.createElement("div");
-  element.innerHTML = reportHtml;
-
-  html2pdf().from(element).set({
-    filename: `${sanitizedName}-report.pdf`,
-    margin: 10,
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-    },
-    jsPDF: {
-      format: "a4",
-      orientation: "portrait",
-    },
-  }).save();
-};
-
-const handleDownloadPDF = () => {
-  if (!portfolioData || !analysis) return;
-  const reportHtml = generateReportHtml(portfolioData, analysis);
-
-  // Open the report in a new window and trigger browser print-to-PDF
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    toast({ title: "Popup Blocked", description: "Please allow popups for this site to download the PDF.", variant: "destructive" });
-    return;
-  }
-
-  printWindow.document.open();
-  printWindow.document.write(reportHtml);
-  printWindow.document.close();
-
-  // Wait for resources (fonts, images) to load before printing
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-    // Optional: close the window after print dialog closes
-    printWindow.onafterprint = () => printWindow.close();
+  const handleDownloadReport = () => {
+    // FIX 2: use portfolioData?.name, not undefined `sanitizedName` (declared later)
+    const name = (portfolioData?.name || "report").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
+    const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name}-full-ui.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 150);
+    toast({ title: "Downloaded", description: "Report HTML downloaded" });
   };
-};
 
+  const handleGenerateReport = () => {
+    if (!portfolioData || !analysis) return;
+    // FIX 3: same — sanitizedName not yet in scope here, compute locally
+    const name = (portfolioData?.name || "report").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
+    const reportHtml = generateReportHtml(portfolioData, analysis, selectedFields);
+    const element = document.createElement("div");
+    element.innerHTML = reportHtml;
+    html2pdf().from(element).set({
+      filename: `${name}-report.pdf`,
+      margin: 10,
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+      },
+      jsPDF: {
+        format: "a4",
+        orientation: "portrait",
+      },
+    }).save();
+  };
+
+  const handleDownloadPDF = () => {
+    if (!portfolioData || !analysis) return;
+    const reportHtml = generateReportHtml(portfolioData, analysis, selectedFields);
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast({ title: "Popup Blocked", description: "Please allow popups for this site to download the PDF.", variant: "destructive" });
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(reportHtml);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.onafterprint = () => printWindow.close();
+    };
+  };
 
   const updateField = (field: keyof PortfolioData, value: any) => {
     if (!portfolioData) return;
@@ -533,6 +541,7 @@ const handleDownloadPDF = () => {
               onDownloadPDF={handleDownloadPDF}
               onGenerateReport={handleGenerateReport}
               requiredTechStack={requiredTechStack}
+              selectedFields={selectedFields}
             />
           </>
         )}

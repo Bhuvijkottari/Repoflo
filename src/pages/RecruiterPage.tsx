@@ -17,11 +17,14 @@ import {
   signInWithGoogle, signOutUser, updateRecruiterUsage, incrementRecruiterRequestUsage,
   checkRecruiterLimit, addRecruiterHistory, fetchRecruiterHistory,
   storeCandidateAnalysis, findExistingCandidate, subscribeRecruiterRequest, RecruiterRequest,
-  submitSupportTicket, subscribeSiteSettings, SiteSettings,
+  submitSupportTicket, subscribeSiteSettings, SiteSettings
 } from "@/lib/firebase";
+import { fetchRecruiterDrives } from "@/lib/firebase";
 import { sanitizeSupportMessage, sanitizeEmail, sanitizeText } from "@/lib/sanitize";
 import TechStackInput from "@/components/TechStackInput";
 import type { PortfolioData } from "@/lib/mockData";
+import { fetchDriveById } from "@/lib/firebase";
+import type { Drive } from "@/lib/firebase";
 
 /* ── friendly error messages ─────────────────────────────────── */
 const friendlyError = (e: any): string => {
@@ -87,7 +90,20 @@ const RecruiterPage = () => {
   const [supportSending, setSupportSending] = useState(false);
   const [supportSent, setSupportSent] = useState(false);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({ portfolioEnabled: true, recruiterEnabled: true });
+  const [drives, setDrives] = useState<Drive[]>([]);
+const [selectedDrive, setSelectedDrive] = useState<Drive | null>(null);
+const [selectedFields, setSelectedFields] = useState<string[]>([]);
+const [selectedDriveId, setSelectedDriveId] = useState<string>("");
 
+  useEffect(() => {
+  const loadDrives = async () => {
+    if (!user?.email) return;
+    const data = await fetchRecruiterDrives(user.email);
+    setDrives(data);
+  };
+
+  loadDrives();
+}, [user]);
   useEffect(() => {
     const unsub = subscribeSiteSettings(setSiteSettings);
     return unsub;
@@ -108,6 +124,7 @@ const RecruiterPage = () => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
 
   const [searchParams] = useSearchParams();
+  const driveId = searchParams.get("driveId");
   const showPreview = searchParams.get("preview") === "1";
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState("");
@@ -219,10 +236,32 @@ useEffect(() => {
   });
 
   
-
+   
 
   useEffect(() => { if (user) loadHistory(); }, [user]);
+  useEffect(() => {
+  if (!driveId) return;
 
+  const loadDrive = async () => {
+    const data = await fetchDriveById(driveId);
+
+    if (!data) return;
+
+    setSelectedDrive(data);
+    setSelectedDriveId(data.id!);
+    setSelectedFields(data.selectedFields || []);
+
+    setRequiredTechStack(
+      data.requiredTechStack || []
+    );
+
+    setExperienceLevel(
+      data.experienceLevel || ""
+    );
+  };
+
+  loadDrive();
+}, [driveId]);
   const handleSignIn = async () => {
     try { await signInWithGoogle(); }
     catch { toast({ title: "Sign in failed", description: "Failed to sign in with Google.", variant: "destructive" }); }
@@ -239,29 +278,75 @@ useEffect(() => {
       toast({ title: "Authentication required", description: "Please sign in to continue.", variant: "destructive" });
       return;
     }
-    if (!checkRecruiterLimit(recruiterProfile)) {
-      toast({ title: "Usage limit reached", description: `You've reached your analysis limit.`, variant: "destructive" });
+    // Use recruiterRequest for limit check (new system); fall back to old profile
+    const usageCount = recruiterRequest?.usageCount ?? recruiterProfile?.usageCount ?? 0;
+    const packageLimit = recruiterRequest?.packageLimit ?? recruiterProfile?.packageLimit ?? 25;
+    if (packageLimit !== -1 && usageCount >= packageLimit) {
+      toast({ title: "Usage limit reached", description: `You've reached your analysis limit of ${packageLimit}.`, variant: "destructive" });
       return;
     }
-    if (!githubData) return;
+    if (!selectedDrive) {
+  toast({
+    title: "Select a drive",
+    description: "Please select a hiring drive first.",
+    variant: "destructive",
+  });
+  return;
+}
+    const needsGithub = selectedDrive.selectedFields.includes("github");
+    const needsResume = selectedDrive.selectedFields.includes("resume");
+    const needsLeetcode = selectedDrive.selectedFields.includes("leetcode");
+
+    if (needsGithub && !githubData) {
+      toast({ title: "GitHub required", description: "Please enter a valid GitHub URL and wait for it to load.", variant: "destructive" });
+      return;
+    }
+    if (needsResume && !resumeFile) {
+      toast({ title: "Resume required", description: "Please upload the candidate's resume.", variant: "destructive" });
+      return;
+    }
+    if (needsLeetcode && !leetcodeData) {
+      toast({ title: "LeetCode required", description: "Please enter a valid LeetCode username and wait for it to load.", variant: "destructive" });
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      let finalData: PortfolioData = { ...githubData, leetcodeStats: leetcodeData ?? null };
-      sessionStorage.setItem("recruiterPrefs", JSON.stringify({ requiredTechStack, experienceLevel }));
+      const driveContext = selectedDrive;
 
-      const githubUser = extractGithubUser(githubUrl);
-      const githubName = (githubData.name || "").trim();
-      const leetcodeUser = leetcodeData?.username?.trim() || "";
+      // Build finalData only from fields the drive requires
+      let finalData: PortfolioData = needsGithub
+        ? { ...githubData! }
+        : ({} as PortfolioData); // if no github, start empty
 
-      if (leetcodeUser) {
-        // frontend LeetCode/GitHub name matching validation removed
+      if (needsLeetcode && leetcodeData) {
+        finalData = { ...finalData, leetcodeStats: leetcodeData };
+      } else {
+        finalData = { ...finalData, leetcodeStats: null };
       }
 
-      if (resumeFile) {
+sessionStorage.setItem(
+  "recruiterPrefs",
+  JSON.stringify({
+    requiredTechStack:
+      driveContext?.requiredTechStack || requiredTechStack,
+
+    experienceLevel:
+      driveContext?.experienceLevel || experienceLevel,
+
+    selectedFields:
+      driveContext?.selectedFields || [],
+  })
+);
+      const githubUser = needsGithub ? extractGithubUser(githubUrl) : "";
+      const githubName = needsGithub ? (githubData?.name || "").trim() : "";
+      const leetcodeUser = needsLeetcode ? (leetcodeData?.username?.trim() || "") : "";
+
+      if (needsResume && resumeFile) {
         setStatus("Reading resume and extracting data...");
         const formData = new FormData();
         formData.append("resume", resumeFile);
-        formData.append("githubData", JSON.stringify(githubData));
+        if (githubData) formData.append("githubData", JSON.stringify(githubData));
         const response = await fetch("/api/parse-resume", {
           method: "POST",
           body: formData,
@@ -272,7 +357,13 @@ useEffect(() => {
         }
         const data = await response.json();
         if (data?.error) throw new Error(data.error);
-        finalData = { ...finalData, ...data, avatar: data.avatar || githubData.avatar, githubStats: githubData.githubStats, leetcodeStats: finalData.leetcodeStats };
+        finalData = {
+          ...finalData,
+          ...data,
+          avatar: data.avatar || githubData?.avatar,
+          githubStats: githubData?.githubStats,
+          leetcodeStats: finalData.leetcodeStats,
+        };
 
         // ── NAME VALIDATION ──────────────────────────────────────────
         const resumeName: string = (data.name || "").trim();
@@ -302,16 +393,20 @@ useEffect(() => {
 
       setStatus("Looking up previous analyses...");
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
+      sessionStorage.setItem(
+  "driveContext",
+  JSON.stringify(driveContext)
+);
 
       // ── Check if this candidate was already analyzed with same inputs ──
-      const ghUsername = extractGithubUser(githubUrl);
+      const ghUsername = needsGithub ? extractGithubUser(githubUrl) : `resume-${Date.now()}`;
       const existingCandidate = await findExistingCandidate(
-        ghUsername,
-        user.email!,
-        leetcodeData?.username,
-        requiredTechStack,
-        experienceLevel,
-      );
+  ghUsername,
+  user.email!,
+  needsLeetcode ? leetcodeData?.username : undefined,
+  selectedDrive?.requiredTechStack || [],
+  selectedDrive?.experienceLevel || ""
+);
 
       if (existingCandidate?.analysis) {
         // Use cached result — no Gemini call needed, no usage counted
@@ -337,22 +432,52 @@ useEffect(() => {
         incrementRecruiterRequestUsage(user.uid).catch((e) => console.warn("Request usage tracking failed:", e)),
       ]);
 
+      // Firestore does not accept undefined — replace all undefined with null
+      const sanitizeForFirestore = (obj: any): any => {
+        if (obj === undefined) return null;
+        if (obj === null || typeof obj !== "object") return obj;
+        if (Array.isArray(obj)) return obj.map(sanitizeForFirestore);
+        return Object.fromEntries(
+          Object.entries(obj).map(([k, v]) => [k, sanitizeForFirestore(v)])
+        );
+      };
+
+      const sanitizedPortfolioData = sanitizeForFirestore(finalData);
+
       const candidateId = await storeCandidateAnalysis({
-        githubUsername: ghUsername,
-        ...(leetcodeData?.username ? { leetcodeUsername: leetcodeData.username } : {}),
-        name: githubData.name,
-        email: finalData.email || "",
-        portfolioData: finalData,
-        analysis: null,
-        recruiterEmail: user.email!,
-        requiredTechStack,
-        experienceLevel,
-      });
+  driveId: selectedDrive?.id,
+  driveName: selectedDrive?.driveName,
+
+  githubUsername: ghUsername,
+
+  ...(selectedDrive?.selectedFields?.includes("leetcode") &&
+  leetcodeData?.username
+    ? { leetcodeUsername: leetcodeData.username }
+    : {}),
+
+  name: finalData.name || githubData?.name || "",
+  email: finalData.email || "",
+
+  portfolioData: sanitizedPortfolioData,
+
+  analysis: null,
+
+  recruiterEmail: user.email!,
+
+  requiredTechStack:
+    selectedDrive?.requiredTechStack || [],
+
+  experienceLevel:
+    selectedDrive?.experienceLevel || "",
+
+  selectedFields:
+    selectedDrive?.selectedFields || [],
+});
       sessionStorage.setItem("candidateId", candidateId);
       sessionStorage.removeItem("cachedAnalysis");
 
       const historyId = await addRecruiterHistory(user.email!, {
-        portfolioData: finalData,
+        portfolioData: sanitizedPortfolioData,
         analysis: null,
         createdAt: new Date().toISOString(),
         candidateId,
@@ -467,6 +592,12 @@ useEffect(() => {
               >
                 <LogOut className="w-4 h-4" />
               </Button>
+               <Button
+  onClick={() => navigate("/create-drive")}
+  className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
+>
+  Create New Drive
+</Button>
             </div>
           </div>
         </div>
@@ -569,7 +700,7 @@ useEffect(() => {
           </div>
           <h1 className="font-display text-4xl font-bold text-white mb-3">Analyze Candidate</h1>
           <p className="text-[#b8c7e0] font-body text-base max-w-sm mx-auto leading-relaxed">
-            Provide the candidate's GitHub profile, LeetCode username, and resume for AI-powered assessment.
+           Submit candidate information according to the selected hiring drive requirements.
           </p>
         </motion.div>
 
@@ -581,131 +712,249 @@ useEffect(() => {
           onSubmit={handleSubmit}
           className="space-y-7"
         >
+          <div className="space-y-2.5">
+  <FieldLabel icon={Briefcase} text="Select Hiring Drive" />
+
+  <Select
+    value={selectedDriveId}
+    onValueChange={(id) => {
+      const drive = drives.find(d => d.id === id) || null;
+      setSelectedDrive(drive);
+      setSelectedDriveId(id);
+
+      if (drive) {
+        setRequiredTechStack(drive.requiredTechStack);
+        setExperienceLevel(drive.experienceLevel);
+         setSelectedFields(drive.selectedFields || []);
+      }
+    }}
+  >
+    <SelectTrigger className="h-12 bg-[#0b1f3a] border-[#3fc4e7]/20">
+      <SelectValue placeholder="Choose a drive" />
+    </SelectTrigger>
+
+    <SelectContent className="bg-[#132f52] text-white">
+      {drives.map((d) => (
+        <SelectItem key={d.id} value={d.id!}>
+          {d.driveName} ({d.role})
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
           <NavyCard className="p-6 space-y-7">
 
             {/* GitHub URL */}
-            <div className="space-y-2.5">
-              <FieldLabel icon={Github} text="Candidate GitHub Profile URL" />
-              <Input
-                type="url"
-                placeholder="https://github.com/candidateusername"
-                value={githubUrl}
-                onChange={(e) => setGithubUrl(e.target.value)}
-                required
-                className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
-              />
-              <StatusRow
-                loading={githubFetching && "Fetching candidate's GitHub profile..."}
-                error={githubError}
-                success={githubData && !githubFetching && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 p-3 bg-[#0b1f3a] border border-[#3fc4e7]/20 rounded-xl"
-                  >
-                    <img src={githubData.avatar} alt={githubData.name} className="w-11 h-11 rounded-full border-2 border-[#3fc4e7]/30" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-display font-semibold text-sm text-white truncate">{githubData.name}</p>
-                      <p className="text-xs text-[#b8c7e0] font-body truncate">
-                        {githubData.title} · {githubData.githubStats?.publicRepos || 0} repos · {githubData.skills.slice(0, 4).join(", ")}
-                      </p>
-                    </div>
-                    <CheckCircle2 className="w-5 h-5 text-[#3fc4e7] flex-shrink-0" />
-                  </motion.div>
-                )}
-              />
+            {/* GitHub URL */}
+{(!selectedDrive || selectedDrive.selectedFields.includes("github")) && (
+  <div className="space-y-2.5">
+    <FieldLabel
+      icon={Github}
+      text="Candidate GitHub Profile URL"
+    />
+
+    <Input
+      type="url"
+      placeholder="https://github.com/candidateusername"
+      value={githubUrl}
+      onChange={(e) => setGithubUrl(e.target.value)}
+      required
+      className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+    />
+
+    <StatusRow
+      loading={
+        githubFetching &&
+        "Fetching candidate's GitHub profile..."
+      }
+      error={githubError}
+      success={
+        githubData &&
+        !githubFetching && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-3 bg-[#0b1f3a] border border-[#3fc4e7]/20 rounded-xl"
+          >
+            <img
+              src={githubData.avatar}
+              alt={githubData.name}
+              className="w-11 h-11 rounded-full border-2 border-[#3fc4e7]/30"
+            />
+
+            <div className="flex-1 min-w-0">
+              <p className="font-display font-semibold text-sm text-white truncate">
+                {githubData.name}
+              </p>
+
+              <p className="text-xs text-[#b8c7e0] font-body truncate">
+                {githubData.title} ·{" "}
+                {githubData.githubStats?.publicRepos || 0}
+                {" "}repos ·{" "}
+                {githubData.skills
+                  .slice(0, 4)
+                  .join(", ")}
+              </p>
             </div>
+
+            <CheckCircle2 className="w-5 h-5 text-[#3fc4e7] flex-shrink-0" />
+          </motion.div>
+        )
+      }
+    />
+  </div>
+)}
 
             {/* LeetCode */}
-            <div className="space-y-2.5">
-              <FieldLabel icon={Code2} text="Candidate LeetCode Username" note="(for coding assessment)" />
-              <Input
-                type="text"
-                placeholder="candidate_leetcode_username"
-                value={leetcodeUsername}
-                onChange={(e) => setLeetcodeUsername(e.target.value)}
-                className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
-              />
-              <StatusRow
-                loading={leetcodeFetching && "Fetching LeetCode profile..."}
-                error={leetcodeError}
-                success={leetcodeData && !leetcodeFetching && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 p-3 bg-[#0b1f3a] border border-[#3fc4e7]/20 rounded-xl"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-[#3fc4e7]/15 border border-[#3fc4e7]/25 flex items-center justify-center flex-shrink-0">
-                      <Code2 className="w-5 h-5 text-[#3fc4e7]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-display font-semibold text-sm text-white">{leetcodeData.username}</p>
-                      <p className="text-xs text-[#b8c7e0] font-body">
-                        {leetcodeData.totalSolved} solved · Easy {leetcodeData.easySolved} · Med {leetcodeData.mediumSolved} · Hard {leetcodeData.hardSolved}
-                      </p>
-                    </div>
-                    <CheckCircle2 className="w-5 h-5 text-[#3fc4e7] flex-shrink-0" />
-                  </motion.div>
-                )}
-              />
+            {/* LeetCode */}
+{(!selectedDrive || selectedDrive.selectedFields.includes("leetcode")) && (
+  <div className="space-y-2.5">
+    <FieldLabel
+      icon={Code2}
+      text="Candidate LeetCode Username"
+      note="(for coding assessment)"
+    />
+
+    <Input
+      type="text"
+      placeholder="candidate_leetcode_username"
+      value={leetcodeUsername}
+      onChange={(e) =>
+        setLeetcodeUsername(e.target.value)
+      }
+      className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+    />
+
+    <StatusRow
+      loading={
+        leetcodeFetching &&
+        "Fetching LeetCode profile..."
+      }
+      error={leetcodeError}
+      success={
+        leetcodeData &&
+        !leetcodeFetching && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-3 bg-[#0b1f3a] border border-[#3fc4e7]/20 rounded-xl"
+          >
+            <div className="w-10 h-10 rounded-full bg-[#3fc4e7]/15 border border-[#3fc4e7]/25 flex items-center justify-center flex-shrink-0">
+              <Code2 className="w-5 h-5 text-[#3fc4e7]" />
             </div>
 
-          </NavyCard>
+            <div className="flex-1 min-w-0">
+              <p className="font-display font-semibold text-sm text-white">
+                {leetcodeData.username}
+              </p>
 
-          {/* Recruiter Preferences */}
-          <NavyCard className="p-6 space-y-6">
-            <p className="text-xs font-bold text-[#69d2f1] uppercase tracking-widest font-display">Role Requirements</p>
-
-            {/* Required Tech Stack */}
-            <div className="space-y-2.5">
-              <FieldLabel icon={Code2} text="Required Tech Stack" note="(optional)" />
-              <TechStackInput selected={requiredTechStack} onChange={setRequiredTechStack} />
+              <p className="text-xs text-[#b8c7e0] font-body">
+                {leetcodeData.totalSolved} solved ·
+                Easy {leetcodeData.easySolved} ·
+                Med {leetcodeData.mediumSolved} ·
+                Hard {leetcodeData.hardSolved}
+              </p>
             </div>
 
-            {/* Experience Level */}
-            <div className="space-y-2.5">
-              <FieldLabel icon={Briefcase} text="Experience Level" note="(optional — hiring preference)" />
-              <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                <SelectTrigger className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white focus:border-[#3fc4e7]/50 data-[placeholder]:text-[#b8c7e0]/60">
-                  <SelectValue placeholder="Any experience level" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#132f52] border-[#3fc4e7]/20 text-white">
-                  {[
-                    ["any", "Any Level"],
-                    ["intern", "Intern"],
-                    ["fresher", "Fresher / Just Graduated"],
-                    ["entry", "Entry Level (0-2 years)"],
-                    ["mid", "Mid Level (2-5 years)"],
-                    ["senior", "Senior (5-8 years)"],
-                    ["staff", "Staff / Lead (8+ years)"],
-                    ["principal", "Principal / Architect (10+ years)"],
-                  ].map(([val, label]) => (
-                    <SelectItem key={val} value={val} className="text-[#b8c7e0] hover:text-white focus:bg-[#3fc4e7]/15 focus:text-white">
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </NavyCard>
+            <CheckCircle2 className="w-5 h-5 text-[#3fc4e7] flex-shrink-0" />
+          </motion.div>
+        )
+      }
+    />
+  </div>
+)}
+</NavyCard>
+
+          {/* Drive Requirements */}
+<NavyCard className="p-6 space-y-6">
+  <p className="text-xs font-bold text-[#69d2f1] uppercase tracking-widest font-display">
+    Drive Requirements
+  </p>
+
+  <div className="space-y-2.5">
+    <FieldLabel icon={Code2} text="Required Tech Stack" />
+
+    <div className="flex flex-wrap gap-2">
+      {selectedDrive?.requiredTechStack?.length ? (
+        selectedDrive.requiredTechStack.map((tech) => (
+          <span
+            key={tech}
+            className="px-3 py-1 rounded-full bg-[#3fc4e7]/10 border border-[#3fc4e7]/20 text-[#69d2f1] text-sm"
+          >
+            {tech}
+          </span>
+        ))
+      ) : (
+        <p className="text-[#b8c7e0] text-sm">
+          No tech stack requirement
+        </p>
+      )}
+    </div>
+  </div>
+
+  <div className="space-y-2.5">
+    <FieldLabel icon={Briefcase} text="Experience Level" />
+
+    <div className="h-12 px-4 flex items-center rounded-xl bg-[#0b1f3a] border border-[#3fc4e7]/20 text-white">
+      {selectedDrive?.experienceLevel || "Any"}
+    </div>
+  </div>
+</NavyCard>
 
           {/* Resume Upload */}
-          <NavyCard className="p-6">
-            <FieldLabel icon={FileText} text="Candidate Resume" note="required" />
-            <label className={`mt-3 flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${resumeFile ? "border-[#3fc4e7]/60 bg-[#3fc4e7]/5" : "border-red-400/40 hover:border-[#3fc4e7]/50 hover:bg-[#3fc4e7]/5"}`}>
-              {resumeFile ? (
-                <div className="flex items-center gap-2.5 text-white">
-                  <CheckCircle2 className="w-5 h-5 text-[#3fc4e7]" />
-                  <span className="font-body text-sm">{resumeFile.name}</span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center text-[#b8c7e0]">
-                  <Upload className="w-8 h-8 mb-2 text-red-400/70" />
-                  <span className="font-body text-sm">Upload candidate resume <span className="text-red-400 font-semibold">*</span></span>
-                  <span className="font-body text-xs mt-1 text-[#b8c7e0]/60">PDF only — required for analysis</span>
-                </div>
-              )}
-              <input type="file" accept=".pdf" className="hidden" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} />
-            </label>
-          </NavyCard>
+          {/* Resume Upload */}
+{(!selectedDrive || selectedDrive.selectedFields.includes("resume")) && (
+  <NavyCard className="p-6">
+    <FieldLabel
+      icon={FileText}
+      text="Candidate Resume"
+      note="required"
+    />
+
+    <label
+      className={`mt-3 flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${
+        resumeFile
+          ? "border-[#3fc4e7]/60 bg-[#3fc4e7]/5"
+          : "border-red-400/40 hover:border-[#3fc4e7]/50 hover:bg-[#3fc4e7]/5"
+      }`}
+    >
+      {resumeFile ? (
+        <div className="flex items-center gap-2.5 text-white">
+          <CheckCircle2 className="w-5 h-5 text-[#3fc4e7]" />
+          <span className="font-body text-sm">
+            {resumeFile.name}
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center text-[#b8c7e0]">
+          <Upload className="w-8 h-8 mb-2 text-red-400/70" />
+
+          <span className="font-body text-sm">
+            Upload candidate resume{" "}
+            <span className="text-red-400 font-semibold">
+              *
+            </span>
+          </span>
+
+          <span className="font-body text-xs mt-1 text-[#b8c7e0]/60">
+            PDF only — required for analysis
+          </span>
+        </div>
+      )}
+
+      <input
+        type="file"
+        accept=".pdf"
+        className="hidden"
+        onChange={(e) =>
+          setResumeFile(
+            e.target.files?.[0] || null
+          )
+        }
+      />
+    </label>
+  </NavyCard>
+)}
 
 
           {/* Submit */}
@@ -732,7 +981,12 @@ useEffect(() => {
           ) : (
             <Button
               type="submit"
-              disabled={!githubData || !resumeFile}
+             disabled={
+  !selectedDrive ||
+  (selectedDrive.selectedFields.includes("github") && !githubData) ||
+  (selectedDrive.selectedFields.includes("resume") && !resumeFile) ||
+  (selectedDrive.selectedFields.includes("leetcode") && !leetcodeData)
+}
               className="w-full h-13 py-3.5 text-base font-bold rounded-xl bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black hover:opacity-90 transition-opacity shadow-lg disabled:opacity-40 font-display"
             >
               <ArrowRight className="w-5 h-5 mr-2" />

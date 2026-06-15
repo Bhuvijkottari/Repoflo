@@ -646,6 +646,7 @@ const RecruiterLandingPage = () => {
               {signInLoading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" />Signing in…</> : <>Get Started <ArrowRight className="ml-2 w-5 h-5" /></>}
             </Button>
             <p className="text-[#b8c7e0]/50 font-body text-xs mt-3">Sign in with Google → choose plan → admin approval → 1 year access</p>
+           
           </div>
         </div>
       </section>

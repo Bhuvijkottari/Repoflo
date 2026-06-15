@@ -365,8 +365,11 @@ export const fetchRecruiterHistory = async (email: string): Promise<RecruiterHis
 // Candidate functions
 export interface CandidateData {
   id?: string;
+  driveId?: string;
+  driveName?: string;
   githubUsername: string;
   leetcodeUsername?: string;
+  selectedFields?: string[];
   name: string;
   email?: string;
   portfolioData: any;
@@ -507,7 +510,7 @@ export const fetchAllCandidates = async (limitCount = 100): Promise<CandidateDat
 };
 
 // ─── ADMIN USERS (Firestore-managed, primary always included) ───────────────
-export const PRIMARY_ADMIN = "cadithya110@gmail.com";
+export const PRIMARY_ADMIN = "bhuvijkottari@gmail.com";
 
 export interface AdminUser {
   email: string;
@@ -716,6 +719,114 @@ export const approveRecruiterRequest = async (uid: string, packageId: string): P
 export const rejectRecruiterRequest = async (uid: string): Promise<void> => {
   await updateDoc(doc(db, "recruiter_requests", uid), { status: "rejected" });
 };
+export interface Drive {
+  id?: string;
+
+  recruiterEmail: string;
+
+  driveName: string;
+
+  role: string;
+
+  selectedFields: string[];
+
+  requiredTechStack: string[];
+
+  experienceLevel: string;
+
+  status: "active" | "closed";
+
+  createdAt: string;
+}
+export const createDrive = async (
+  drive: Omit<Drive, "id" | "createdAt">
+): Promise<string> => {
+  const docRef = await addDoc(
+    collection(db, "drives"),
+    {
+      ...drive,
+      createdAt: new Date().toISOString(),
+    }
+  );
+
+  return docRef.id;
+};
+export const fetchRecruiterDrives = async (
+  recruiterEmail: string
+): Promise<Drive[]> => {
+  try {
+    // Composite index required: recruiterEmail (ASC) + createdAt (DESC)
+    // Create it in Firebase Console → Firestore → Indexes if drives don't load
+    const q = query(
+      collection(db, "drives"),
+      where("recruiterEmail", "==", recruiterEmail),
+      orderBy("createdAt", "desc")
+    );
+
+    const snap = await getDocs(q);
+
+    return snap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Drive[];
+  } catch (error: any) {
+    // If composite index is missing, fall back to unordered fetch
+    if (error?.code === "failed-precondition" || error?.message?.includes("index")) {
+      console.warn("Drives index not ready yet — fetching without sort order");
+      try {
+        const fallbackQ = query(
+          collection(db, "drives"),
+          where("recruiterEmail", "==", recruiterEmail)
+        );
+        const fallbackSnap = await getDocs(fallbackQ);
+        const results = fallbackSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Drive[];
+        // Sort client-side while index builds
+        return results.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      } catch (fallbackErr) {
+        console.error("Fallback fetch also failed:", fallbackErr);
+        return [];
+      }
+    }
+    console.error(error);
+    return [];
+  }
+};
+export const fetchDriveById = async (
+  driveId: string
+): Promise<Drive | null> => {
+  try {
+    const snap = await getDoc(
+      doc(db, "drives", driveId)
+    );
+
+    if (!snap.exists()) return null;
+
+    return {
+      id: snap.id,
+      ...snap.data(),
+    } as Drive;
+  } catch {
+    return null;
+  }
+};
+export const updateDrive = async (
+  driveId: string,
+  updates: Partial<Drive>
+) => {
+  await updateDoc(doc(db, "drives", driveId), updates);
+};
+
+export const deleteDrive = async (
+  driveId: string
+) => {
+  await deleteDoc(doc(db, "drives", driveId));
+};
+
 
 // ─── PORTFOLIO USAGE TRACKING ────────────────────────────────────────────────
 export interface PortfolioUsageEntry {

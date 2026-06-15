@@ -31,17 +31,17 @@ const useAdminGuard = () => {
   useEffect(() => {
     // First gate: custom session check
     if (!isAdminAuthenticated()) {
-      navigate("/adminProtectedRoutes/auth/signin", { replace: true });
+    navigate("/adminProtectedRoutes/auth/signin", { replace: true });
       return;
     }
     // Second gate: verify Firebase Auth is still active and matches
     const unsub = onAuthStateChanged(auth, (user) => {
-      const sessionEmail = getAuthenticatedAdminEmail();
-      if (!user || user.email?.toLowerCase() !== sessionEmail.toLowerCase()) {
-        adminLogout();
+     const sessionEmail = getAuthenticatedAdminEmail();
+     if (!user || user.email?.toLowerCase() !== sessionEmail.toLowerCase()) {
+       adminLogout();
         navigate("/adminProtectedRoutes/auth/signin", { replace: true });
       }
-    });
+   });
     return unsub;
   }, [navigate]);
 };
