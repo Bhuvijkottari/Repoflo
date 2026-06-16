@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import {
   Github, Upload, ArrowRight, FileText, CheckCircle2, AlertCircle,
   Loader2, Code2, Briefcase, Search, LogIn, LogOut, Shield,
-  MessageCircle, X, Send,
+  MessageCircle, X, Send, Zap,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PreviewPage from "./PreviewPage";
@@ -120,12 +120,19 @@ const [selectedDriveId, setSelectedDriveId] = useState<string>("");
   }, [user]);
 
   const [githubUrl, setGithubUrl] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [instagramUrl, setInstagramUrl] = useState("");
+  const [aptitudeScore, setAptitudeScore] = useState<number | string>("");
+  const [technicalScore, setTechnicalScore] = useState<number | string>("");
   const [leetcodeUsername, setLeetcodeUsername] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
 
   const [searchParams] = useSearchParams();
   const driveId = searchParams.get("driveId");
   const showPreview = searchParams.get("preview") === "1";
+  const needsLinkedin = selectedDrive?.selectedFields.includes("linkedin");
+  const needsAptitude = selectedDrive?.selectedFields.includes("aptitudeScore");
+  const needsTechnical = selectedDrive?.selectedFields.includes("technicalScore");
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState("");
   const [githubData, setGithubData] = useState<PortfolioData | null>(null);
@@ -296,9 +303,29 @@ useEffect(() => {
     const needsGithub = selectedDrive.selectedFields.includes("github");
     const needsResume = selectedDrive.selectedFields.includes("resume");
     const needsLeetcode = selectedDrive.selectedFields.includes("leetcode");
+    const needsLinkedin = selectedDrive.selectedFields.includes("linkedin");
+    const needsInstagram = selectedDrive.selectedFields.includes("instagram");
+    const needsAptitude = selectedDrive.selectedFields.includes("aptitudeScore");
+    const needsTechnical = selectedDrive.selectedFields.includes("technicalScore");
 
     if (needsGithub && !githubData) {
       toast({ title: "GitHub required", description: "Please enter a valid GitHub URL and wait for it to load.", variant: "destructive" });
+      return;
+    }
+    if (needsLinkedin && !linkedinUrl.trim()) {
+      toast({ title: "LinkedIn required", description: "Please enter the candidate's LinkedIn profile URL.", variant: "destructive" });
+      return;
+    }
+    if (needsInstagram && !instagramUrl.trim()) {
+      toast({ title: "Instagram required", description: "Please enter the candidate's Instagram profile URL.", variant: "destructive" });
+      return;
+    }
+    if (needsAptitude && (aptitudeScore === "" || isNaN(Number(aptitudeScore)) || Number(aptitudeScore) < 0 || Number(aptitudeScore) > 100)) {
+      toast({ title: "Aptitude score required", description: "Enter a score between 0 and 100.", variant: "destructive" });
+      return;
+    }
+    if (needsTechnical && (technicalScore === "" || isNaN(Number(technicalScore)) || Number(technicalScore) < 0 || Number(technicalScore) > 100)) {
+      toast({ title: "Technical score required", description: "Enter a score between 0 and 100.", variant: "destructive" });
       return;
     }
     if (needsResume && !resumeFile) {
@@ -313,6 +340,9 @@ useEffect(() => {
     setIsProcessing(true);
     try {
       const driveContext = selectedDrive;
+      const needsLinkedin = selectedDrive.selectedFields.includes("linkedin");
+      const needsAptitude = selectedDrive.selectedFields.includes("aptitudeScore");
+      const needsTechnical = selectedDrive.selectedFields.includes("technicalScore");
 
       // Build finalData only from fields the drive requires
       let finalData: PortfolioData = needsGithub
@@ -325,19 +355,36 @@ useEffect(() => {
         finalData = { ...finalData, leetcodeStats: null };
       }
 
-sessionStorage.setItem(
-  "recruiterPrefs",
-  JSON.stringify({
-    requiredTechStack:
-      driveContext?.requiredTechStack || requiredTechStack,
+      if (needsLinkedin) {
+        finalData = { ...finalData, linkedin: linkedinUrl.trim() };
+      }
+      if (needsInstagram) {
+        finalData = { ...finalData, instagram: instagramUrl.trim() };
+      }
+      if (needsAptitude) {
+        finalData = { ...finalData, aptitudeScore: Number(aptitudeScore) };
+      }
+      if (needsTechnical) {
+        finalData = { ...finalData, technicalScore: Number(technicalScore) };
+      }
 
-    experienceLevel:
-      driveContext?.experienceLevel || experienceLevel,
+      if (!finalData.name) {
+        finalData = { ...finalData, name: "Candidate" } as PortfolioData;
+      }
 
-    selectedFields:
-      driveContext?.selectedFields || [],
-  })
-);
+      sessionStorage.setItem(
+        "recruiterPrefs",
+        JSON.stringify({
+          requiredTechStack:
+            driveContext?.requiredTechStack || requiredTechStack,
+
+          experienceLevel:
+            driveContext?.experienceLevel || experienceLevel,
+
+          selectedFields:
+            driveContext?.selectedFields || [],
+        })
+      );
       const githubUser = needsGithub ? extractGithubUser(githubUrl) : "";
       const githubName = needsGithub ? (githubData?.name || "").trim() : "";
       const leetcodeUser = needsLeetcode ? (leetcodeData?.username?.trim() || "") : "";
@@ -401,12 +448,17 @@ sessionStorage.setItem(
       // ── Check if this candidate was already analyzed with same inputs ──
       const ghUsername = needsGithub ? extractGithubUser(githubUrl) : `resume-${Date.now()}`;
       const existingCandidate = await findExistingCandidate(
-  ghUsername,
-  user.email!,
-  needsLeetcode ? leetcodeData?.username : undefined,
-  selectedDrive?.requiredTechStack || [],
-  selectedDrive?.experienceLevel || ""
-);
+        ghUsername,
+        user.email!,
+        needsLeetcode ? leetcodeData?.username : undefined,
+        selectedDrive?.requiredTechStack || [],
+        selectedDrive?.experienceLevel || "",
+        selectedDrive?.selectedFields || [],
+        needsLinkedin ? linkedinUrl.trim() : undefined,
+        needsAptitude ? Number(aptitudeScore) : undefined,
+        needsTechnical ? Number(technicalScore) : undefined,
+        needsInstagram ? instagramUrl.trim() : undefined
+      );
 
       if (existingCandidate?.analysis) {
         // Use cached result — no Gemini call needed, no usage counted
@@ -445,34 +497,36 @@ sessionStorage.setItem(
       const sanitizedPortfolioData = sanitizeForFirestore(finalData);
 
       const candidateId = await storeCandidateAnalysis({
-  driveId: selectedDrive?.id,
-  driveName: selectedDrive?.driveName,
+        driveId: selectedDrive?.id,
+        driveName: selectedDrive?.driveName,
 
-  githubUsername: ghUsername,
+        githubUsername: ghUsername,
+        ...(selectedDrive?.selectedFields?.includes("leetcode") && leetcodeData?.username
+          ? { leetcodeUsername: leetcodeData.username }
+          : {}),
+        ...(needsLinkedin ? { linkedinUrl: linkedinUrl.trim() } : {}),
+        ...(needsInstagram ? { instagramUrl: instagramUrl.trim() } : {}),
+        ...(needsAptitude ? { aptitudeScore: Number(aptitudeScore) } : {}),
+        ...(needsTechnical ? { technicalScore: Number(technicalScore) } : {}),
 
-  ...(selectedDrive?.selectedFields?.includes("leetcode") &&
-  leetcodeData?.username
-    ? { leetcodeUsername: leetcodeData.username }
-    : {}),
+        name: finalData.name || githubData?.name || "Candidate",
+        email: finalData.email || "",
 
-  name: finalData.name || githubData?.name || "",
-  email: finalData.email || "",
+        portfolioData: sanitizedPortfolioData,
 
-  portfolioData: sanitizedPortfolioData,
+        analysis: null,
 
-  analysis: null,
+        recruiterEmail: user.email!,
 
-  recruiterEmail: user.email!,
+        requiredTechStack:
+          selectedDrive?.requiredTechStack || [],
 
-  requiredTechStack:
-    selectedDrive?.requiredTechStack || [],
+        experienceLevel:
+          selectedDrive?.experienceLevel || "",
 
-  experienceLevel:
-    selectedDrive?.experienceLevel || "",
-
-  selectedFields:
-    selectedDrive?.selectedFields || [],
-});
+        selectedFields:
+          selectedDrive?.selectedFields || [],
+      });
       sessionStorage.setItem("candidateId", candidateId);
       sessionStorage.removeItem("cachedAnalysis");
 
@@ -592,13 +646,7 @@ sessionStorage.setItem(
               >
                 <LogOut className="w-4 h-4" />
               </Button>
-               <Button
-  onClick={() => navigate("/create-drive")}
-  className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
->
-  Create New Drive
-</Button>
-            </div>
+             </div>
           </div>
         </div>
       </div>
@@ -863,6 +911,86 @@ sessionStorage.setItem(
     />
   </div>
 )}
+
+{(!selectedDrive || selectedDrive.selectedFields.includes("linkedin")) && (
+  <div className="space-y-2.5">
+    <FieldLabel icon={Briefcase} text="Candidate LinkedIn URL" note="(URL-based analysis)" />
+    <Input
+      type="url"
+      placeholder="https://linkedin.com/in/candidate"
+      value={linkedinUrl}
+      onChange={(e) => setLinkedinUrl(e.target.value)}
+      className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+    />
+    <StatusRow
+      loading={(!selectedDrive || selectedDrive.selectedFields.includes("linkedin")) && !linkedinUrl.trim() ? false : undefined}
+      error={linkedinUrl && !linkedinUrl.startsWith("http") ? "Enter a valid LinkedIn URL" : undefined}
+      success={
+        linkedinUrl.trim() && linkedinUrl.startsWith("http") && (
+          <span className="text-sm text-emerald-400">LinkedIn URL ready for AI analysis</span>
+        )
+      }
+    />
+  </div>
+)}
+
+{(!selectedDrive || selectedDrive.selectedFields.includes("instagram")) && (
+  <div className="space-y-2.5">
+    <FieldLabel icon={Briefcase} text="Candidate Instagram URL" note="(URL-based analysis)" />
+    <Input
+      type="url"
+      placeholder="https://instagram.com/candidate"
+      value={instagramUrl}
+      onChange={(e) => setInstagramUrl(e.target.value)}
+      className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+    />
+    <StatusRow
+      loading={(!selectedDrive || selectedDrive.selectedFields.includes("instagram")) && !instagramUrl.trim() ? false : undefined}
+      error={instagramUrl && !instagramUrl.startsWith("http") ? "Enter a valid Instagram URL" : undefined}
+      success={
+        instagramUrl.trim() && instagramUrl.startsWith("http") && (
+          <span className="text-sm text-emerald-400">Instagram URL ready for AI analysis</span>
+        )
+      }
+    />
+  </div>
+)}
+
+{((!selectedDrive || selectedDrive.selectedFields.includes("aptitudeScore")) || (!selectedDrive || selectedDrive.selectedFields.includes("technicalScore"))) && (
+  <div className="space-y-2.5">
+    <FieldLabel icon={Zap} text="Candidate Test Scores" note="(0-100)" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {(!selectedDrive || selectedDrive.selectedFields.includes("aptitudeScore")) && (
+        <div className="space-y-2.5">
+          <Label className="text-white mb-2 block">Aptitude / Maths Score (0-100)</Label>
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            placeholder="82"
+            value={aptitudeScore}
+            onChange={(e) => setAptitudeScore(e.target.value === "" ? "" : Number(e.target.value))}
+            className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+          />
+        </div>
+      )}
+      {(!selectedDrive || selectedDrive.selectedFields.includes("technicalScore")) && (
+        <div className="space-y-2.5">
+          <Label className="text-white mb-2 block">Technical Test Score (0-100)</Label>
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            placeholder="91"
+            value={technicalScore}
+            onChange={(e) => setTechnicalScore(e.target.value === "" ? "" : Number(e.target.value))}
+            className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+          />
+        </div>
+      )}
+    </div>
+  </div>
+)}
 </NavyCard>
 
           {/* Drive Requirements */}
@@ -981,12 +1109,15 @@ sessionStorage.setItem(
           ) : (
             <Button
               type="submit"
-             disabled={
-  !selectedDrive ||
-  (selectedDrive.selectedFields.includes("github") && !githubData) ||
-  (selectedDrive.selectedFields.includes("resume") && !resumeFile) ||
-  (selectedDrive.selectedFields.includes("leetcode") && !leetcodeData)
-}
+              disabled={
+                !selectedDrive ||
+                (selectedDrive.selectedFields.includes("github") && !githubData) ||
+                (selectedDrive.selectedFields.includes("resume") && !resumeFile) ||
+                (selectedDrive.selectedFields.includes("leetcode") && !leetcodeData) ||
+                (selectedDrive.selectedFields.includes("linkedin") && !linkedinUrl.trim()) ||
+                (selectedDrive.selectedFields.includes("aptitudeScore") && (aptitudeScore === "" || isNaN(Number(aptitudeScore)))) ||
+                (selectedDrive.selectedFields.includes("technicalScore") && (technicalScore === "" || isNaN(Number(technicalScore))))
+              }
               className="w-full h-13 py-3.5 text-base font-bold rounded-xl bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black hover:opacity-90 transition-opacity shadow-lg disabled:opacity-40 font-display"
             >
               <ArrowRight className="w-5 h-5 mr-2" />

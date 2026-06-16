@@ -5,7 +5,7 @@ import {
   Shield, LogOut, ToggleLeft, ToggleRight, Users, FileText, Star,
   Trash2, CheckCircle2, XCircle, Clock, RefreshCw, Package,
   BarChart3, AlertTriangle, ChevronDown, ChevronUp, Eye,
-  Loader2, Settings, MessageSquare, GitBranch, TrendingUp, Headphones,
+  Loader2, Settings, MessageSquare, TrendingUp, Headphones,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,6 @@ import {
   getSiteSettings, updateSiteSettings, subscribeSiteSettings, SiteSettings,
   getAllRecruiterRequests, approveRecruiterRequest, rejectRecruiterRequest, RecruiterRequest,
   fetchFeedbacks, deleteFeedback,
-  fetchPortfolioUsage, PortfolioUsageEntry,
   fetchGeminiUsageToday, GeminiUsageToday,
   getVisitorCount,
   PACKAGES, getAdminUsers, addAdminUser, removeAdminUser, AdminUser,
@@ -71,154 +70,18 @@ const statusBadge = (status: RecruiterRequest["status"]) => {
   return <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">Pending</span>;
 };
 
-// ─── Portfolio summary row ────────────────────────────────────────────────────
-const PortfolioSummaryRow = ({ p }: { p: PortfolioUsageEntry }) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="font-body">
-      {/* Header row — always visible */}
-      <div
-        className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-[#3fc4e7]/4 transition-colors"
-        onClick={() => setOpen(!open)}
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-[#3fc4e7]/15 border border-[#3fc4e7]/30 flex items-center justify-center flex-shrink-0 text-xs font-bold text-[#3fc4e7]">
-            {(p.name || "?")[0].toUpperCase()}
-          </div>
-          <div className="min-w-0">
-            <p className="text-white font-semibold text-sm truncate">{p.name || "—"}</p>
-            <p className="text-[#b8c7e0]/60 text-xs truncate">{p.title || p.currentOccupation || "—"}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 flex-shrink-0 ml-4">
-          <span className="hidden sm:block text-[#b8c7e0] text-xs">{p.email || "—"}</span>
-          <span className="hidden md:block text-[#b8c7e0] text-xs">{p.phone || "—"}</span>
-          <span className="text-[#3fc4e7] text-xs font-semibold capitalize px-2 py-0.5 bg-[#3fc4e7]/10 rounded-full">{p.theme}</span>
-          <span className="text-[#b8c7e0]/50 text-xs">{p.timestamp ? new Date(p.timestamp).toLocaleDateString() : "—"}</span>
-          <ChevronDown className={`w-4 h-4 text-[#b8c7e0]/50 transition-transform ${open ? "rotate-180" : ""}`} />
-        </div>
-      </div>
-
-      {/* Expanded summary */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            className="overflow-hidden"
-          >
-            <div className="px-5 pb-5 pt-2 bg-[#0b1f3a]/40 border-t border-[#3fc4e7]/8 space-y-4">
-
-              {/* Bio + contact */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {p.bio && (
-                  <div className="sm:col-span-2">
-                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">Bio</p>
-                    <p className="text-[#b8c7e0] text-xs leading-relaxed">{p.bio}</p>
-                  </div>
-                )}
-                {p.location && (
-                  <div>
-                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">Location</p>
-                    <p className="text-[#b8c7e0] text-xs">📍 {p.location}</p>
-                  </div>
-                )}
-                {p.email && (
-                  <div>
-                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">Email</p>
-                    <a href={`mailto:${p.email}`} className="text-[#3fc4e7] text-xs hover:underline">✉ {p.email}</a>
-                  </div>
-                )}
-                {p.phone && (
-                  <div>
-                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">Phone</p>
-                    <p className="text-[#b8c7e0] text-xs">📞 {p.phone}</p>
-                  </div>
-                )}
-                {p.github && (
-                  <div>
-                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">GitHub</p>
-                    <a href={p.github} target="_blank" rel="noreferrer" className="text-[#3fc4e7] text-xs hover:underline truncate block">{p.github}</a>
-                  </div>
-                )}
-                {p.linkedin && (
-                  <div>
-                    <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-1">LinkedIn</p>
-                    <a href={p.linkedin} target="_blank" rel="noreferrer" className="text-[#3fc4e7] text-xs hover:underline truncate block">{p.linkedin}</a>
-                  </div>
-                )}
-              </div>
-
-              {/* Stats row */}
-              <div className="flex flex-wrap gap-3">
-                {[
-                  { label: "Experience", value: p.experienceCount ?? 0, icon: "💼" },
-                  { label: "Projects", value: p.projectsCount ?? 0, icon: "🚀" },
-                  { label: "Education", value: p.educationCount ?? 0, icon: "🎓" },
-                  { label: "Commits", value: p.totalCommits?.toLocaleString() ?? 0, icon: "⚡" },
-                  { label: "Repos", value: p.publicRepos ?? 0, icon: "📁" },
-                  { label: "Followers", value: p.followers ?? 0, icon: "👥" },
-                ].map(s => (
-                  <div key={s.label} className="bg-[#132f52] border border-[#3fc4e7]/15 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
-                    <p className="text-base">{s.icon}</p>
-                    <p className="text-white font-bold text-sm">{s.value}</p>
-                    <p className="text-[#b8c7e0]/60 text-xs">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Skills */}
-              {p.skills && p.skills.length > 0 && (
-                <div>
-                  <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-2">Skills</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {p.skills.map((s, i) => (
-                      <span key={i} className="text-xs bg-[#3fc4e7]/10 text-[#69d2f1] border border-[#3fc4e7]/20 px-2.5 py-1 rounded-full">{s}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Top languages */}
-              {p.topLanguages && p.topLanguages.length > 0 && (
-                <div>
-                  <p className="text-xs text-[#69d2f1] font-semibold uppercase tracking-wider mb-2">Top Languages</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {p.topLanguages.map((l, i) => (
-                      <span key={i} className="text-xs bg-purple-500/10 text-purple-300 border border-purple-500/20 px-2.5 py-1 rounded-full">{l}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Resume + theme */}
-              <div className="flex flex-wrap gap-4 pt-1 border-t border-[#3fc4e7]/8 text-xs text-[#b8c7e0]/60">
-                <span>📄 {p.resumeName || "No resume"}</span>
-                <span>🎨 Theme: <span className="text-[#3fc4e7] capitalize font-semibold">{p.theme}</span></span>
-                <span>🕐 {p.timestamp ? new Date(p.timestamp).toLocaleString() : "—"}</span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
 // ─── main dashboard ──────────────────────────────────────────────────────────
+
 const AdminDashboardPage = () => {
   useAdminGuard();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"overview"|"recruiters"|"portfolio"|"feedback"|"settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview"|"recruiters"|"feedback"|"support"|"admins"|"settings">("overview");
 
   // Data
   const [settings, setSettings] = useState<SiteSettings>({ portfolioEnabled: true, recruiterEnabled: true });
   const [settingLoading, setSettingLoading] = useState<string>("");
   const [requests, setRequests] = useState<RecruiterRequest[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
-  const [portfolioUsage, setPortfolioUsage] = useState<PortfolioUsageEntry[]>([]);
   const [geminiUsage, setGeminiUsage] = useState<GeminiUsageToday>({ parseResume: 0, analyzeCandidate: 0, total: 0, remaining: 500, dailyLimit: 500 });
   const [loading, setLoading] = useState(true);
   const [approvePkg, setApprovePkg] = useState<Record<string, string>>({});
@@ -239,10 +102,9 @@ const AdminDashboardPage = () => {
 
   const loadAll = useCallback(async () => {
     setLoading(true);
-    const [reqs, fbs, usage, admins, tickets, gemini, visitors] = await Promise.all([
+    const [reqs, fbs, admins, tickets, gemini, visitors] = await Promise.all([
       getAllRecruiterRequests(),
       fetchFeedbacks(100),
-      fetchPortfolioUsage(),
       getAdminUsers(),
       fetchSupportTickets(),
       fetchGeminiUsageToday(),
@@ -252,7 +114,6 @@ const AdminDashboardPage = () => {
     setSupportTickets(tickets);
     setRequests(reqs);
     setFeedbacks(fbs);
-    setPortfolioUsage(usage);
     setGeminiUsage(gemini);
     setVisitorCount(visitors);
     // default approve package = their requested package
@@ -297,7 +158,6 @@ const AdminDashboardPage = () => {
   const tabs = [
     { id: "overview",   label: "Overview",   icon: BarChart3 },
     { id: "recruiters", label: "Recruiters",  icon: Users, badge: pending.length },
-    { id: "portfolio",  label: "Portfolio",   icon: GitBranch },
     { id: "feedback",   label: "Feedback",    icon: MessageSquare },
     { id: "support",    label: "Support",     icon: Headphones, badge: supportTickets.filter(t => t.status === "open").length },
     { id: "admins",     label: "Admins",      icon: Shield },
@@ -322,9 +182,6 @@ const AdminDashboardPage = () => {
         <div className="flex items-center gap-2">
           {/* Site status pills — hidden on mobile */}
           <div className="hidden md:flex items-center gap-2">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${settings.portfolioEnabled ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}>
-              Portfolio {settings.portfolioEnabled ? "ON" : "OFF"}
-            </span>
             <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${settings.recruiterEnabled ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}>
               Recruiter {settings.recruiterEnabled ? "ON" : "OFF"}
             </span>
@@ -397,8 +254,7 @@ const AdminDashboardPage = () => {
                   {[
                     { label: "Site Visitors", value: visitorCount.toLocaleString(), icon: Eye, color: "text-[#69d2f1]", bg: "bg-[#69d2f1]/10" },
                     { label: "Pending Requests", value: pending.length, icon: Clock, color: "text-amber-400", bg: "bg-amber-500/10" },
-                    { label: "Active Recruiters", value: approved.length, icon: Users, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-                    { label: "Portfolios Generated", value: portfolioUsage.length, icon: GitBranch, color: "text-[#3fc4e7]", bg: "bg-[#3fc4e7]/10" },
+                    { label: "Active Recruiters", value: approved.length, icon: Users, color: "text-emerald-400", bg: "bg-[#3fc4e7]/10" },
                     { label: "Total Feedbacks", value: feedbacks.length, icon: Star, color: "text-purple-400", bg: "bg-purple-500/10" },
                   ].map((s) => (
                     <Card key={s.label} className="p-5">
@@ -450,7 +306,7 @@ const AdminDashboardPage = () => {
                     {/* Simple summary */}
                     <div className="bg-[#0b1f3a] rounded-xl p-4 border border-[#3fc4e7]/10 text-sm font-body text-[#b8c7e0] space-y-1">
                       <p>✅ You can still make approximately <span className="text-white font-semibold">{geminiUsage.remaining} more AI-powered actions</span> today</p>
-                      <p>📊 That's roughly <span className="text-white font-semibold">{geminiUsage.remaining} portfolio resumes</span> or <span className="text-white font-semibold">{geminiUsage.remaining} recruiter analyses</span></p>
+                      <p>📊 That's roughly <span className="text-white font-semibold">{geminiUsage.remaining} AI actions</span> or <span className="text-white font-semibold">{geminiUsage.remaining} recruiter analyses</span></p>
                     </div>
                   </div>
                 </Card>
@@ -460,7 +316,6 @@ const AdminDashboardPage = () => {
                   <SectionTitle icon={Settings} title="Site Controls" />
                   <div className="p-6 grid sm:grid-cols-2 gap-4">
                     {([
-                      { key: "portfolioEnabled", label: "Portfolio Generation", desc: "Allow users to generate portfolios from GitHub & resume" },
                       { key: "recruiterEnabled", label: "Recruiter Portal", desc: "Allow recruiters to access candidate analysis tools" },
                     ] as const).map((ctrl) => (
                       <div key={ctrl.key} className="flex items-center justify-between bg-[#0b1f3a] rounded-xl p-4 border border-[#3fc4e7]/10">
@@ -906,13 +761,6 @@ const AdminDashboardPage = () => {
                   <SectionTitle icon={Settings} title="Site Controls" />
                   <div className="p-6 space-y-4">
                     {([
-                      {
-                        key: "portfolioEnabled" as const,
-                        label: "Portfolio Generation",
-                        desc: "When OFF — users see a 'Under Maintenance' message instead of the generate page",
-                        onColor: "text-emerald-400",
-                        offMsg: "Portfolio generation is currently DISABLED site-wide",
-                      },
                       {
                         key: "recruiterEnabled" as const,
                         label: "Recruiter Portal",

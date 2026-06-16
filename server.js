@@ -347,6 +347,7 @@ app.post("/api/analyze-candidate", async (req, res) => {
   try {
     if (!GEMINI_KEY) return res.status(500).json({ error: "AI service not configured" });
     const { portfolioData, requiredTechStack, experienceLevel } = req.body;
+    const { portfolioData, requiredTechStack, experienceLevel, selectedFields } = req.body;
     if (!portfolioData) return res.status(400).json({ error: "No portfolio data provided" });
 
     // Prepare portfolio data for analysis
@@ -376,12 +377,24 @@ app.post("/api/analyze-candidate", async (req, res) => {
         recentCollaborations: portfolioData.githubStats.recentCollaborations,
       } : null,
       leetcodeStats: portfolioData.leetcodeStats,
+      linkedin: portfolioData.linkedin || portfolioData.linkedinUrl || null,
+      aptitudeScore: portfolioData.aptitudeScore != null ? portfolioData.aptitudeScore : null,
+      technicalScore: portfolioData.technicalScore != null ? portfolioData.technicalScore : null,
     };
+
+    const selectedFieldsList = Array.isArray(selectedFields) && selectedFields.length > 0
+      ? selectedFields
+      : ["github", "resume", "leetcode", "linkedin", "aptitudeScore", "technicalScore"];
 
     const prompt = `You are a senior technical recruiter with 15+ years of hiring experience and an expert ATS analyst. Provide a THOROUGH and DETAILED analysis of this candidate.
 
 CANDIDATE DATA:
 ${JSON.stringify(trimmed)}
+
+USE THE FOLLOWING INPUTS WHEN PROVIDED:
+- LinkedIn profile URL: if present, assess professional branding, completeness, role match, and seniority signals.
+- Aptitude/Maths score: if present, treat it as a normalized 0-100 quantitative reasoning score.
+- Technical Test score: if present, treat it as a normalized 0-100 coding and engineering ability score.
 
 ANALYSIS REQUIREMENTS — be detailed and specific, not generic:
 1. GitHub activity: Evaluate commit frequency, repo count, language diversity, collaboration patterns, contribution streak, and account age. Mention specific numbers.
@@ -391,17 +404,22 @@ ANALYSIS REQUIREMENTS — be detailed and specific, not generic:
 5. Project quality: Evaluate each project individually — complexity, real-world impact, tech choices, star count. For projects with "No description provided", write a detailed inferred description (2-3 sentences) based on the project name, tech stack, and stars.
 6. AI-generated content: Flag any AI-detected repos and factor into the assessment.
 7. LeetCode performance (if available): Analyze problem-solving ability, difficulty distribution, contest rating.
-8. ATS Resume Analysis: Score keywords, formatting, experience depth, education, and skills coverage.
-${requiredTechStack?.length ? `9. Required Tech Stack: ${requiredTechStack.join(", ")}. Include "techStackMatch" with "matched" and "missing" arrays and a brief explanation.` : ""}
-${experienceLevel ? `10. Experience Level Required: "${experienceLevel}". Include "experienceLevelMatch": { "required": "${experienceLevel}", "assessed": "assessed level", "isMatch": true/false, "explanation": "detailed reasoning" }.` : ""}
+8. LinkedIn signal: If the LinkedIn URL is provided, comment on the candidate's profile completeness and how their LinkedIn presentation affects the role fit and hiring recommendation.
+9. Aptitude / Maths score: If provided, explain how this score reflects analytical and numerical ability and how it should influence the hiring recommendation.
+10. Technical Test score: If provided, explain how this score validates the candidate's coding ability, compare it to GitHub/LeetCode signals, and use it to refine the overall score.
+${requiredTechStack?.length ? `11. Required Tech Stack: ${requiredTechStack.join(", ")}. Include "techStackMatch" with "matched" and "missing" arrays and a brief explanation.` : ""}
+${experienceLevel ? `12. Experience Level Required: "${experienceLevel}". Include "experienceLevelMatch": { "required": "${experienceLevel}", "assessed": "assessed level", "isMatch": true/false, "explanation": "detailed reasoning" }.` : ""}
+
+Fields provided for this analysis: ${selectedFieldsList.join(", ")}.
 
 SCORING (0-100 overallScore):
-- Below 50: "DO NOT CONSIDER"
-- 50-60: "MILD CHANCE"
-- 60-70: "MODERATE"
-- 70-80: "AVERAGE"
-- 80-90: "GOOD"
-- 90-100: "EXCEPTIONAL"
+Weighted formula:
+- GitHub (25%), Technical skills (20%), Experience (20%), ATS (15%), LeetCode (10%), LinkedIn (5%), Aptitude (2.5%), Technical score (2.5%)
+- If aptitude score < 40: deduct 10 points
+- If technical score < 40: deduct 10 points
+- Verdict thresholds: <50=DO NOT CONSIDER, 50-60=MILD CHANCE, 60-70=MODERATE, 70-80=AVERAGE, 80-90=GOOD, 90-100=EXCEPTIONAL
+Include linkedinInsights and testScoreInsights fields in response.
+If test scores are low, flag in hiringNotes.
 
 Return ONLY valid JSON with this structure:
 {
@@ -425,6 +443,17 @@ Return ONLY valid JSON with this structure:
     "consistency": "analysis of contribution patterns, streak, and regularity",
     "collaboration": "assessment of PRs, collaborations, and community involvement"
   },
+  "linkedinInsights": {
+    "profileStrength": "assessment of LinkedIn profile completeness and professionalism if URL provided, or N/A if not provided",
+    "activityLevel": "assessment of recent activity and engagement signals, or N/A if not provided",
+    "roleAlignment": "how well the LinkedIn profile aligns with the target role, or N/A if not provided",
+    "summary": "one-line summary of professional presence or N/A"
+  },
+  "testScoreInsights": {
+    "aptitudeAnalysis": "detailed analysis of aptitude score if provided (e.g. 'Score of 85 shows strong analytical ability' or 'Low score of 32 suggests quantitative reasoning gaps'), or N/A if not provided",
+    "technicalAnalysis": "detailed analysis of technical test score if provided, or N/A if not provided",
+    "scoreComparison": "how test scores compare to GitHub/LeetCode signals if both available, or N/A"
+  },
   "leetcodeInsights": {
     "problemSolvingLevel": "detailed assessment or N/A",
     "difficultyBalance": "breakdown of easy/medium/hard or N/A",
@@ -439,7 +468,7 @@ Return ONLY valid JSON with this structure:
   "inferredProjectDescriptions": {
     "projectName": "2-3 sentence detailed description inferred from name, tech stack, and context"
   },
-  "hiringNotes": "5-7 sentence detailed hiring manager notes covering: (1) overall impression, (2) what role/team this candidate would fit best, (3) interview focus areas, (4) potential red flags or standout qualities, (5) compensation/level recommendation"
+  "hiringNotes": "7-10 sentence detailed hiring manager notes covering: (1) overall impression, (2) what role/team this candidate would fit best, (3) interview focus areas, (4) potential red flags (esp. if test scores are low), (5) if LinkedIn provided comment on professional branding, (6) compensation/level recommendation. IMPORTANT: If aptitude or technical scores are below 40, explicitly flag this as a concern. If below 50, note it as 'Major weakness to address in interviews'."
 }
 
 IMPORTANT: Be specific and reference actual data. Avoid generic phrases like "good developer" — cite specific repos, commit counts, technologies, and patterns. Every field should contain meaningful, actionable insight.`;

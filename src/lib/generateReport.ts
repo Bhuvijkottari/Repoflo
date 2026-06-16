@@ -12,6 +12,23 @@ export interface CandidateAnalysis {
     consistency: string;
     collaboration: string;
   } | null;
+  linkedinInsights?: {
+    profileStrength: string;
+    activityLevel: string;
+    roleAlignment: string;
+    summary: string;
+  } | null;
+  instagramInsights?: {
+    profileQuality: string;
+    engagementLevel: string;
+    professionalPresence: string;
+    summary: string;
+  } | null;
+  testScoreInsights?: {
+    aptitudeAnalysis: string;
+    technicalAnalysis: string;
+    scoreComparison: string;
+  } | null;
   technicalAssessment: {
     primaryStack: string;
     experienceLevel: string;
@@ -63,11 +80,17 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
   const fields = selectedFields.length > 0 ? selectedFields
     : [
         ...(data.githubStats ? ["github"] : []),
+        ...(data.linkedin ? ["linkedin"] : []),
+        ...(data.aptitudeScore != null ? ["aptitudeScore"] : []),
+        ...(data.technicalScore != null ? ["technicalScore"] : []),
         ...(data.leetcodeStats ? ["leetcode"] : []),
         ...((data.experience?.length || data.education?.length) ? ["resume"] : []),
       ];
 
   const showGithub = fields.includes("github");
+  const showLinkedin = fields.includes("linkedin");
+  const showAptitude = fields.includes("aptitudeScore");
+  const showTechnical = fields.includes("technicalScore");
   const showLeetcode = fields.includes("leetcode");
   const showResume = fields.includes("resume");
 
@@ -418,6 +441,42 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
     </div>` : ""}` : ""}
   </div>` : ""}
 
+  <!-- ══ LINKEDIN INSIGHTS ══ -->
+  ${analysis.linkedinInsights && analysis.linkedinInsights.profileStrength !== "N/A" ? `
+  <div class="no-break">
+    <div class="sec-title">LinkedIn Profile</div>
+    <div class="two-col">
+      <div class="info-card">
+        <div class="insight-row"><span class="lbl">Profile Strength</span><span class="val">${analysis.linkedinInsights.profileStrength}</span></div>
+        <div class="insight-row"><span class="lbl">Activity Level</span><span class="val">${analysis.linkedinInsights.activityLevel}</span></div>
+      </div>
+      <div class="info-card">
+        <div class="insight-row"><span class="lbl">Role Alignment</span><span class="val">${analysis.linkedinInsights.roleAlignment}</span></div>
+      </div>
+    </div>
+    ${analysis.linkedinInsights.summary && analysis.linkedinInsights.summary !== "N/A" ? `<div style="margin-top:10px" class="summary-box">${analysis.linkedinInsights.summary}</div>` : ""}
+  </div>` : ""}
+
+  <!-- ══ TEST SCORE INSIGHTS ══ -->
+  ${analysis.testScoreInsights && (analysis.testScoreInsights.aptitudeAnalysis !== "N/A" || analysis.testScoreInsights.technicalAnalysis !== "N/A") ? `
+  <div class="no-break">
+    <div class="sec-title">Assessment Results</div>
+    <div class="two-col">
+      ${analysis.testScoreInsights.aptitudeAnalysis !== "N/A" ? `
+      <div class="info-card">
+        <div class="card-label">Aptitude & Reasoning</div>
+        <div class="card-val" style="font-size:12px;line-height:1.5">${analysis.testScoreInsights.aptitudeAnalysis}</div>
+      </div>` : ""}
+      ${analysis.testScoreInsights.technicalAnalysis !== "N/A" ? `
+      <div class="info-card">
+        <div class="card-label">Technical Proficiency</div>
+        <div class="card-val" style="font-size:12px;line-height:1.5">${analysis.testScoreInsights.technicalAnalysis}</div>
+      </div>` : ""}
+    </div>
+    ${analysis.testScoreInsights.scoreComparison && analysis.testScoreInsights.scoreComparison !== "N/A" ? `<div style="margin-top:10px" class="summary-box">${analysis.testScoreInsights.scoreComparison}</div>` : ""}
+  </div>` : ""}
+
+
   <!-- ══ ATS SCORE ══ -->
   ${showResume && analysis.atsScore ? `
   <div class="no-break">
@@ -429,6 +488,16 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
         <div class="card-label" style="margin-bottom:6px">Improvement Suggestions</div>
         ${analysis.atsScore.suggestions.map(sg => `<div class="concern-item">${sg}</div>`).join("")}` : ""}
       </div>
+    </div>
+  </div>` : ""}
+
+  ${((showLinkedin && data.linkedin) || showAptitude || showTechnical) ? `
+  <div class="no-break">
+    <div class="sec-title">Additional Candidate Inputs</div>
+    <div class="three-col" style="margin-bottom:14px">
+      ${showLinkedin ? `<div class="info-card"><div class="card-label">LinkedIn</div><div class="card-val">${data.linkedin ? `<a href="${data.linkedin}" target="_blank" style="color:#0f172a;text-decoration:none">${data.linkedin}</a>` : "Not provided"}</div></div>` : ""}
+      ${showAptitude ? `<div class="info-card"><div class="card-label">Aptitude / Maths</div><div class="card-val">${data.aptitudeScore != null ? `${data.aptitudeScore}/100` : "Not provided"}</div></div>` : ""}
+      ${showTechnical ? `<div class="info-card"><div class="card-label">Technical Test</div><div class="card-val">${data.technicalScore != null ? `${data.technicalScore}/100` : "Not provided"}</div></div>` : ""}
     </div>
   </div>` : ""}
 

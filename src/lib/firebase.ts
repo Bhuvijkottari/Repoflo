@@ -369,6 +369,10 @@ export interface CandidateData {
   driveName?: string;
   githubUsername: string;
   leetcodeUsername?: string;
+  linkedinUrl?: string;
+  instagramUrl?: string;
+  aptitudeScore?: number;
+  technicalScore?: number;
   selectedFields?: string[];
   name: string;
   email?: string;
@@ -457,6 +461,11 @@ export const findExistingCandidate = async (
   leetcodeUsername?: string,
   requiredTechStack?: string[],
   experienceLevel?: string,
+  selectedFields?: string[],
+  linkedinUrl?: string,
+  aptitudeScore?: number,
+  technicalScore?: number,
+  instagramUrl?: string,
 ): Promise<CandidateData | null> => {
   try {
     if (!githubUsername) return null;
@@ -487,6 +496,25 @@ export const findExistingCandidate = async (
     if (JSON.stringify(storedTech.sort()) !== JSON.stringify([...newTech].sort())) return null;
     if (storedLevel !== newLevel) return null;
 
+    // Check if selectedFields match
+    const storedFields = (candidate as any).selectedFields || [];
+    const newFields = selectedFields || [];
+    if (JSON.stringify(storedFields.sort()) !== JSON.stringify([...newFields].sort())) return null;
+
+    // Check if LinkedIn URL matches
+    const storedLinkedin = (candidate.linkedinUrl || "").trim().toLowerCase();
+    const newLinkedin = (linkedinUrl || "").trim().toLowerCase();
+    if (newLinkedin !== storedLinkedin) return null;
+
+    // Check if Instagram URL matches
+    const storedInstagram = (candidate.instagramUrl || "").trim().toLowerCase();
+    const newInstagram = (instagramUrl || "").trim().toLowerCase();
+    if (newInstagram !== storedInstagram) return null;
+
+    // Check if test scores match
+    if (candidate.aptitudeScore !== aptitudeScore) return null;
+    if (candidate.technicalScore !== technicalScore) return null;
+
     return candidate;
   } catch (error) {
     console.error("Error finding existing candidate:", error);
@@ -511,6 +539,8 @@ export const fetchAllCandidates = async (limitCount = 100): Promise<CandidateDat
 
 // ─── ADMIN USERS (Firestore-managed, primary always included) ───────────────
 export const PRIMARY_ADMIN = "bhuvijkottari@gmail.com";
+export const SECONDARY_ADMIN = "cadithya110@gmail.com";
+export const DEFAULT_ADMIN_EMAILS = [PRIMARY_ADMIN, SECONDARY_ADMIN];
 
 export interface AdminUser {
   email: string;
@@ -519,18 +549,25 @@ export interface AdminUser {
   isPrimary: boolean;
 }
 
-/** Returns full list of allowed admin emails (always includes PRIMARY_ADMIN) */
+/** Returns full list of allowed admin emails (always includes primary and secondary admins) */
 export const getAdminUsers = async (): Promise<AdminUser[]> => {
   try {
     const snap = await getDoc(doc(db, "admin_settings", "admin_users"));
     const list: AdminUser[] = snap.exists() ? (snap.data().users || []) : [];
-    // Ensure primary is always present
-    if (!list.find(u => u.email === PRIMARY_ADMIN)) {
-      list.unshift({ email: PRIMARY_ADMIN, addedAt: new Date().toISOString(), addedBy: "system", isPrimary: true });
+    // Ensure default admins are always present
+    for (const email of DEFAULT_ADMIN_EMAILS) {
+      if (!list.find((u) => u.email.toLowerCase() === email.toLowerCase())) {
+        list.unshift({ email, addedAt: new Date().toISOString(), addedBy: "system", isPrimary: email === PRIMARY_ADMIN });
+      }
     }
     return list;
   } catch {
-    return [{ email: PRIMARY_ADMIN, addedAt: new Date().toISOString(), addedBy: "system", isPrimary: true }];
+    return DEFAULT_ADMIN_EMAILS.map((email) => ({
+      email,
+      addedAt: new Date().toISOString(),
+      addedBy: "system",
+      isPrimary: email === PRIMARY_ADMIN,
+    }));
   }
 };
 
@@ -727,6 +764,10 @@ export interface Drive {
   driveName: string;
 
   role: string;
+
+  createdByName?: string;
+
+  createdByPosition?: string;
 
   selectedFields: string[];
 

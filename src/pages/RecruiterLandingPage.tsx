@@ -11,13 +11,19 @@ import {
 import {
   PACKAGES, signInWithGoogle, signOutUser, createRecruiterRequest,
   getRecruiterRequest, subscribeRecruiterRequest, RecruiterRequest,
+  fetchRecruiterDrives, fetchCandidatesByRecruiter, Drive,
 } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/favicon/IMG-20260403-WA0058.jpg";
 
 // ── Recruiter-specific navbar ────────────────────────────────────────────────
-const RecruiterNav = ({ user, onSignIn, onSignOut, signingIn }: {
-  user: any; onSignIn: () => void; onSignOut: () => void; signingIn: boolean;
+const RecruiterNav = ({ user, onSignIn, onSignOut, signingIn, showCreateDrive, onCreateDrive }: {
+  user: any;
+  onSignIn: () => void;
+  onSignOut: () => void;
+  signingIn: boolean;
+  showCreateDrive?: boolean;
+  onCreateDrive?: () => void;
 }) => (
   <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0b1f3a]/90 backdrop-blur-lg border-b border-[#3fc4e7]/15 px-6 py-3 flex items-center justify-between">
     <Link to="/" className="flex items-center gap-2">
@@ -37,11 +43,22 @@ const RecruiterNav = ({ user, onSignIn, onSignOut, signingIn }: {
     <div className="flex items-center gap-2">
       {user ? (
         <div className="flex items-center gap-2">
-          {user.photoURL && <img src={user.photoURL} className="w-7 h-7 rounded-full" alt="" />}
-          <span className="text-white text-sm font-semibold hidden sm:block">{user.displayName?.split(" ")[0]}</span>
-          <button onClick={onSignOut} className="text-[#b8c7e0]/50 hover:text-white p-1.5 rounded-lg hover:bg-[#3fc4e7]/10 transition-all">
-            <LogOut className="w-4 h-4" />
-          </button>
+          {showCreateDrive && onCreateDrive && (
+            <Button
+              size="sm"
+              onClick={onCreateDrive}
+              className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold rounded-full px-4 py-2 hover:opacity-90"
+            >
+              Create Drive
+            </Button>
+          )}
+          <div className="flex items-center gap-2">
+            {user.photoURL && <img src={user.photoURL} className="w-7 h-7 rounded-full" alt="" />}
+            <span className="text-white text-sm font-semibold hidden sm:block">{user.displayName?.split(" ")[0]}</span>
+            <button onClick={onSignOut} className="text-[#b8c7e0]/50 hover:text-white p-1.5 rounded-lg hover:bg-[#3fc4e7]/10 transition-all">
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       ) : (
         <Button size="sm" onClick={onSignIn} disabled={signingIn}
@@ -71,43 +88,51 @@ const RecruiterLandingPage = () => {
   const [signInError, setSignInError] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
   const [request, setRequest] = useState<RecruiterRequest | null>(null);
+  const [drives, setDrives] = useState<Drive[]>([]);
+  const [driveCounts, setDriveCounts] = useState<Record<string, number>>({});
+  const [loadingDrives, setLoadingDrives] = useState(false);
+
+  const isApprovedRecruiter = request?.status === "approved";
 
   // Subscribe to request status once signed in
   useEffect(() => {
     if (!user) { setRequest(null); return; }
     const unsub = subscribeRecruiterRequest(user.uid, (r) => {
       setRequest(r);
-      if (r?.status === "approved") {
-        navigate("/recruiter", { replace: true });
-      } else if (r?.status === "pending") {
+      if (r?.status === "pending") {
         setStep("waiting");
       }
     });
     return unsub;
-  }, [user, navigate]);
+  }, [user]);
 
   // On page load, if already signed in check existing request
   useEffect(() => {
     if (!user) return;
     getRecruiterRequest(user.uid).then(r => {
       if (!r) { setStep("select-plan"); return; }
-      if (r.status === "approved") { navigate("/recruiter", { replace: true }); return; }
+      if (r.status === "approved") { setStep("landing"); return; }
       if (r.status === "pending") { setStep("waiting"); return; }
       // rejected or other — show plan selection again
       setStep("select-plan");
     });
-  }, [user, navigate]);
+  }, [user]);
 
   // "Get Started" — sign in first, then decide next step
   const handleGetStarted = async () => {
     setSignInError("");
     setSignInLoading(true);
     try {
+      if (user && isApprovedRecruiter) {
+        navigate("/create-drive", { replace: true });
+        return;
+      }
+
       const signedInUser = await signInWithGoogle();
       if (!signedInUser) throw new Error("Sign-in cancelled.");
       const existing = await getRecruiterRequest(signedInUser.uid);
       if (existing?.status === "approved") {
-        navigate("/recruiter", { replace: true });
+        navigate("/create-drive", { replace: true });
       } else if (existing?.status === "pending") {
         setStep("waiting");
       } else {
@@ -119,6 +144,31 @@ const RecruiterLandingPage = () => {
       setSignInLoading(false);
     }
   };
+
+  const loadRecruiterDrives = async () => {
+    if (!user?.email) return;
+    setLoadingDrives(true);
+    try {
+      const loadedDrives = await fetchRecruiterDrives(user.email);
+      setDrives(loadedDrives);
+      const candidates = await fetchCandidatesByRecruiter(user.email);
+      const counts = candidates.reduce((acc, candidate) => {
+        if (candidate.driveId) {
+          acc[candidate.driveId] = (acc[candidate.driveId] || 0) + 1;
+        }
+        return acc;
+      }, {} as Record<string, number>);
+      setDriveCounts(counts);
+    } finally {
+      setLoadingDrives(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user && isApprovedRecruiter) {
+      loadRecruiterDrives();
+    }
+  }, [user, isApprovedRecruiter]);
 
   const handleSubmitPlan = async () => {
     if (!user || !selectedPlan) return;
@@ -138,6 +188,8 @@ const RecruiterLandingPage = () => {
     setStep("landing");
     setSelectedPlan("");
     setRequest(null);
+    setDrives([]);
+    setDriveCounts({});
   };
 
   // ── Select plan screen ──
@@ -220,7 +272,14 @@ const RecruiterLandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0b1f3a] text-white overflow-x-hidden">
-      <RecruiterNav user={user} onSignIn={handleGetStarted} onSignOut={handleSignOut} signingIn={signInLoading} />
+      <RecruiterNav
+        user={user}
+        onSignIn={handleGetStarted}
+        onSignOut={handleSignOut}
+        signingIn={signInLoading}
+        showCreateDrive={!!user && isApprovedRecruiter}
+        onCreateDrive={() => navigate("/create-drive")}
+      />
 
       {/* ── HERO ── */}
       <section className="relative pt-32 pb-24 px-4 overflow-hidden">
@@ -251,11 +310,9 @@ const RecruiterLandingPage = () => {
               <Button
                 size="lg"
                 className="rounded-full px-10 py-6 text-base bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold shadow-lg shadow-[#3fc4e7]/20 hover:opacity-90"
-                asChild
+                onClick={handleGetStarted}
               >
-                <a href="#pricing" onClick={(e) => { e.preventDefault(); document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); }}>
-                  Get Started <ArrowRight className="ml-2 w-5 h-5" />
-                </a>
+                Get Started <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <a
                 href="#how-it-works"
@@ -610,6 +667,90 @@ const RecruiterLandingPage = () => {
               All plans include full AI analysis, reports & GitHub insights. Billed annually.
             </p>
           </motion.div>
+
+          {isApprovedRecruiter && (
+            <section className="py-14">
+              <div className="container mx-auto max-w-5xl">
+                <motion.div {...fadeUp()} className="text-center mb-8">
+                  <div className="inline-flex items-center gap-2 bg-[#3fc4e7]/10 text-[#69d2f1] px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-4 border border-[#3fc4e7]/20">
+                    <Target className="w-4 h-4" /> Hiring Drives
+                  </div>
+                  <h2 className="font-display text-3xl sm:text-4xl font-bold mb-3">Your active hiring drives</h2>
+                  <p className="text-[#b8c7e0] font-body max-w-2xl mx-auto">
+                    Manage your drive entries, analyze candidates, and review candidate results per drive.
+                  </p>
+                </motion.div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  {drives.length > 0 ? (
+                    drives.map((drive) => (
+                      <motion.div
+                        key={drive.id}
+                        {...fadeUp(0.05)}
+                        className="bg-[#132f52] border border-[#3fc4e7]/15 rounded-3xl p-6 shadow-lg shadow-[#3fc4e7]/10"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <div>
+                            <p className="text-sm text-[#69d2f1] uppercase tracking-[0.2em] font-semibold mb-2">{drive.role}</p>
+                            <h3 className="font-display text-2xl font-bold text-white">{drive.driveName}</h3>
+                          </div>
+                          <div className="text-right text-xs text-[#b8c7e0]">
+                            <p>{drive.createdByName || "Recruiter"}</p>
+                            <p>{drive.createdByPosition || "Role not set"}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {drive.selectedFields.map((field) => (
+                            <span key={field} className="px-3 py-1 rounded-full bg-[#3fc4e7]/10 border border-[#3fc4e7]/20 text-[#69d2f1] text-xs font-semibold">
+                              {field}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 mb-6 text-sm text-[#b8c7e0]">
+                          <div className="rounded-2xl bg-[#0b1f3a] p-3 border border-[#3fc4e7]/10">
+                            <p className="font-semibold text-white">Candidates</p>
+                            <p>{driveCounts[drive.id!] ?? 0}</p>
+                          </div>
+                          <div className="rounded-2xl bg-[#0b1f3a] p-3 border border-[#3fc4e7]/10">
+                            <p className="font-semibold text-white">Experience</p>
+                            <p>{drive.experienceLevel || "Any"}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Button
+                            className="w-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
+                            onClick={() => navigate(`/recruiter?driveId=${drive.id}`)}
+                          >
+                            Analyze
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full text-[#69d2f1] border-[#3fc4e7]/30"
+                            onClick={() => navigate(`/recruiter?driveId=${drive.id}`)}
+                          >
+                            View Candidate Results
+                          </Button>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="rounded-3xl border border-[#3fc4e7]/20 bg-[#132f52] p-8 text-center">
+                      <p className="text-[#b8c7e0] mb-4">You don't have any drives yet.</p>
+                      <Button
+                        className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
+                        onClick={() => navigate("/create-drive")}
+                      >
+                        Create your first drive
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
             {PACKAGES.map((pkg, i) => (

@@ -188,6 +188,9 @@ const RecruiterAnalysisPanel = ({
         ...((d.experience?.length || d.education?.length) ? ["resume"] : []),
       ];
   const showGithub = fields.includes("github");
+  const showLinkedin = fields.includes("linkedin");
+  const showAptitude = fields.includes("aptitudeScore");
+  const showTechnical = fields.includes("technicalScore");
   const showLeetcode = fields.includes("leetcode");
   const showResume = fields.includes("resume");
 
@@ -287,6 +290,89 @@ const RecruiterAnalysisPanel = ({
               </div>
             </Card>
           </motion.div>
+
+          {(showLinkedin || showAptitude || showTechnical) && (
+            <motion.div {...fadeUp(0.06)}>
+              <Card>
+                <CardHeader icon={Shield} title="Additional Candidate Data" subtitle="LinkedIn and test score inputs" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+                  {showLinkedin && d.linkedin && (
+                    <div className="bg-[#0b1f3a] rounded-2xl p-4 border border-[#3fc4e7]/15">
+                      <p className="text-sm font-semibold text-[#b8c7e0]">LinkedIn URL</p>
+                      <p className="text-sm text-white break-all mt-2">{d.linkedin}</p>
+                    </div>
+                  )}
+                  {showAptitude && d.aptitudeScore != null && (
+                    <div className="bg-[#0b1f3a] rounded-2xl p-4 border border-[#3fc4e7]/15">
+                      <p className="text-sm font-semibold text-[#b8c7e0]">Aptitude / Maths Score</p>
+                      <p className="mt-2 text-3xl font-bold text-white">{d.aptitudeScore}/100</p>
+                    </div>
+                  )}
+                  {showTechnical && d.technicalScore != null && (
+                    <div className="bg-[#0b1f3a] rounded-2xl p-4 border border-[#3fc4e7]/15">
+                      <p className="text-sm font-semibold text-[#b8c7e0]">Technical Test Score</p>
+                      <p className="mt-2 text-3xl font-bold text-white">{d.technicalScore}/100</p>
+                    </div>
+                  )}
+                </div>
+                <div className="px-6 pb-6 pt-2 text-sm leading-6 text-[#b8c7e0]">
+                  Gemini uses LinkedIn signals and candidate test scores alongside the rest of the profile to make a more complete hiring recommendation.
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* ══ LINKEDIN INSIGHTS (from AI analysis) ════════════ */}
+          {analysis.linkedinInsights && analysis.linkedinInsights.profileStrength !== "N/A" && (
+            <motion.div {...fadeUp(0.065)}>
+              <Card>
+                <CardHeader icon={Briefcase} title="LinkedIn Profile Assessment" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Profile Strength</p>
+                    <p className="text-base text-foreground">{analysis.linkedinInsights.profileStrength}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Activity Level</p>
+                    <p className="text-base text-foreground">{analysis.linkedinInsights.activityLevel}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Role Alignment</p>
+                    <p className="text-base text-foreground">{analysis.linkedinInsights.roleAlignment}</p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* ══ TEST SCORE INSIGHTS (from AI analysis) ═════════ */}
+          {analysis.testScoreInsights && (analysis.testScoreInsights.aptitudeAnalysis !== "N/A" || analysis.testScoreInsights.technicalAnalysis !== "N/A") && (
+            <motion.div {...fadeUp(0.07)}>
+              <Card>
+                <CardHeader icon={Award} title="Assessment Analysis" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+                  {analysis.testScoreInsights.aptitudeAnalysis !== "N/A" && (
+                    <div className="bg-secondary/40 rounded-xl p-4">
+                      <p className="text-sm font-semibold text-primary mb-2">Aptitude & Reasoning</p>
+                      <p className="text-sm text-foreground leading-relaxed">{analysis.testScoreInsights.aptitudeAnalysis}</p>
+                    </div>
+                  )}
+                  {analysis.testScoreInsights.technicalAnalysis !== "N/A" && (
+                    <div className="bg-secondary/40 rounded-xl p-4">
+                      <p className="text-sm font-semibold text-primary mb-2">Technical Proficiency</p>
+                      <p className="text-sm text-foreground leading-relaxed">{analysis.testScoreInsights.technicalAnalysis}</p>
+                    </div>
+                  )}
+                  {analysis.testScoreInsights.scoreComparison !== "N/A" && (
+                    <div className="md:col-span-2 bg-secondary/40 rounded-xl p-4">
+                      <p className="text-sm font-semibold text-primary mb-2">Score Comparison & Context</p>
+                      <p className="text-sm text-foreground leading-relaxed">{analysis.testScoreInsights.scoreComparison}</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
+          )}
 
           {/* ══ EXECUTIVE SUMMARY ═══════════════════════════════ */}
           <motion.div {...fadeUp(0.08)}>

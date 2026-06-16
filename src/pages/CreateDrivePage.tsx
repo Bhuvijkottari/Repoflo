@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,8 @@ const CreateDrive = () => {
 
   const [driveName, setDriveName] = useState("");
   const [role, setRole] = useState("");
+  const [createdByName, setCreatedByName] = useState("");
+  const [createdByPosition, setCreatedByPosition] = useState("");
 
   const [requiredTechStack, setRequiredTechStack] =
     useState<string[]>([]);
@@ -39,12 +41,17 @@ const CreateDrive = () => {
 
   const [selectedFields, setSelectedFields] =
     useState<string[]>([]);
+  const [driveCreatedMessage, setDriveCreatedMessage] = useState("");
+  const successRef = useRef<HTMLDivElement | null>(null);
 
   const availableFields = [
     { id: "github", label: "GitHub" },
+    { id: "linkedin", label: "LinkedIn" },
+    { id: "instagram", label: "Instagram" },
     { id: "leetcode", label: "LeetCode" },
     { id: "resume", label: "Resume" },
-    { id: "linkedin", label: "LinkedIn" },
+    { id: "aptitudeScore", label: "Aptitude/Maths Score" },
+    { id: "technicalScore", label: "Technical Test Score" },
     { id: "codechef", label: "CodeChef" },
     { id: "geeksforgeeks", label: "GeeksForGeeks" },
     { id: "hackerrank", label: "HackerRank" },
@@ -75,6 +82,24 @@ const CreateDrive = () => {
       return;
     }
 
+    if (!createdByName.trim()) {
+      toast({
+        title: "Recruiter name required",
+        description: "Please enter the name of the person creating the drive.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!createdByPosition.trim()) {
+      toast({
+        title: "Position required",
+        description: "Please enter the recruiter position in the company.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (selectedFields.length === 0) {
       toast({
         title: "Select at least one field",
@@ -88,17 +113,24 @@ const CreateDrive = () => {
         recruiterEmail: user?.email || "",
         driveName,
         role,
+        createdByName,
+        createdByPosition,
         selectedFields,
         requiredTechStack,
         experienceLevel,
         status: "active",
       });
 
+      const successText = `Drive "${driveName}" created successfully.`;
       toast({
         title: "Drive created successfully",
+        description: successText,
       });
-
-      navigate("/recruiter");
+      setDriveCreatedMessage(successText);
+      setTimeout(() => {
+        successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
+      return;
     } catch (err) {
       console.error(err);
 
@@ -135,6 +167,11 @@ const CreateDrive = () => {
           </div>
 
           <div className="bg-[#132f52] border border-[#3fc4e7]/20 rounded-2xl p-6 space-y-6">
+            {driveCreatedMessage && (
+              <div ref={successRef} className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+                {driveCreatedMessage}
+              </div>
+            )}
 
             {/* Drive Name */}
             <div>
@@ -162,6 +199,36 @@ const CreateDrive = () => {
                   setRole(e.target.value)
                 }
                 placeholder="Frontend Developer"
+                className="bg-[#0b1f3a] border-[#3fc4e7]/20"
+              />
+            </div>
+
+            {/* Recruiter name */}
+            <div>
+              <Label className="text-white mb-2 block">
+                Recruiter Name
+              </Label>
+              <Input
+                value={createdByName}
+                onChange={(e) =>
+                  setCreatedByName(e.target.value)
+                }
+                placeholder="Akhil Sharma"
+                className="bg-[#0b1f3a] border-[#3fc4e7]/20"
+              />
+            </div>
+
+            {/* Position in company */}
+            <div>
+              <Label className="text-white mb-2 block">
+                Position in Company
+              </Label>
+              <Input
+                value={createdByPosition}
+                onChange={(e) =>
+                  setCreatedByPosition(e.target.value)
+                }
+                placeholder="Talent Acquisition Lead"
                 className="bg-[#0b1f3a] border-[#3fc4e7]/20"
               />
             </div>
@@ -261,6 +328,7 @@ const CreateDrive = () => {
             </div>
 
             <Button
+              type="button"
               onClick={handleCreateDrive}
               className="w-full h-12 bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
             >

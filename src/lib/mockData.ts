@@ -9,6 +9,7 @@ export interface PortfolioData {
   location: string;
   github: string;
   linkedin: string;
+  instagram?: string;
   website: string;
   skills: string[];
   experience: { company: string; role: string; period: string; description: string }[];
@@ -42,6 +43,8 @@ export interface PortfolioData {
     totalContests: number;
     recentSubmissions: string[];
   } | null;
+  aptitudeScore?: number;
+  technicalScore?: number;
 }
 
 export const mockPortfolioData: PortfolioData = {
