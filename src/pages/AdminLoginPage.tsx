@@ -105,7 +105,7 @@ const AccessDenied = ({ email, onBack }: { email: string; onBack: () => void }) 
         {/* Blinking cursor line */}
         <div className="mt-3 text-center">
           <span className="text-red-900/60 font-mono text-xs">
-            REPOFLO SECURITY SYSTEM v2.1 · DEVORA TECHNOLOGIES
+            REPOFLO SECURITY SYSTEM v2.1 · TORSecure Cyber LLP
             <span className="animate-[blink_1s_step-end_infinite] ml-1">█</span>
           </span>
         </div>
@@ -205,7 +205,7 @@ const AdminLoginPage = () => {
         </div>
 
         <p className="text-center text-[#b8c7e0]/25 font-body text-xs mt-4">
-          Repoflo Admin · Powered by Devora Technologies
+          Repoflo Admin · Powered by Torsecure Cyber LLP
         </p>
       </motion.div>
     </div>

@@ -2,6 +2,16 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import {
   ArrowRight, BarChart3, Brain, FileText, Shield, CheckCircle2,
   XCircle, GitBranch, Zap, Users, Target, Clock, Star,
@@ -11,9 +21,11 @@ import {
 import {
   PACKAGES, signInWithGoogle, signOutUser, createRecruiterRequest,
   getRecruiterRequest, subscribeRecruiterRequest, RecruiterRequest,
-  fetchRecruiterDrives, fetchCandidatesByRecruiter, Drive,
+  fetchRecruiterDrives, fetchCandidatesByRecruiter, deleteDrive, Drive,
 } from "@/lib/firebase";
+import { hashPassword } from "@/lib/password";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import logo from "@/favicon/IMG-20260403-WA0058.jpg";
 
 // ── Recruiter-specific navbar ────────────────────────────────────────────────
@@ -43,6 +55,18 @@ const RecruiterNav = ({ user, onSignIn, onSignOut, signingIn, showCreateDrive, o
     <div className="flex items-center gap-2">
       {user ? (
         <div className="flex items-center gap-2">
+          <Link
+            to="/ethics-learning"
+            className="text-sm font-semibold text-[#b8c7e0] border border-[#3fc4e7]/20 rounded-full px-3 py-2 hover:bg-[#3fc4e7]/10 hover:text-white transition-all"
+          >
+            Ethics Learning
+          </Link>
+          <Link
+            to="/ai-vs-me"
+            className="text-sm font-semibold text-[#b8c7e0] border border-[#3fc4e7]/20 rounded-full px-3 py-2 hover:bg-[#3fc4e7]/10 hover:text-white transition-all"
+          >
+            AI vs Me
+          </Link>
           {showCreateDrive && onCreateDrive && (
             <Button
               size="sm"
@@ -79,6 +103,7 @@ const fadeUp = (delay = 0) => ({
 
 const RecruiterLandingPage = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   // step: 'landing' → 'select-plan' → 'waiting'
@@ -91,6 +116,12 @@ const RecruiterLandingPage = () => {
   const [drives, setDrives] = useState<Drive[]>([]);
   const [driveCounts, setDriveCounts] = useState<Record<string, number>>({});
   const [loadingDrives, setLoadingDrives] = useState(false);
+  const [activeDrive, setActiveDrive] = useState<Drive | null>(null);
+  const [activeDriveAction, setActiveDriveAction] = useState<"analyze" | "results" | "delete" | null>(null);
+  const [passwordAttempt, setPasswordAttempt] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionDialogOpen, setActionDialogOpen] = useState(false);
 
   const isApprovedRecruiter = request?.status === "approved";
 
@@ -110,11 +141,20 @@ const RecruiterLandingPage = () => {
   useEffect(() => {
     if (!user) return;
     getRecruiterRequest(user.uid).then(r => {
-      if (!r) { setStep("select-plan"); return; }
-      if (r.status === "approved") { setStep("landing"); return; }
-      if (r.status === "pending") { setStep("waiting"); return; }
-      // rejected or other — show plan selection again
-      setStep("select-plan");
+      if (!r) {
+        setStep("landing");
+        return;
+      }
+      if (r.status === "approved") {
+        setStep("landing");
+        return;
+      }
+      if (r.status === "pending") {
+        setStep("waiting");
+        return;
+      }
+      // rejected or other — keep landing and let user decide next
+      setStep("landing");
     });
   }, [user]);
 
@@ -123,21 +163,27 @@ const RecruiterLandingPage = () => {
     setSignInError("");
     setSignInLoading(true);
     try {
-      if (user && isApprovedRecruiter) {
-        navigate("/create-drive", { replace: true });
+      const decideNextStep = async (authUser: any) => {
+        const existing = await getRecruiterRequest(authUser.uid);
+        if (existing?.status === "pending") {
+          setStep("waiting");
+          return;
+        }
+        if (!existing) {
+          setStep("select-plan");
+          return;
+        }
+        setStep("landing");
+      };
+
+      if (user) {
+        await decideNextStep(user);
         return;
       }
 
       const signedInUser = await signInWithGoogle();
       if (!signedInUser) throw new Error("Sign-in cancelled.");
-      const existing = await getRecruiterRequest(signedInUser.uid);
-      if (existing?.status === "approved") {
-        navigate("/create-drive", { replace: true });
-      } else if (existing?.status === "pending") {
-        setStep("waiting");
-      } else {
-        setStep("select-plan");
-      }
+      await decideNextStep(signedInUser);
     } catch (err: any) {
       setSignInError(err.message || "Sign-in failed. Please try again.");
     } finally {
@@ -169,6 +215,58 @@ const RecruiterLandingPage = () => {
       loadRecruiterDrives();
     }
   }, [user, isApprovedRecruiter]);
+
+  const startDriveAction = (drive: Drive, action: "analyze" | "results" | "delete") => {
+    setActiveDrive(drive);
+    setActiveDriveAction(action);
+    setPasswordAttempt("");
+    setActionError("");
+    setActionDialogOpen(true);
+  };
+
+  const performDriveAction = async () => {
+    if (!activeDrive || !activeDriveAction) return;
+
+    const requiresPassword = !!activeDrive.passwordHash;
+    if (requiresPassword) {
+      if (!/^[0-9]{4}$/.test(passwordAttempt)) {
+        setActionError("Enter the 4-digit drive passcode.");
+        return;
+      }
+      const hashed = await hashPassword(passwordAttempt);
+      if (hashed !== activeDrive.passwordHash) {
+        setActionError("Incorrect passcode. Please try again.");
+        return;
+      }
+    }
+
+    setActionLoading(true);
+    try {
+      const driveId = activeDrive.id;
+      if (!driveId) throw new Error("Drive ID missing.");
+
+      if (activeDriveAction === "analyze") {
+        sessionStorage.setItem(`driveAuth:${driveId}`, "true");
+        navigate(`/recruiter?driveId=${driveId}`);
+      }
+
+      if (activeDriveAction === "results") {
+        sessionStorage.setItem(`driveAuth:${driveId}`, "true");
+        navigate(`/recruiter/results/${driveId}`);
+      }
+
+      if (activeDriveAction === "delete") {
+        await deleteDrive(driveId);
+        await loadRecruiterDrives();
+        toast({ title: "Drive deleted", description: "Drive and its candidates were removed." });
+      }
+      setActionDialogOpen(false);
+    } catch (err: any) {
+      setActionError(err.message || "Action failed. Please try again.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const handleSubmitPlan = async () => {
     if (!user || !selectedPlan) return;
@@ -290,21 +388,21 @@ const RecruiterLandingPage = () => {
         <div className="container mx-auto max-w-5xl relative">
           <motion.div {...fadeUp(0)} className="text-center">
             <div className="inline-flex items-center gap-2 bg-[#3fc4e7]/10 text-[#69d2f1] px-4 py-1.5 rounded-full text-sm font-display font-semibold mb-6 border border-[#3fc4e7]/20">
-              <Target className="w-4 h-4" /> Built exclusively for Technical Recruiters
+              <Target className="w-4 h-4" /> Built for talent intelligence and developer hiring
             </div>
 
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1] mb-6 tracking-tight">
-              Hire the{" "}
-              <span className="text-[#3fc4e7]">right developer</span>
+              Find, assess, and hire
               <br />
-              in half the time
+              <span className="text-[#3fc4e7]">talent across roles</span>
+              <br /> quickly and fairly.
             </h1>
 
-            <p className="text-[#b8c7e0] font-body text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mb-10">
-              Stop guessing from resumes. Repoflo gives recruiters AI-powered GitHub analysis,
-              ATS scoring, and candidate assessment reports — everything you need to make
-              confident hiring decisions, fast.
+            <p className="text-[#b8c7e0] font-body text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mb-6">
+              Repoflo brings together portfolios, code samples, test results, and AI-assisted insights into a single recruiter workflow. Evaluate candidates for engineering, design, product, and other roles with consistent criteria.
             </p>
+
+            <p className="text-[#b8c7e0]/60 text-sm max-w-2xl mx-auto mb-8">Data privacy: candidate data is stored securely and shared only with authorized members of your team.</p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
@@ -314,12 +412,14 @@ const RecruiterLandingPage = () => {
               >
                 Get Started <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
+
               <a
-                href="#how-it-works"
-                onClick={(e) => { e.preventDefault(); document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" }); }}
-                className="text-[#b8c7e0] font-body text-sm font-medium hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
+                href="https://example.com/repoflo-documentation.pdf"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-full border border-[#3fc4e7]/30 bg-[#132f52]/80 px-6 py-3 text-sm font-semibold text-[#b8c7e0] hover:text-white transition-colors"
               >
-                See how it works <ChevronRight className="w-4 h-4" />
+                Read Documentation
               </a>
             </div>
 
@@ -416,11 +516,11 @@ const RecruiterLandingPage = () => {
               <Zap className="w-4 h-4" /> Recruiter Features
             </div>
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
-              Everything you need to hire{" "}
-              <span className="text-[#3fc4e7]">with confidence</span>
+              AI-powered sourcing, screening,
+              <br /> and candidate review for developer hiring
             </h2>
             <p className="text-[#b8c7e0] font-body max-w-xl mx-auto">
-              Built specifically for technical recruiting teams — not a generic HR tool.
+              From drive configuration to downloadable reports, Repoflo gives hiring teams one modern workflow for recruiting engineers.
             </p>
           </motion.div>
 
@@ -722,16 +822,25 @@ const RecruiterLandingPage = () => {
                         <div className="flex flex-col sm:flex-row gap-3">
                           <Button
                             className="w-full bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black font-bold"
-                            onClick={() => navigate(`/recruiter?driveId=${drive.id}`)}
+                            onClick={() => startDriveAction(drive, "analyze")}
                           >
                             Analyze
                           </Button>
                           <Button
                             variant="outline"
                             className="w-full text-[#69d2f1] border-[#3fc4e7]/30"
-                            onClick={() => navigate(`/recruiter?driveId=${drive.id}`)}
+                            onClick={() => startDriveAction(drive, "results")}
                           >
                             View Candidate Results
+                          </Button>
+                        </div>
+                        <div className="mt-3">
+                          <Button
+                            variant="ghost"
+                            className="w-full text-red-400 border border-red-400/20 hover:bg-red-400/10"
+                            onClick={() => startDriveAction(drive, "delete")}
+                          >
+                            Delete Drive
                           </Button>
                         </div>
                       </motion.div>
@@ -793,13 +902,73 @@ const RecruiterLandingPage = () => {
       </section>
 
       {/* FOOTER */}
+      <Dialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
+        <DialogContent className="bg-[#132f52] border border-[#3fc4e7]/20 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              {activeDriveAction === "delete" ? "Delete Drive" : "Verify Drive Passcode"}
+            </DialogTitle>
+            <DialogDescription className="text-[#b8c7e0] mt-2">
+              {activeDrive?.passwordHash
+                ? activeDriveAction === "delete"
+                  ? "This drive is protected. Confirm deletion by entering the 4-digit passcode. All candidate data will be lost."
+                  : "Enter the 4-digit passcode to access this drive."
+                : activeDriveAction === "delete"
+                  ? "This drive has no passcode. Confirm deletion to remove the drive and its candidates."
+                  : "This drive has no passcode, so you may proceed without a passcode."
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-6 space-y-4">
+            <div className="rounded-2xl bg-[#0b1f3a] border border-[#3fc4e7]/20 p-4">
+              <p className="text-sm text-[#b8c7e0]">Drive</p>
+              <p className="text-white font-semibold">{activeDrive?.driveName || "Untitled Drive"}</p>
+              <p className="text-xs text-[#69d2f1] mt-1">{activeDrive?.role || "No role"}</p>
+            </div>
+
+            {activeDrive?.passwordHash && (
+              <div className="space-y-2">
+                <Label className="text-white text-sm">Drive Passcode</Label>
+                <Input
+                  type="password"
+                  maxLength={4}
+                  value={passwordAttempt}
+                  onChange={(e) => setPasswordAttempt(e.target.value.replace(/[^0-9]/g, ""))}
+                  placeholder="1234"
+                  className="bg-[#0b1f3a] border-[#3fc4e7]/20 text-white"
+                />
+                <p className="text-[#b8c7e0] text-xs">
+                  This code was set when the drive was created. It protects analyze, view, and delete actions.
+                </p>
+              </div>
+            )}
+
+            {actionError && <p className="text-red-400 text-sm">{actionError}</p>}
+          </div>
+
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setActionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black"
+              onClick={performDriveAction}
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Working…" : activeDriveAction === "delete" ? "Delete" : "Continue"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <footer className="py-6 border-t border-[#3fc4e7]/15 bg-[#0b1f3a]">
         <div className="container mx-auto px-4 text-center space-y-1">
           <p className="text-sm text-[#b8c7e0]/40 font-body">
             © {new Date().getFullYear()} Repoflo · Recruiter Platform
           </p>
           <p className="text-xs text-[#b8c7e0]/30 font-body">
-            Powered by <span className="font-semibold text-[#b8c7e0]/50">Devora Technologies</span>
+            Powered by <span className="font-semibold text-[#b8c7e0]/50">Torsecure Cyber LLP</span>
           </p>
         </div>
       </footer>

@@ -19,6 +19,17 @@ const friendlyError = (e: any): string => {
   ) return "server_busy";
   return msg || "Something went wrong. Please try again.";
 };
+
+const parseApiJson = async (res: Response) => {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { error: text.trim() || `Invalid JSON response (${res.status})` };
+  }
+};
+
 import { useToast } from "@/hooks/use-toast";
 import type { PortfolioData } from "@/lib/mockData";
 import { subscribeSiteSettings, SiteSettings, trackPortfolioGeneration, trackGeminiCall } from "@/lib/firebase";
@@ -55,7 +66,8 @@ const GeneratePage = () => {
       setGithubFetching(true); setGithubError("");
       try {
         const res = await fetch("/api/fetch-github", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ githubUrl }) });
-        const data = await res.json();
+        const data = await parseApiJson(res);
+        if (!res.ok) throw new Error(data?.error || `GitHub API error: ${res.status}`);
         if (data?.error) throw new Error(data.error);
         setGithubData(data as PortfolioData);
       } catch (e: any) {

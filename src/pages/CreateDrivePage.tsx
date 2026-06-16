@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { hashPassword, isValidPasswordCode } from "@/lib/password";
 
 import { createDrive } from "@/lib/firebase";
 
@@ -41,6 +42,7 @@ const CreateDrive = () => {
 
   const [selectedFields, setSelectedFields] =
     useState<string[]>([]);
+  const [drivePassword, setDrivePassword] = useState("");
   const [driveCreatedMessage, setDriveCreatedMessage] = useState("");
   const successRef = useRef<HTMLDivElement | null>(null);
 
@@ -48,13 +50,12 @@ const CreateDrive = () => {
     { id: "github", label: "GitHub" },
     { id: "linkedin", label: "LinkedIn" },
     { id: "instagram", label: "Instagram" },
+    { id: "website", label: "Portfolio Website" },
     { id: "leetcode", label: "LeetCode" },
     { id: "resume", label: "Resume" },
     { id: "aptitudeScore", label: "Aptitude/Maths Score" },
     { id: "technicalScore", label: "Technical Test Score" },
-    { id: "codechef", label: "CodeChef" },
-    { id: "geeksforgeeks", label: "GeeksForGeeks" },
-    { id: "hackerrank", label: "HackerRank" },
+    // Removed GeeksForGeeks per UI cleanup request
   ];
 
   const toggleField = (field: string) => {
@@ -100,6 +101,15 @@ const CreateDrive = () => {
       return;
     }
 
+    if (drivePassword && !isValidPasswordCode(drivePassword)) {
+      toast({
+        title: "Password must be 4 digits",
+        description: "Enter a 4-digit numeric code to secure the drive.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (selectedFields.length === 0) {
       toast({
         title: "Select at least one field",
@@ -118,6 +128,7 @@ const CreateDrive = () => {
         selectedFields,
         requiredTechStack,
         experienceLevel,
+        passwordHash: drivePassword ? await hashPassword(drivePassword) : undefined,
         status: "active",
       });
 
@@ -126,6 +137,12 @@ const CreateDrive = () => {
         title: "Drive created successfully",
         description: successText,
       });
+      if (!drivePassword) {
+        toast({
+          title: "Tip: secure your drive",
+          description: "An optional 4-digit password can protect analysis and results for this drive.",
+        });
+      }
       setDriveCreatedMessage(successText);
       setTimeout(() => {
         successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -151,7 +168,7 @@ const CreateDrive = () => {
           <Button
             variant="outline"
             className="mb-6 border-[#3fc4e7]/30 bg-transparent"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/recruiter")}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
@@ -168,8 +185,15 @@ const CreateDrive = () => {
 
           <div className="bg-[#132f52] border border-[#3fc4e7]/20 rounded-2xl p-6 space-y-6">
             {driveCreatedMessage && (
-              <div ref={successRef} className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
-                {driveCreatedMessage}
+              <div ref={successRef} className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200 space-y-4">
+                <div>{driveCreatedMessage}</div>
+                <Button
+                  variant="outline"
+                  className="w-full border-[#3fc4e7]/30 bg-transparent text-white"
+                  onClick={() => navigate("/recruiter")}
+                >
+                  Back to Recruiter Portal
+                </Button>
               </div>
             )}
 
@@ -325,6 +349,21 @@ const CreateDrive = () => {
                   </SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label className="text-white mb-2 block">Optional Drive Password</Label>
+              <Input
+                type="password"
+                maxLength={4}
+                value={drivePassword}
+                onChange={(e) => setDrivePassword(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder="1234"
+                className="bg-[#0b1f3a] border-[#3fc4e7]/20"
+              />
+              <p className="text-[#b8c7e0] text-xs mt-2">
+                Keep this drive secure with an optional 4-digit passcode. If you skip it, anyone with access can analyze or view results for this drive.
+              </p>
             </div>
 
             <Button

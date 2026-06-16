@@ -21,6 +21,7 @@ import CreateDrive from "./pages/CreateDrivePage";
 import Index from "./pages/Index";
 import GeneratePage from "./pages/GeneratePage";
 import RecruiterPage from "./pages/RecruiterPage";
+import RecruiterResultsPage from "./pages/RecruiterResultsPage";
 import AdminPage from "./pages/AdminPage";
 import ThemesPage from "./pages/ThemesPage";
 import PreviewPage from "./pages/PreviewPage";
@@ -28,6 +29,8 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import PremiumPage from "./pages/PremiumPage";
 import RecruiterLandingPage from "./pages/RecruiterLandingPage";
+import EthicsLearningPage from "./pages/EthicsLearningPage";
+import AIVsMePage from "./pages/AIVsMePage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminVerifyPage from "./pages/AdminVerifyPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
@@ -76,12 +79,15 @@ const AnimatedRoutes = () => {
           <Routes location={location}>
             <Route path="/" element={<RecruiterLandingPage />} />
             <Route path="/generate" element={<GeneratePage />} />
+            <Route path="/recruiter/results/:driveId" element={<RecruiterResultsPage />} />
             <Route path="/recruiter" element={<RecruiterPage />} />
             <Route path="/create-drive" element={
               <ApprovedRecruiterRoute>
                 <CreateDrive />
               </ApprovedRecruiterRoute>
             } />
+            <Route path="/ethics-learning" element={<EthicsLearningPage />} />
+            <Route path="/ai-vs-me" element={<AIVsMePage />} />
             <Route path="/for-recruiters" element={<RecruiterLandingPage />} />
             <Route path="/adminProtectedRoutes/auth/signin" element={<AdminLoginPage />} />
             <Route path="/adminProtectedRoutes/auth/verify" element={<AdminVerifyPage />} />

@@ -274,7 +274,7 @@ const AdminDashboardPage = () => {
                     {/* Progress bar */}
                     <div>
                       <div className="flex justify-between items-end mb-2">
-                        <span className="text-white font-bold text-2xl">{geminiUsage.total} <span className="text-sm font-normal text-[#b8c7e0]">AI calls used</span></span>
+                        <span className="text-white font-bold text-4xl">{geminiUsage.total} <span className="text-sm font-normal text-[#b8c7e0]">AI calls used</span></span>
                         <span className={`text-sm font-semibold ${geminiUsage.remaining < 50 ? 'text-red-400' : geminiUsage.remaining < 150 ? 'text-amber-400' : 'text-emerald-400'}`}>
                           {geminiUsage.remaining} left today
                         </span>
@@ -294,12 +294,12 @@ const AdminDashboardPage = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-[#0b1f3a] rounded-xl p-4 border border-[#3fc4e7]/10">
                         <p className="text-xs text-[#b8c7e0]/60 font-body mb-1">📄 Resumes read by AI</p>
-                        <p className="text-2xl font-black text-[#3fc4e7]">{geminiUsage.parseResume}</p>
+                        <p className="text-3xl font-black text-[#3fc4e7]">{geminiUsage.parseResume}</p>
                         <p className="text-xs text-[#b8c7e0]/50 font-body mt-1">1 call per resume upload</p>
                       </div>
                       <div className="bg-[#0b1f3a] rounded-xl p-4 border border-[#3fc4e7]/10">
                         <p className="text-xs text-[#b8c7e0]/60 font-body mb-1">🔍 Recruiter analyses done</p>
-                        <p className="text-2xl font-black text-purple-400">{geminiUsage.analyzeCandidate}</p>
+                        <p className="text-3xl font-black text-purple-400">{geminiUsage.analyzeCandidate}</p>
                         <p className="text-xs text-[#b8c7e0]/50 font-body mt-1">1 call per analysis</p>
                       </div>
                     </div>

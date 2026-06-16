@@ -122,9 +122,16 @@ app.post("/api/fetch-github", async (req, res) => {
       return res.status(profileRes.status).json({ error: msg });
     }
 
-    const profile = await profileRes.json();
-    const repos = await reposRes.json();
-    const events = await eventsRes.json();
+    const parseJsonSafe = async (res, defaultValue = {}) => {
+      const text = await res.text();
+      if (!text) return defaultValue;
+      try { return JSON.parse(text); } catch { return defaultValue; }
+    };
+
+    const profile = await parseJsonSafe(profileRes, {});
+
+    const repos = reposRes.ok ? await parseJsonSafe(reposRes, []) : [];
+    const events = eventsRes.ok ? await parseJsonSafe(eventsRes, []) : [];
 
     let pushCount = 0, prCount = 0;
     const collaborations = new Set();
@@ -145,7 +152,7 @@ app.post("/api/fetch-github", async (req, res) => {
     const topLanguages = Object.entries(languageCounts).sort((a, b) => b[1] - a[1]).slice(0, 6)
       .map(([name, score]) => ({ name, percentage: Math.round((score / totalLangScore) * 100) }));
 
-    const topRepos = repos.filter((r) => !r.fork).slice(0, 6);
+    const topRepos = Array.isArray(repos) ? repos.filter((r) => !r.fork).slice(0, 6) : [];
     const aiResults = await Promise.all(topRepos.map((r) => checkForAIMarkers(username, r.name)));
     const aiDetectedRepos = topRepos.filter((_, i) => aiResults[i]).map((r) => r.name);
     const topProjects = topRepos.map((r, i) => ({
@@ -346,40 +353,59 @@ IMPORTANT: Return ONLY valid JSON, no markdown, no explanation.`;
 app.post("/api/analyze-candidate", async (req, res) => {
   try {
     if (!GEMINI_KEY) return res.status(500).json({ error: "AI service not configured" });
-    const { portfolioData, requiredTechStack, experienceLevel } = req.body;
     const { portfolioData, requiredTechStack, experienceLevel, selectedFields } = req.body;
     if (!portfolioData) return res.status(400).json({ error: "No portfolio data provided" });
 
+    const showGithub = Array.isArray(selectedFields) && selectedFields.includes("github");
+    const showResume = Array.isArray(selectedFields) && selectedFields.includes("resume");
+    const showLinkedin = Array.isArray(selectedFields) && selectedFields.includes("linkedin");
+    const showInstagram = Array.isArray(selectedFields) && selectedFields.includes("instagram");
+    const showLeetcode = Array.isArray(selectedFields) && selectedFields.includes("leetcode");
+    const showAptitude = Array.isArray(selectedFields) && selectedFields.includes("aptitudeScore");
+    const showTechnical = Array.isArray(selectedFields) && selectedFields.includes("technicalScore");
+
     // Prepare portfolio data for analysis
     const trimmed = {
-      name: portfolioData.name, title: portfolioData.title, bio: portfolioData.bio,
+      name: portfolioData.name,
+      title: portfolioData.title,
+      bio: portfolioData.bio,
       skills: portfolioData.skills?.slice(0, 20),
-      experience: portfolioData.experience?.slice(0, 8),
-      education: portfolioData.education?.slice(0, 5),
-      projects: portfolioData.projects?.slice(0, 8).map((p) => ({
-        name: p.name, description: p.description?.substring(0, 300),
-        tech: p.tech?.slice(0, 8), stars: p.stars, forks: p.forks, isAiGenerated: p.isAiGenerated, lastUpdated: p.lastUpdated,
-      })),
-      githubStats: portfolioData.githubStats ? {
-        totalCommits: portfolioData.githubStats.totalCommits,
-        publicRepos: portfolioData.githubStats.publicRepos,
-        followers: portfolioData.githubStats.followers,
-        following: portfolioData.githubStats.following,
-        totalStars: portfolioData.githubStats.totalStars,
-        pullRequests: portfolioData.githubStats.pullRequests,
-        contributionStreak: portfolioData.githubStats.contributionStreak,
-        topLanguages: portfolioData.githubStats.topLanguages?.slice(0, 6),
-        aiGeneratedContent: portfolioData.githubStats.aiGeneratedContent,
-        aiDetectedRepos: portfolioData.githubStats.aiDetectedRepos,
-        daysOnGithub: portfolioData.githubStats.daysOnGithub,
-        ownedRepos: portfolioData.githubStats.ownedRepos,
-        forkedRepos: portfolioData.githubStats.forkedRepos,
-        recentCollaborations: portfolioData.githubStats.recentCollaborations,
-      } : null,
-      leetcodeStats: portfolioData.leetcodeStats,
-      linkedin: portfolioData.linkedin || portfolioData.linkedinUrl || null,
-      aptitudeScore: portfolioData.aptitudeScore != null ? portfolioData.aptitudeScore : null,
-      technicalScore: portfolioData.technicalScore != null ? portfolioData.technicalScore : null,
+      ...(showResume ? {
+        experience: portfolioData.experience?.slice(0, 8),
+        education: portfolioData.education?.slice(0, 5),
+      } : {}),
+      ...(showGithub ? {
+        projects: portfolioData.projects?.slice(0, 8).map((p) => ({
+          name: p.name,
+          description: p.description?.substring(0, 300),
+          tech: p.tech?.slice(0, 8),
+          stars: p.stars,
+          forks: p.forks,
+          isAiGenerated: p.isAiGenerated,
+          lastUpdated: p.lastUpdated,
+        })),
+        githubStats: portfolioData.githubStats ? {
+          totalCommits: portfolioData.githubStats.totalCommits,
+          publicRepos: portfolioData.githubStats.publicRepos,
+          followers: portfolioData.githubStats.followers,
+          following: portfolioData.githubStats.following,
+          totalStars: portfolioData.githubStats.totalStars,
+          pullRequests: portfolioData.githubStats.pullRequests,
+          contributionStreak: portfolioData.githubStats.contributionStreak,
+          topLanguages: portfolioData.githubStats.topLanguages?.slice(0, 6),
+          aiGeneratedContent: portfolioData.githubStats.aiGeneratedContent,
+          aiDetectedRepos: portfolioData.githubStats.aiDetectedRepos,
+          daysOnGithub: portfolioData.githubStats.daysOnGithub,
+          ownedRepos: portfolioData.githubStats.ownedRepos,
+          forkedRepos: portfolioData.githubStats.forkedRepos,
+          recentCollaborations: portfolioData.githubStats.recentCollaborations,
+        } : null,
+      } : {}),
+      ...(showLeetcode ? { leetcodeStats: portfolioData.leetcodeStats } : {}),
+      ...(showLinkedin ? { linkedin: portfolioData.linkedin || portfolioData.linkedinUrl } : {}),
+      ...(showInstagram ? { instagram: portfolioData.instagram } : {}),
+      ...(showAptitude ? { aptitudeScore: portfolioData.aptitudeScore } : {}),
+      ...(showTechnical ? { technicalScore: portfolioData.technicalScore } : {}),
     };
 
     const selectedFieldsList = Array.isArray(selectedFields) && selectedFields.length > 0
@@ -404,9 +430,9 @@ ANALYSIS REQUIREMENTS — be detailed and specific, not generic:
 5. Project quality: Evaluate each project individually — complexity, real-world impact, tech choices, star count. For projects with "No description provided", write a detailed inferred description (2-3 sentences) based on the project name, tech stack, and stars.
 6. AI-generated content: Flag any AI-detected repos and factor into the assessment.
 7. LeetCode performance (if available): Analyze problem-solving ability, difficulty distribution, contest rating.
-8. LinkedIn signal: If the LinkedIn URL is provided, comment on the candidate's profile completeness and how their LinkedIn presentation affects the role fit and hiring recommendation.
+8. LinkedIn signal: If the LinkedIn URL is provided, comment on the candidate's profile completeness, professional branding, and how their LinkedIn presentation impacts role fit and seniority expectation.
 9. Aptitude / Maths score: If provided, explain how this score reflects analytical and numerical ability and how it should influence the hiring recommendation.
-10. Technical Test score: If provided, explain how this score validates the candidate's coding ability, compare it to GitHub/LeetCode signals, and use it to refine the overall score.
+10. Technical Test score: If provided, explain how this score validates coding and engineering ability, compare it to GitHub/LeetCode signals, and use it to refine the overall recommendation.
 ${requiredTechStack?.length ? `11. Required Tech Stack: ${requiredTechStack.join(", ")}. Include "techStackMatch" with "matched" and "missing" arrays and a brief explanation.` : ""}
 ${experienceLevel ? `12. Experience Level Required: "${experienceLevel}". Include "experienceLevelMatch": { "required": "${experienceLevel}", "assessed": "assessed level", "isMatch": true/false, "explanation": "detailed reasoning" }.` : ""}
 

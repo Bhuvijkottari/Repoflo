@@ -217,7 +217,7 @@ const Index = () => {
             </Link>
 
             <p className="text-sm text-[#b8c7e0] font-body">
-              © {new Date().getFullYear()} Repoflo · Powered by <span className="font-semibold text-white">Devora Technologies</span>
+              © {new Date().getFullYear()} Repoflo · Powered by <span className="font-semibold text-white">Torsecure Cyber LLP</span>
             </p>
 
           </div>

@@ -324,6 +324,7 @@ export interface RecruiterHistoryEntry {
   analysis: any;
   createdAt: string;
   candidateId?: string;
+  driveId?: string;
 }
 
 export const addRecruiterHistory = async (email: string, entry: RecruiterHistoryEntry): Promise<string> => {
@@ -458,6 +459,7 @@ export const fetchCandidatesByRecruiter = async (recruiterEmail: string): Promis
 export const findExistingCandidate = async (
   githubUsername: string,
   recruiterEmail: string,
+  driveId?: string,
   leetcodeUsername?: string,
   requiredTechStack?: string[],
   experienceLevel?: string,
@@ -468,11 +470,12 @@ export const findExistingCandidate = async (
   instagramUrl?: string,
 ): Promise<CandidateData | null> => {
   try {
-    if (!githubUsername) return null;
+    if (!githubUsername || !driveId) return null;
     const q = query(
       collection(db, "candidates"),
       where("githubUsername", "==", githubUsername.toLowerCase()),
       where("recruiterEmail", "==", recruiterEmail),
+      where("driveId", "==", driveId),
       orderBy("createdAt", "desc"),
       limit(1)
     );
@@ -519,6 +522,22 @@ export const findExistingCandidate = async (
   } catch (error) {
     console.error("Error finding existing candidate:", error);
     return null;
+  }
+};
+
+export const fetchCandidatesByDrive = async (recruiterEmail: string, driveId: string): Promise<CandidateData[]> => {
+  try {
+    const q = query(
+      collection(db, "candidates"),
+      where("recruiterEmail", "==", recruiterEmail),
+      where("driveId", "==", driveId),
+      orderBy("createdAt", "desc")
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as CandidateData));
+  } catch (error) {
+    console.error("Error fetching candidates by drive:", error);
+    return [];
   }
 };
 
@@ -775,6 +794,8 @@ export interface Drive {
 
   experienceLevel: string;
 
+  passwordHash?: string;
+
   status: "active" | "closed";
 
   createdAt: string;
@@ -791,6 +812,19 @@ export const createDrive = async (
   );
 
   return docRef.id;
+};
+
+export const deleteDrive = async (
+  driveId: string
+) => {
+  const candidatesQuery = query(
+    collection(db, "candidates"),
+    where("driveId", "==", driveId)
+  );
+  const candidateSnap = await getDocs(candidatesQuery);
+  const deletePromises = candidateSnap.docs.map((docItem) => deleteDoc(doc(db, "candidates", docItem.id)));
+  await Promise.all(deletePromises);
+  await deleteDoc(doc(db, "drives", driveId));
 };
 export const fetchRecruiterDrives = async (
   recruiterEmail: string
@@ -860,12 +894,6 @@ export const updateDrive = async (
   updates: Partial<Drive>
 ) => {
   await updateDoc(doc(db, "drives", driveId), updates);
-};
-
-export const deleteDrive = async (
-  driveId: string
-) => {
-  await deleteDoc(doc(db, "drives", driveId));
 };
 
 

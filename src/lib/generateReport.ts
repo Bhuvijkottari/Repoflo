@@ -24,6 +24,12 @@ export interface CandidateAnalysis {
     professionalPresence: string;
     summary: string;
   } | null;
+  websiteInsights?: {
+    websiteQuality: string;
+    technologyUse: string;
+    userExperience: string;
+    summary: string;
+  } | null;
   testScoreInsights?: {
     aptitudeAnalysis: string;
     technicalAnalysis: string;
@@ -89,6 +95,8 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
 
   const showGithub = fields.includes("github");
   const showLinkedin = fields.includes("linkedin");
+  const showInstagram = fields.includes("instagram");
+  const showWebsite = fields.includes("website");
   const showAptitude = fields.includes("aptitudeScore");
   const showTechnical = fields.includes("technicalScore");
   const showLeetcode = fields.includes("leetcode");
@@ -442,7 +450,7 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
   </div>` : ""}
 
   <!-- ══ LINKEDIN INSIGHTS ══ -->
-  ${analysis.linkedinInsights && analysis.linkedinInsights.profileStrength !== "N/A" ? `
+  ${showLinkedin && analysis.linkedinInsights && analysis.linkedinInsights.profileStrength !== "N/A" ? `
   <div class="no-break">
     <div class="sec-title">LinkedIn Profile</div>
     <div class="two-col">
@@ -457,8 +465,40 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
     ${analysis.linkedinInsights.summary && analysis.linkedinInsights.summary !== "N/A" ? `<div style="margin-top:10px" class="summary-box">${analysis.linkedinInsights.summary}</div>` : ""}
   </div>` : ""}
 
+  <!-- ══ INSTAGRAM INSIGHTS ══ -->
+  ${showInstagram && analysis.instagramInsights && analysis.instagramInsights.profileQuality !== "N/A" ? `
+  <div class="no-break">
+    <div class="sec-title">Instagram Profile</div>
+    <div class="two-col">
+      <div class="info-card">
+        <div class="insight-row"><span class="lbl">Profile Quality</span><span class="val">${analysis.instagramInsights.profileQuality}</span></div>
+        <div class="insight-row"><span class="lbl">Engagement Level</span><span class="val">${analysis.instagramInsights.engagementLevel}</span></div>
+      </div>
+      <div class="info-card">
+        <div class="insight-row"><span class="lbl">Professional Presence</span><span class="val">${analysis.instagramInsights.professionalPresence}</span></div>
+      </div>
+    </div>
+    ${analysis.instagramInsights.summary ? `<div style="margin-top:10px" class="summary-box">${analysis.instagramInsights.summary}</div>` : ""}
+  </div>` : ""}
+
+  <!-- ══ WEBSITE INSIGHTS ══ -->
+  ${showWebsite && analysis.websiteInsights && analysis.websiteInsights.websiteQuality !== "N/A" ? `
+  <div class="no-break">
+    <div class="sec-title">Portfolio Website</div>
+    <div class="two-col">
+      <div class="info-card">
+        <div class="insight-row"><span class="lbl">Website Quality</span><span class="val">${analysis.websiteInsights.websiteQuality}</span></div>
+        <div class="insight-row"><span class="lbl">Technology Use</span><span class="val">${analysis.websiteInsights.technologyUse}</span></div>
+      </div>
+      <div class="info-card">
+        <div class="insight-row"><span class="lbl">User Experience</span><span class="val">${analysis.websiteInsights.userExperience}</span></div>
+      </div>
+    </div>
+    ${analysis.websiteInsights.summary ? `<div style="margin-top:10px" class="summary-box">${analysis.websiteInsights.summary}</div>` : ""}
+  </div>` : ""}
+
   <!-- ══ TEST SCORE INSIGHTS ══ -->
-  ${analysis.testScoreInsights && (analysis.testScoreInsights.aptitudeAnalysis !== "N/A" || analysis.testScoreInsights.technicalAnalysis !== "N/A") ? `
+  ${showAptitude && showTechnical && analysis.testScoreInsights && (analysis.testScoreInsights.aptitudeAnalysis !== "N/A" || analysis.testScoreInsights.technicalAnalysis !== "N/A") ? `
   <div class="no-break">
     <div class="sec-title">Assessment Results</div>
     <div class="two-col">
@@ -491,11 +531,12 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
     </div>
   </div>` : ""}
 
-  ${((showLinkedin && data.linkedin) || showAptitude || showTechnical) ? `
+  ${((showLinkedin && data.linkedin) || showWebsite || showAptitude || showTechnical) ? `
   <div class="no-break">
     <div class="sec-title">Additional Candidate Inputs</div>
     <div class="three-col" style="margin-bottom:14px">
       ${showLinkedin ? `<div class="info-card"><div class="card-label">LinkedIn</div><div class="card-val">${data.linkedin ? `<a href="${data.linkedin}" target="_blank" style="color:#0f172a;text-decoration:none">${data.linkedin}</a>` : "Not provided"}</div></div>` : ""}
+      ${showWebsite ? `<div class="info-card"><div class="card-label">Portfolio Website</div><div class="card-val">${data.website ? `<a href="${data.website}" target="_blank" style="color:#0f172a;text-decoration:none">${data.website}</a>` : "Not provided"}</div></div>` : ""}
       ${showAptitude ? `<div class="info-card"><div class="card-label">Aptitude / Maths</div><div class="card-val">${data.aptitudeScore != null ? `${data.aptitudeScore}/100` : "Not provided"}</div></div>` : ""}
       ${showTechnical ? `<div class="info-card"><div class="card-label">Technical Test</div><div class="card-val">${data.technicalScore != null ? `${data.technicalScore}/100` : "Not provided"}</div></div>` : ""}
     </div>
@@ -546,8 +587,11 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
         <strong style="font-size:13px">${p.name}</strong>
         ${p.stars ? `<span style="font-size:11px;color:#d97706">★ ${p.stars} stars</span>` : ""}
       </div>
-      <div style="font-size:12px;color:#475569;margin:3px 0">${p.description}</div>
-      <div>${p.tech.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+      <div style="font-size:12px;color:#475569;margin:3px 0">${p.description}
+        ${((p.tech || []).join(" ")+" " + (p.description||"")).toLowerCase().includes("ai") ? `<span style="margin-left:6px;background:#fde68a;color:#92400e;padding:2px 6px;border-radius:6px;font-size:11px;margin-left:8px">AI-related</span>` : ""}
+        ${((p.owner||p.author||p.username||"").toLowerCase() === "lovable") ? `<span style="margin-left:6px;background:#c7f9cc;color:#065f46;padding:2px 6px;border-radius:6px;font-size:11px;margin-left:8px">Lovable</span>` : ""}
+      </div>
+      <div>${(p.tech||[]).map(t => `<span class="tag">${t}</span>`).join("")}</div>
     </div>`).join("")}
   </div>` : ""}
 
@@ -572,7 +616,7 @@ export function generateReportHtml(data: PortfolioData, analysis: CandidateAnaly
   <div class="report-footer no-break">
     <div>
       <div class="brand">REPOFLO</div>
-      <div style="font-size:10px;color:#94a3b8;margin-top:2px">Powered by Devora Technologies</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:2px">Powered by Torsecure Cyber LLP</div>
     </div>
     <div class="meta">
       <div>Generated: ${date}</div>

@@ -63,6 +63,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
   const [candidateId, setCandidateId] = useState<string | null>(null);
   const [historyId, setHistoryId] = useState<string | null>(null);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
+  const [recruiterDriveId, setRecruiterDriveId] = useState<string | null>(null);
 
   const isRecruiter = themeId === "recruiter";
 
@@ -84,16 +85,33 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
       // Load history ID for updating analysis
       const storedHistoryId = sessionStorage.getItem("historyId");
       if (storedHistoryId) setHistoryId(storedHistoryId);
-      // Restore saved analysis (from history "View" button) — skip re-running
+      // Track which recruiter drive this preview belongs to
+      const storedDriveId = sessionStorage.getItem("recruiterDriveId");
+      if (storedDriveId) setRecruiterDriveId(storedDriveId);
+      // Load recruiter-specific drive context so preview uses the right input settings
+      const storedDriveContext = sessionStorage.getItem("driveContext");
+      if (storedDriveContext) {
+        const parsedContext = JSON.parse(storedDriveContext);
+        if (Array.isArray(parsedContext.requiredTechStack)) setRequiredTechStack(parsedContext.requiredTechStack);
+        if (parsedContext.experienceLevel) setExperienceLevel(parsedContext.experienceLevel);
+        if (Array.isArray(parsedContext.selectedFields)) setSelectedFields(parsedContext.selectedFields);
+      }
+      // Restore saved analysis (from history "View" button) only when recruiter preview is tied to a drive
       const savedAnalysis = sessionStorage.getItem("savedAnalysis");
-      if (savedAnalysis) {
-        setAnalysis(JSON.parse(savedAnalysis));
+      if (savedAnalysis && storedDriveId) {
+        const parsed = JSON.parse(savedAnalysis);
+        if (parsed && Object.keys(parsed).length > 0) {
+          setAnalysis(parsed);
+        }
         sessionStorage.removeItem("savedAnalysis");
       }
-      // Restore cached analysis (from findExistingCandidate) — skip re-running
+      // Restore cached analysis (from findExistingCandidate) only when recruiter preview is tied to a drive
       const cachedAnalysis = sessionStorage.getItem("cachedAnalysis");
-      if (cachedAnalysis) {
-        setAnalysis(JSON.parse(cachedAnalysis));
+      if (cachedAnalysis && storedDriveId) {
+        const parsed = JSON.parse(cachedAnalysis);
+        if (parsed && Object.keys(parsed).length > 0) {
+          setAnalysis(parsed);
+        }
         sessionStorage.removeItem("cachedAnalysis");
       }
     } catch {}
@@ -156,6 +174,9 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ overrideThemeId }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           portfolioData,
+          // Include explicit numeric test scores so analysis receives both values
+          aptitudeScore: (portfolioData as any)?.aptitudeScore ?? undefined,
+          technicalScore: (portfolioData as any)?.technicalScore ?? undefined,
           requiredTechStack:
             driveContext.requiredTechStack?.length > 0
               ? driveContext.requiredTechStack

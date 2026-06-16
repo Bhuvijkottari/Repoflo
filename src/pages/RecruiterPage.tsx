@@ -44,6 +44,18 @@ const friendlyError = (e: any): string => {
 const extractGithubUser = (url: string) =>
   url?.match(/github\.com\/([^\/\?#\s]+)/i)?.[1]?.toLowerCase() || "";
 
+const isValidGithubUrl = (url: string) =>
+  /^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9_-]+(?:\/(?=(?:[?#]|$))(?:[?#].*)?)?$/i.test(url.trim());
+
+const isValidLinkedinUrl = (url: string) =>
+  /^https?:\/\/(www\.)?linkedin\.com\/(in|pub|profile)\/.+/i.test(url.trim());
+
+const isValidInstagramUrl = (url: string) =>
+  /^https?:\/\/(www\.)?instagram\.com\/[A-Za-z0-9._-]+(?:\/?(?:[?#].*)?)?$/i.test(url.trim());
+
+const isValidWebsiteUrl = (url: string) =>
+  /^https?:\/\/.+\..+/i.test(url.trim());
+
 /* ── small helpers ───────────────────────────────────────────── */
 const NavyCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`bg-[#132f52] border border-[#3fc4e7]/20 rounded-2xl ${className}`}>
@@ -122,6 +134,7 @@ const [selectedDriveId, setSelectedDriveId] = useState<string>("");
   const [githubUrl, setGithubUrl] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [aptitudeScore, setAptitudeScore] = useState<number | string>("");
   const [technicalScore, setTechnicalScore] = useState<number | string>("");
   const [leetcodeUsername, setLeetcodeUsername] = useState("");
@@ -131,6 +144,8 @@ const [selectedDriveId, setSelectedDriveId] = useState<string>("");
   const driveId = searchParams.get("driveId");
   const showPreview = searchParams.get("preview") === "1";
   const needsLinkedin = selectedDrive?.selectedFields.includes("linkedin");
+  const needsInstagram = selectedDrive?.selectedFields.includes("instagram");
+  const needsWebsite = selectedDrive?.selectedFields.includes("website");
   const needsAptitude = selectedDrive?.selectedFields.includes("aptitudeScore");
   const needsTechnical = selectedDrive?.selectedFields.includes("technicalScore");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -148,6 +163,16 @@ const [selectedDriveId, setSelectedDriveId] = useState<string>("");
   const [debouncedGithubUrl, setDebouncedGithubUrl] = useState("");
   const [debouncedLeetcode, setDebouncedLeetcode] = useState("");
 
+  const githubValid = !selectedDrive?.selectedFields.includes("github") || Boolean(githubData);
+  const resumeValid = !selectedDrive?.selectedFields.includes("resume") || Boolean(resumeFile);
+  const leetcodeValid = !selectedDrive?.selectedFields.includes("leetcode") || Boolean(leetcodeData);
+  const linkedinValid = !selectedDrive?.selectedFields.includes("linkedin") || isValidLinkedinUrl(linkedinUrl);
+  const instagramValid = !selectedDrive?.selectedFields.includes("instagram") || isValidInstagramUrl(instagramUrl);
+  const websiteValid = !selectedDrive?.selectedFields.includes("website") || isValidWebsiteUrl(websiteUrl);
+  const aptitudeValid = !selectedDrive?.selectedFields.includes("aptitudeScore") || (aptitudeScore !== "" && !isNaN(Number(aptitudeScore)));
+  const technicalValid = !selectedDrive?.selectedFields.includes("technicalScore") || (technicalScore !== "" && !isNaN(Number(technicalScore)));
+  const isFormValid = Boolean(selectedDrive) && githubValid && resumeValid && leetcodeValid && linkedinValid && instagramValid && websiteValid && aptitudeValid && technicalValid;
+
 /* ── GitHub Debounce ── */
 useEffect(() => {
   const timer = setTimeout(() => {
@@ -158,21 +183,30 @@ useEffect(() => {
 }, [githubUrl]);
 
 useEffect(() => {
-  const match = debouncedGithubUrl.match(/github\.com\/([^\/\?#]+)/);
-
-  if (!debouncedGithubUrl || !match) {
+  if (!debouncedGithubUrl.trim() || !isValidGithubUrl(debouncedGithubUrl)) {
     setGithubData(null);
-    setGithubError("");
+    setGithubError(debouncedGithubUrl.trim() ? "Enter a valid GitHub profile URL." : "");
     return;
   }
+
+  const parseApiJson = async (res: Response) => {
+    const text = await res.text();
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { error: text.trim() || `Invalid JSON response (${res.status})` };
+    }
+  };
 
   const fetchGithub = async () => {
     setGithubFetching(true);
     setGithubError("");
 
     try {
-      const res = await fetch("/api/fetch-github", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ githubUrl: debouncedGithubUrl }) });
-      const data = await res.json();
+      const res = await fetch("/api/fetch-github", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ githubUrl: debouncedGithubUrl.trim() }) });
+      const data = await parseApiJson(res);
+      if (!res.ok) throw new Error(data?.error || `GitHub API error: ${res.status}`);
       if (data?.error) throw new Error(data.error);
 
       setGithubData(data);
@@ -209,7 +243,8 @@ useEffect(() => {
 
     try {
       const res = await fetch("/api/fetch-leetcode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: debouncedLeetcode }) });
-      const data = await res.json();
+      const data = await parseApiJson(res);
+      if (!res.ok) throw new Error(data?.error || `LeetCode API error: ${res.status}`);
       if (data?.error) throw new Error(data.error);
 
       setLeetcodeData(data);
@@ -226,10 +261,23 @@ useEffect(() => {
 
   const [historySortBy, setHistorySortBy] = useState<"date" | "score">("date");
 
+  useEffect(() => {
+    if (!showPreview) {
+      sessionStorage.removeItem("candidateId");
+      sessionStorage.removeItem("historyId");
+      sessionStorage.removeItem("cachedAnalysis");
+      sessionStorage.removeItem("savedAnalysis");
+      sessionStorage.removeItem("driveContext");
+      sessionStorage.removeItem("recruiterDriveId");
+    }
+  }, [showPreview]);
+
   const loadHistory = async () => {
     if (user?.email) {
       const h = await fetchRecruiterHistory(user.email);
-      setHistoryEntries(h);
+      // Exclude drive-specific history entries from the top 'Previous Analyses' list
+      // Only include entries where driveId is null/undefined/empty string
+      setHistoryEntries(h.filter((entry: any) => !entry.driveId || String(entry.driveId).trim() === ""));
     }
   };
 
@@ -320,6 +368,10 @@ useEffect(() => {
       toast({ title: "Instagram required", description: "Please enter the candidate's Instagram profile URL.", variant: "destructive" });
       return;
     }
+    if (needsWebsite && !websiteUrl.trim()) {
+      toast({ title: "Portfolio Website required", description: "Please enter the candidate's portfolio website URL.", variant: "destructive" });
+      return;
+    }
     if (needsAptitude && (aptitudeScore === "" || isNaN(Number(aptitudeScore)) || Number(aptitudeScore) < 0 || Number(aptitudeScore) > 100)) {
       toast({ title: "Aptitude score required", description: "Enter a score between 0 and 100.", variant: "destructive" });
       return;
@@ -341,6 +393,8 @@ useEffect(() => {
     try {
       const driveContext = selectedDrive;
       const needsLinkedin = selectedDrive.selectedFields.includes("linkedin");
+      const needsInstagram = selectedDrive.selectedFields.includes("instagram");
+      const needsWebsite = selectedDrive.selectedFields.includes("website");
       const needsAptitude = selectedDrive.selectedFields.includes("aptitudeScore");
       const needsTechnical = selectedDrive.selectedFields.includes("technicalScore");
 
@@ -360,6 +414,9 @@ useEffect(() => {
       }
       if (needsInstagram) {
         finalData = { ...finalData, instagram: instagramUrl.trim() };
+      }
+      if (needsWebsite) {
+        finalData = { ...finalData, website: websiteUrl.trim() };
       }
       if (needsAptitude) {
         finalData = { ...finalData, aptitudeScore: Number(aptitudeScore) };
@@ -442,14 +499,21 @@ useEffect(() => {
       sessionStorage.setItem("portfolioData", JSON.stringify(finalData));
       sessionStorage.setItem(
   "driveContext",
-  JSON.stringify(driveContext)
+  JSON.stringify({
+    ...driveContext,
+    driveId: selectedDrive?.id,
+  })
 );
+      if (selectedDrive?.id) {
+        sessionStorage.setItem("recruiterDriveId", selectedDrive.id);
+      }
 
       // ── Check if this candidate was already analyzed with same inputs ──
       const ghUsername = needsGithub ? extractGithubUser(githubUrl) : `resume-${Date.now()}`;
       const existingCandidate = await findExistingCandidate(
         ghUsername,
         user.email!,
+        selectedDrive?.id,
         needsLeetcode ? leetcodeData?.username : undefined,
         selectedDrive?.requiredTechStack || [],
         selectedDrive?.experienceLevel || "",
@@ -535,6 +599,7 @@ useEffect(() => {
         analysis: null,
         createdAt: new Date().toISOString(),
         candidateId,
+        driveId: selectedDrive?.id || null,
       });
       sessionStorage.setItem("historyId", historyId);
       navigate(`/recruiter?preview=1`);
@@ -791,71 +856,68 @@ useEffect(() => {
   </Select>
 </div>
           <NavyCard className="p-6 space-y-7">
+            {!selectedDrive && (
+              <div className="rounded-2xl border border-[#3fc4e7]/20 bg-[#0b1f3a]/80 p-6 text-center text-[#b8c7e0]">
+                Select a hiring drive above to show only the candidate details required for that drive.
+              </div>
+            )}
 
-            {/* GitHub URL */}
-            {/* GitHub URL */}
-{(!selectedDrive || selectedDrive.selectedFields.includes("github")) && (
-  <div className="space-y-2.5">
-    <FieldLabel
-      icon={Github}
-      text="Candidate GitHub Profile URL"
-    />
+            {selectedDrive?.selectedFields.includes("github") && (
+              <div className="space-y-2.5">
+                <FieldLabel icon={Github} text="Candidate GitHub Profile URL" />
 
-    <Input
-      type="url"
-      placeholder="https://github.com/candidateusername"
-      value={githubUrl}
-      onChange={(e) => setGithubUrl(e.target.value)}
-      required
-      className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
-    />
+                <Input
+                  type="url"
+                  placeholder="https://github.com/candidateusername"
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                  required
+                  className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+                />
 
-    <StatusRow
-      loading={
-        githubFetching &&
-        "Fetching candidate's GitHub profile..."
-      }
-      error={githubError}
-      success={
-        githubData &&
-        !githubFetching && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-3 p-3 bg-[#0b1f3a] border border-[#3fc4e7]/20 rounded-xl"
-          >
-            <img
-              src={githubData.avatar}
-              alt={githubData.name}
-              className="w-11 h-11 rounded-full border-2 border-[#3fc4e7]/30"
-            />
+                <StatusRow
+                  loading={
+                    githubFetching &&
+                    "Fetching candidate's GitHub profile..."
+                  }
+                  error={githubError}
+                  success={
+                    githubData &&
+                    !githubFetching && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-3 p-3 bg-[#0b1f3a] border border-[#3fc4e7]/20 rounded-xl"
+                      >
+                        <img
+                          src={githubData.avatar}
+                          alt={githubData.name}
+                          className="w-11 h-11 rounded-full border-2 border-[#3fc4e7]/30"
+                        />
 
-            <div className="flex-1 min-w-0">
-              <p className="font-display font-semibold text-sm text-white truncate">
-                {githubData.name}
-              </p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-display font-semibold text-sm text-white truncate">
+                            {githubData.name}
+                          </p>
 
-              <p className="text-xs text-[#b8c7e0] font-body truncate">
-                {githubData.title} ·{" "}
-                {githubData.githubStats?.publicRepos || 0}
-                {" "}repos ·{" "}
-                {githubData.skills
-                  .slice(0, 4)
-                  .join(", ")}
-              </p>
-            </div>
+                          <p className="text-xs text-[#b8c7e0] font-body truncate">
+                            {githubData.title} · {githubData.githubStats?.publicRepos || 0} repos · {githubData.skills
+                              .slice(0, 4)
+                              .join(", ")}
+                          </p>
+                        </div>
 
-            <CheckCircle2 className="w-5 h-5 text-[#3fc4e7] flex-shrink-0" />
-          </motion.div>
-        )
-      }
-    />
-  </div>
-)}
+                        <CheckCircle2 className="w-5 h-5 text-[#3fc4e7] flex-shrink-0" />
+                      </motion.div>
+                    )
+                  }
+                />
+              </div>
+            )}
 
             {/* LeetCode */}
             {/* LeetCode */}
-{(!selectedDrive || selectedDrive.selectedFields.includes("leetcode")) && (
+{selectedDrive?.selectedFields.includes("leetcode") && (
   <div className="space-y-2.5">
     <FieldLabel
       icon={Code2}
@@ -912,7 +974,7 @@ useEffect(() => {
   </div>
 )}
 
-{(!selectedDrive || selectedDrive.selectedFields.includes("linkedin")) && (
+{selectedDrive?.selectedFields.includes("linkedin") && (
   <div className="space-y-2.5">
     <FieldLabel icon={Briefcase} text="Candidate LinkedIn URL" note="(URL-based analysis)" />
     <Input
@@ -923,10 +985,10 @@ useEffect(() => {
       className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
     />
     <StatusRow
-      loading={(!selectedDrive || selectedDrive.selectedFields.includes("linkedin")) && !linkedinUrl.trim() ? false : undefined}
-      error={linkedinUrl && !linkedinUrl.startsWith("http") ? "Enter a valid LinkedIn URL" : undefined}
+      loading={selectedDrive?.selectedFields.includes("linkedin") && !linkedinUrl.trim() ? false : undefined}
+      error={linkedinUrl && !/^https?:\/\/(www\.)?linkedin\.com\/.+/i.test(linkedinUrl.trim()) ? "Enter a valid LinkedIn URL" : undefined}
       success={
-        linkedinUrl.trim() && linkedinUrl.startsWith("http") && (
+        linkedinUrl.trim() && /^https?:\/\/(www\.)?linkedin\.com\/.+/i.test(linkedinUrl.trim()) && (
           <span className="text-sm text-emerald-400">LinkedIn URL ready for AI analysis</span>
         )
       }
@@ -934,7 +996,7 @@ useEffect(() => {
   </div>
 )}
 
-{(!selectedDrive || selectedDrive.selectedFields.includes("instagram")) && (
+{selectedDrive?.selectedFields.includes("instagram") && (
   <div className="space-y-2.5">
     <FieldLabel icon={Briefcase} text="Candidate Instagram URL" note="(URL-based analysis)" />
     <Input
@@ -945,7 +1007,7 @@ useEffect(() => {
       className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
     />
     <StatusRow
-      loading={(!selectedDrive || selectedDrive.selectedFields.includes("instagram")) && !instagramUrl.trim() ? false : undefined}
+      loading={selectedDrive?.selectedFields.includes("instagram") && !instagramUrl.trim() ? false : undefined}
       error={instagramUrl && !instagramUrl.startsWith("http") ? "Enter a valid Instagram URL" : undefined}
       success={
         instagramUrl.trim() && instagramUrl.startsWith("http") && (
@@ -955,26 +1017,30 @@ useEffect(() => {
     />
   </div>
 )}
-
-{((!selectedDrive || selectedDrive.selectedFields.includes("aptitudeScore")) || (!selectedDrive || selectedDrive.selectedFields.includes("technicalScore"))) && (
-  <div className="space-y-2.5">
-    <FieldLabel icon={Zap} text="Candidate Test Scores" note="(0-100)" />
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {(!selectedDrive || selectedDrive.selectedFields.includes("aptitudeScore")) && (
+      {selectedDrive?.selectedFields.includes("website") && (
         <div className="space-y-2.5">
-          <Label className="text-white mb-2 block">Aptitude / Maths Score (0-100)</Label>
+          <FieldLabel icon={Briefcase} text="Candidate Portfolio Website" note="(URL-based analysis)" />
           <Input
-            type="number"
-            min={0}
-            max={100}
-            placeholder="82"
-            value={aptitudeScore}
-            onChange={(e) => setAptitudeScore(e.target.value === "" ? "" : Number(e.target.value))}
+            type="url"
+            placeholder="https://candidate-portfolio.com"
+            value={websiteUrl}
+            onChange={(e) => setWebsiteUrl(e.target.value)}
             className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+          />
+          <StatusRow
+            loading={selectedDrive?.selectedFields.includes("website") && !websiteUrl.trim() ? false : undefined}
+            error={websiteUrl && !websiteUrl.startsWith("http") ? "Enter a valid website URL" : undefined}
+            success={
+              websiteUrl.trim() && websiteUrl.startsWith("http") && (
+                <span className="text-sm text-emerald-400">Portfolio website ready for AI analysis</span>
+              )
+            }
           />
         </div>
       )}
-      {(!selectedDrive || selectedDrive.selectedFields.includes("technicalScore")) && (
+    
+
+      {selectedDrive?.selectedFields.includes("technicalScore") && (
         <div className="space-y-2.5">
           <Label className="text-white mb-2 block">Technical Test Score (0-100)</Label>
           <Input
@@ -988,10 +1054,9 @@ useEffect(() => {
           />
         </div>
       )}
-    </div>
-  </div>
-)}
-</NavyCard>
+
+
+          </NavyCard>
 
           {/* Drive Requirements */}
 <NavyCard className="p-6 space-y-6">
@@ -1109,15 +1174,7 @@ useEffect(() => {
           ) : (
             <Button
               type="submit"
-              disabled={
-                !selectedDrive ||
-                (selectedDrive.selectedFields.includes("github") && !githubData) ||
-                (selectedDrive.selectedFields.includes("resume") && !resumeFile) ||
-                (selectedDrive.selectedFields.includes("leetcode") && !leetcodeData) ||
-                (selectedDrive.selectedFields.includes("linkedin") && !linkedinUrl.trim()) ||
-                (selectedDrive.selectedFields.includes("aptitudeScore") && (aptitudeScore === "" || isNaN(Number(aptitudeScore)))) ||
-                (selectedDrive.selectedFields.includes("technicalScore") && (technicalScore === "" || isNaN(Number(technicalScore))))
-              }
+              disabled={!isFormValid}
               className="w-full h-13 py-3.5 text-base font-bold rounded-xl bg-gradient-to-r from-[#3fc4e7] to-[#69d2f1] text-black hover:opacity-90 transition-opacity shadow-lg disabled:opacity-40 font-display"
             >
               <ArrowRight className="w-5 h-5 mr-2" />

@@ -29,7 +29,7 @@ const HeroSection = () => {
             transition={{ delay: 0.2 }}
             className="inline-flex items-center gap-2 bg-[#3fc4e7]/10 text-[#69d2f1] px-4 py-1.5 rounded-full text-sm font-display font-semibold backdrop-blur-sm border border-[#3fc4e7]/20"
           >
-            <Sparkles className="w-4 h-4" /> Powered by DEVORA TECHNOLOGIES
+            <Sparkles className="w-4 h-4" /> Powered by Torsecure Cyber LLP
           </motion.div>
 
           <motion.h1

@@ -20,6 +20,11 @@ export default async function handler(req, res) {
     const showGithub = selectedFields.includes("github");
     const showLeetcode = selectedFields.includes("leetcode");
     const showResume = selectedFields.includes("resume");
+    const showLinkedin = selectedFields.includes("linkedin");
+    const showInstagram = selectedFields.includes("instagram");
+    const showWebsite = selectedFields.includes("website");
+    const showAptitude = selectedFields.includes("aptitudeScore");
+    const showTechnical = selectedFields.includes("technicalScore");
 
     // Build trimmed data only for enabled fields
     const trimmed = {
@@ -54,16 +59,26 @@ export default async function handler(req, res) {
       } : {}),
 
       ...(showLeetcode ? { leetcodeStats: portfolioData.leetcodeStats } : {}),
+      ...(showLinkedin ? { linkedin: portfolioData.linkedin } : {}),
+      ...(showInstagram ? { instagram: portfolioData.instagram } : {}),
+      ...(showWebsite ? { website: portfolioData.website } : {}),
+      ...(showAptitude ? { aptitudeScore: portfolioData.aptitudeScore } : {}),
+      ...(showTechnical ? { technicalScore: portfolioData.technicalScore } : {}),
     };
 
     const enabledSources = [
       showGithub && "GitHub",
       showResume && "Resume",
+      showLinkedin && "LinkedIn",
+      showInstagram && "Instagram",
+      showWebsite && "Portfolio Website",
       showLeetcode && "LeetCode",
+      showAptitude && "Aptitude Score",
+      showTechnical && "Technical Test Score",
     ].filter(Boolean).join(", ");
 
     // Detect if this is a non-IT / domain-agnostic analysis
-    const isResumeOnly = showResume && !showGithub && !showLeetcode;
+    const isResumeOnly = showResume && !showGithub && !showLeetcode && !showLinkedin;
 
     const prompt = `
 You are an expert recruiter${isResumeOnly ? " specializing in ALL industries including non-IT, business, healthcare, finance, law, marketing, operations, and more" : " specializing in technical hiring"}.
@@ -80,10 +95,15 @@ STRICT RULES:
 - Only evaluate data from the ENABLED SOURCES listed above.
 - DO NOT penalize missing sources that were not enabled.
 - ${showGithub ? "Evaluate GitHub activity, code quality, consistency, and collaboration." : "Do NOT mention GitHub. Set githubInsights to null."}
+- ${showLinkedin ? "Evaluate LinkedIn signal and profile quality. Provide a dedicated linkedinInsights section with profileStrength, activityLevel, roleAlignment, and a summary based on the available LinkedIn data." : "Do NOT mention LinkedIn. Set linkedinInsights to null."}
+- ${showInstagram ? "If Instagram is enabled, evaluate the professional presence and public signal from the Instagram profile URL and return instagramInsights." : "Do NOT mention Instagram. Set instagramInsights to null."}
+- ${showWebsite ? "If portfolio website is enabled, evaluate the website's presentation, technology choices, UX, and alignment with the candidate's role, and return websiteInsights." : "Do NOT mention website. Set websiteInsights to null."}
 - ${showLeetcode ? "Evaluate LeetCode problem solving performance." : "Do NOT mention LeetCode. Set leetcodeInsights to null."}
+- ${showAptitude || showTechnical ? "Evaluate the candidate's aptitude and/or technical test scores and provide a dedicated testScoreInsights section with detailed analysis and comparison." : "Do NOT mention test scores. Set testScoreInsights to null."}
 - ${showResume ? "Evaluate resume: experience, education, skills, ATS compatibility." : "Do NOT generate ATS score. Set atsScore to null."}
 - ${isResumeOnly ? "This may be a NON-IT candidate. Do not assume a tech background. Evaluate based on the candidate's actual domain — their role, industry, experience, and education. The primaryStack field should reflect their domain/tools (e.g. 'Marketing & Analytics', 'Finance & Excel', 'Operations Management') not programming languages." : ""}
 - overallScore must reflect ONLY the enabled sources.
+- atsScore.overall must be a separate resume/ATS fit score and should not simply copy overallScore. If resume is enabled, vary atsScore.overall according to resume quality, keyword match, formatting, experience clarity, education, and skills presentation.
 - Be honest and specific in strengths and concerns.
 
 SCORING:
@@ -111,11 +131,34 @@ Return ONLY valid JSON (no markdown, no backticks):
     "consistency": "short",
     "collaboration": "short"
   }` : "null"},
+  "linkedinInsights": ${showLinkedin ? `{
+    "profileStrength": "short",
+    "activityLevel": "short",
+    "roleAlignment": "short",
+    "summary": "short"
+  }` : "null"},
+  "instagramInsights": ${showInstagram ? `{
+    "profileQuality": "short",
+    "engagementLevel": "short",
+    "professionalPresence": "short",
+    "summary": "short"
+  }` : "null"},
+  "websiteInsights": ${showWebsite ? `{
+    "websiteQuality": "short",
+    "technologyUse": "short",
+    "userExperience": "short",
+    "summary": "short"
+  }` : "null"},
   "leetcodeInsights": ${showLeetcode ? `{
     "problemSolvingLevel": "short",
     "difficultyBalance": "short",
     "contestPerformance": "short",
     "summary": "short"
+  }` : "null"},
+  "testScoreInsights": ${showAptitude || showTechnical ? `{
+    "aptitudeAnalysis": "short",
+    "technicalAnalysis": "short",
+    "scoreComparison": "short"
   }` : "null"},
   "atsScore": ${showResume ? `{
     "overall": number,
@@ -132,7 +175,7 @@ Return ONLY valid JSON (no markdown, no backticks):
     "specializations": ["a1"]
   },
   "inferredProjectDescriptions": {},
-  "hiringNotes": "2 sentences max — actionable recruiter recommendation"
+  "hiringNotes": "Detailed paragraph for the hiring manager with actionable insights and interview recommendation"
 }
 `;
 
