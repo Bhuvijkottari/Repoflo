@@ -135,6 +135,12 @@ const [selectedDriveId, setSelectedDriveId] = useState<string>("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [instagramContent, setInstagramContent] = useState<any>(null);
+  const [websiteContent, setWebsiteContent] = useState<any>(null);
+  const [instagramFetching, setInstagramFetching] = useState(false);
+  const [websiteFetching, setWebsiteFetching] = useState(false);
+  const [instagramError, setInstagramError] = useState("");
+  const [websiteError, setWebsiteError] = useState("");
   const [aptitudeScore, setAptitudeScore] = useState<number | string>("");
   const [technicalScore, setTechnicalScore] = useState<number | string>("");
   const [leetcodeUsername, setLeetcodeUsername] = useState("");
@@ -258,6 +264,64 @@ useEffect(() => {
 
   fetchLeetcode();
 }, [debouncedLeetcode]);
+
+/* ── Instagram fetch (debounced) ── */
+useEffect(() => {
+  if (!instagramUrl.trim() || !isValidInstagramUrl(instagramUrl) || !selectedDrive?.selectedFields.includes("instagram")) {
+    setInstagramContent(null);
+    setInstagramError("");
+    return;
+  }
+  const timer = setTimeout(async () => {
+    setInstagramFetching(true);
+    setInstagramError("");
+    try {
+      const res = await fetch("/api/fetch-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: instagramUrl.trim(), type: "instagram" }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "Failed to fetch Instagram");
+      setInstagramContent(data);
+    } catch (e: any) {
+      setInstagramError("Could not load Instagram profile — AI will analyze URL only.");
+      setInstagramContent({ url: instagramUrl.trim(), type: "instagram", fallback: true });
+    } finally {
+      setInstagramFetching(false);
+    }
+  }, 1200);
+  return () => clearTimeout(timer);
+}, [instagramUrl, selectedDrive]);
+
+/* ── Website fetch (debounced) ── */
+useEffect(() => {
+  if (!websiteUrl.trim() || !isValidWebsiteUrl(websiteUrl) || !selectedDrive?.selectedFields.includes("website")) {
+    setWebsiteContent(null);
+    setWebsiteError("");
+    return;
+  }
+  const timer = setTimeout(async () => {
+    setWebsiteFetching(true);
+    setWebsiteError("");
+    try {
+      const res = await fetch("/api/fetch-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: websiteUrl.trim(), type: "website" }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "Failed to fetch website");
+      setWebsiteContent(data);
+    } catch (e: any) {
+      setWebsiteError("Could not load website — AI will analyze URL only.");
+      setWebsiteContent({ url: websiteUrl.trim(), type: "website", fallback: true });
+    } finally {
+      setWebsiteFetching(false);
+    }
+  }, 1200);
+  return () => clearTimeout(timer);
+}, [websiteUrl, selectedDrive]);
 
   const [historySortBy, setHistorySortBy] = useState<"date" | "score">("date");
 
@@ -413,10 +477,18 @@ useEffect(() => {
         finalData = { ...finalData, linkedin: linkedinUrl.trim() };
       }
       if (needsInstagram) {
-        finalData = { ...finalData, instagram: instagramUrl.trim() };
+        finalData = {
+          ...finalData,
+          instagram: instagramUrl.trim(),
+          instagramContent: instagramContent || null,
+        };
       }
       if (needsWebsite) {
-        finalData = { ...finalData, website: websiteUrl.trim() };
+        finalData = {
+          ...finalData,
+          website: websiteUrl.trim(),
+          websiteContent: websiteContent || null,
+        };
       }
       if (needsAptitude) {
         finalData = { ...finalData, aptitudeScore: Number(aptitudeScore) };
@@ -719,92 +791,7 @@ useEffect(() => {
       <div className="container mx-auto px-4 max-w-xl pt-10 pb-20">
 
         {/* ── History ── */}
-        {historyEntries.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-            {/* Header + sort controls */}
-            <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-              <h2 className="font-display text-xl font-bold text-white">
-                Previous Analyses
-                <span className="ml-2 text-sm text-[#b8c7e0] font-normal font-body">({historyEntries.length})</span>
-              </h2>
-              <div className="flex items-center gap-2 bg-[#132f52] border border-[#3fc4e7]/20 rounded-lg p-1">
-                <button
-                  onClick={() => setHistorySortBy("date")}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold font-body transition-colors ${historySortBy === "date" ? "bg-[#3fc4e7]/20 text-[#3fc4e7]" : "text-[#b8c7e0] hover:text-white"}`}
-                >
-                  Latest
-                </button>
-                <button
-                  onClick={() => setHistorySortBy("score")}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold font-body transition-colors ${historySortBy === "score" ? "bg-[#3fc4e7]/20 text-[#3fc4e7]" : "text-[#b8c7e0] hover:text-white"}`}
-                >
-                  Highest Score
-                </button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {sortedHistory.map((h, idx) => {
-                const score = h.analysis?.overallScore;
-                const verdict = h.analysis?.verdict;
-                const scoreColor = score >= 80 ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/25"
-                  : score >= 60 ? "text-amber-400 bg-amber-500/10 border-amber-500/25"
-                  : score != null ? "text-red-400 bg-red-500/10 border-red-500/25"
-                  : "text-[#b8c7e0] bg-[#b8c7e0]/10 border-[#b8c7e0]/20";
-                const hasLeetcode = !!h.portfolioData?.leetcodeStats;
-                const hasResume = h.portfolioData?.experience?.length > 0 || h.portfolioData?.education?.length > 0;
-                const hasTechStack = h.analysis?.techStackMatch || h.analysis?.experienceLevelMatch;
-                return (
-                <NavyCard key={idx} className="flex items-center justify-between p-4 hover:border-[#3fc4e7]/35 transition-colors gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-semibold text-white text-sm font-display truncate">
-                        {h.portfolioData.name || "Unnamed"}
-                      </p>
-                      <div className="flex items-center gap-1 flex-wrap">
-                        {hasLeetcode && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400 border border-purple-500/25">+ LeetCode</span>
-                        )}
-                        {hasResume && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#3fc4e7]/15 text-[#69d2f1] border border-[#3fc4e7]/25">+ Resume</span>
-                        )}
-                        {hasTechStack && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/25">+ Filters</span>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-xs text-[#b8c7e0] font-body mt-0.5">
-                      {new Date(h.createdAt).toLocaleString()}
-                    </p>
-                    {verdict && (
-                      <p className="text-xs text-[#b8c7e0]/60 font-body mt-0.5 truncate">{verdict}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {score != null ? (
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full border font-display ${scoreColor}`}>
-                        {score}/100
-                      </span>
-                    ) : (
-                      <span className="text-xs text-[#b8c7e0]/40 font-body">No score</span>
-                    )}
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        sessionStorage.setItem("portfolioData", JSON.stringify(h.portfolioData));
-                        if (h.analysis) sessionStorage.setItem("savedAnalysis", JSON.stringify(h.analysis));
-                        navigate("/recruiter?preview=1");
-                      }}
-                      className="bg-[#3fc4e7]/15 text-[#69d2f1] border border-[#3fc4e7]/30 hover:bg-[#3fc4e7]/25 font-body text-xs"
-                    >
-                      View
-                    </Button>
-                  </div>
-                </NavyCard>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
+        
 
         {/* ── Hero copy ── */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
@@ -998,7 +985,7 @@ useEffect(() => {
 
 {selectedDrive?.selectedFields.includes("instagram") && (
   <div className="space-y-2.5">
-    <FieldLabel icon={Briefcase} text="Candidate Instagram URL" note="(URL-based analysis)" />
+    <FieldLabel icon={Briefcase} text="Candidate Instagram URL" note="(public profile)" />
     <Input
       type="url"
       placeholder="https://instagram.com/candidate"
@@ -1007,11 +994,20 @@ useEffect(() => {
       className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
     />
     <StatusRow
-      loading={selectedDrive?.selectedFields.includes("instagram") && !instagramUrl.trim() ? false : undefined}
-      error={instagramUrl && !instagramUrl.startsWith("http") ? "Enter a valid Instagram URL" : undefined}
+      loading={instagramFetching && "Loading Instagram profile..."}
+      error={
+        (instagramUrl && !isValidInstagramUrl(instagramUrl) ? "Enter a valid Instagram URL" : undefined) ||
+        (instagramError || undefined)
+      }
       success={
-        instagramUrl.trim() && instagramUrl.startsWith("http") && (
-          <span className="text-sm text-emerald-400">Instagram URL ready for AI analysis</span>
+        instagramContent && !instagramFetching && !instagramError && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 p-3 bg-[#0b1f3a] border border-[#3fc4e7]/20 rounded-xl">
+            <CheckCircle2 className="w-4 h-4 text-[#3fc4e7] flex-shrink-0" />
+            <span className="text-sm text-white">
+              {instagramContent.instagramData?.name || instagramContent.instagramData?.username || "Profile"} — content loaded for AI analysis
+            </span>
+          </motion.div>
         )
       }
     />
@@ -1019,7 +1015,7 @@ useEffect(() => {
 )}
       {selectedDrive?.selectedFields.includes("website") && (
         <div className="space-y-2.5">
-          <FieldLabel icon={Briefcase} text="Candidate Portfolio Website" note="(URL-based analysis)" />
+          <FieldLabel icon={Briefcase} text="Candidate Portfolio Website" note="(content will be fetched)" />
           <Input
             type="url"
             placeholder="https://candidate-portfolio.com"
@@ -1028,11 +1024,23 @@ useEffect(() => {
             className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
           />
           <StatusRow
-            loading={selectedDrive?.selectedFields.includes("website") && !websiteUrl.trim() ? false : undefined}
-            error={websiteUrl && !websiteUrl.startsWith("http") ? "Enter a valid website URL" : undefined}
+            loading={websiteFetching && "Loading portfolio website..."}
+            error={
+              (websiteUrl && !isValidWebsiteUrl(websiteUrl) ? "Enter a valid website URL" : undefined) ||
+              (websiteError || undefined)
+            }
             success={
-              websiteUrl.trim() && websiteUrl.startsWith("http") && (
-                <span className="text-sm text-emerald-400">Portfolio website ready for AI analysis</span>
+              websiteContent && !websiteFetching && !websiteError && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 p-3 bg-[#0b1f3a] border border-[#3fc4e7]/20 rounded-xl">
+                  <CheckCircle2 className="w-4 h-4 text-[#3fc4e7] flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white truncate">{websiteContent.title || "Portfolio loaded"}</p>
+                    {websiteContent.websiteData?.metaDescription && (
+                      <p className="text-xs text-[#b8c7e0] truncate">{websiteContent.websiteData.metaDescription}</p>
+                    )}
+                  </div>
+                </motion.div>
               )
             }
           />
@@ -1050,6 +1058,20 @@ useEffect(() => {
             placeholder="91"
             value={technicalScore}
             onChange={(e) => setTechnicalScore(e.target.value === "" ? "" : Number(e.target.value))}
+            className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
+          />
+        </div>
+      )}
+      {selectedDrive?.selectedFields.includes("aptitudeScore") && (
+        <div className="space-y-2.5">
+          <Label className="text-white mb-2 block">Aptitude Test Score (0-100)</Label>
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            placeholder="91"
+            value={aptitudeScore}
+            onChange={(e) => setAptitudeScore(e.target.value === "" ? "" : Number(e.target.value))}
             className="h-12 text-base bg-[#0b1f3a] border-[#3fc4e7]/20 text-white placeholder:text-[#b8c7e0]/50 focus:border-[#3fc4e7]/50 focus:ring-[#3fc4e7]/20"
           />
         </div>

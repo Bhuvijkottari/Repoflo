@@ -60,8 +60,34 @@ export default async function handler(req, res) {
 
       ...(showLeetcode ? { leetcodeStats: portfolioData.leetcodeStats } : {}),
       ...(showLinkedin ? { linkedin: portfolioData.linkedin } : {}),
-      ...(showInstagram ? { instagram: portfolioData.instagram } : {}),
-      ...(showWebsite ? { website: portfolioData.website } : {}),
+
+      // Instagram — send actual fetched content, not just URL
+      ...(showInstagram ? {
+        instagram: portfolioData.instagram,
+        instagramContent: portfolioData.instagramContent
+          ? {
+              name:     portfolioData.instagramContent.instagramData?.name,
+              username: portfolioData.instagramContent.instagramData?.username,
+              bio:      portfolioData.instagramContent.instagramData?.bio,
+              title:    portfolioData.instagramContent.instagramData?.title,
+              bodyText: portfolioData.instagramContent.bodyText?.slice(0, 1000),
+            }
+          : null,
+      } : {}),
+
+      // Website — send actual fetched content, not just URL
+      ...(showWebsite ? {
+        website: portfolioData.website,
+        websiteContent: portfolioData.websiteContent
+          ? {
+              title:           portfolioData.websiteContent.title,
+              metaDescription: portfolioData.websiteContent.websiteData?.metaDescription,
+              headings:        portfolioData.websiteContent.websiteData?.headings,
+              content:         portfolioData.websiteContent.websiteData?.content?.slice(0, 1500),
+            }
+          : null,
+      } : {}),
+
       ...(showAptitude ? { aptitudeScore: portfolioData.aptitudeScore } : {}),
       ...(showTechnical ? { technicalScore: portfolioData.technicalScore } : {}),
     };
@@ -96,8 +122,8 @@ STRICT RULES:
 - DO NOT penalize missing sources that were not enabled.
 - ${showGithub ? "Evaluate GitHub activity, code quality, consistency, and collaboration." : "Do NOT mention GitHub. Set githubInsights to null."}
 - ${showLinkedin ? "Evaluate LinkedIn signal and profile quality. Provide a dedicated linkedinInsights section with profileStrength, activityLevel, roleAlignment, and a summary based on the available LinkedIn data." : "Do NOT mention LinkedIn. Set linkedinInsights to null."}
-- ${showInstagram ? "If Instagram is enabled, evaluate the professional presence and public signal from the Instagram profile URL and return instagramInsights." : "Do NOT mention Instagram. Set instagramInsights to null."}
-- ${showWebsite ? "If portfolio website is enabled, evaluate the website's presentation, technology choices, UX, and alignment with the candidate's role, and return websiteInsights." : "Do NOT mention website. Set websiteInsights to null."}
+- ${showInstagram ? "Evaluate Instagram professional presence using the fetched profile content (name, bio, title, bodyText). Give real insights about their personal branding and professionalism." : "Do NOT mention Instagram. Set instagramInsights to null."}
+- ${showWebsite ? "Evaluate the portfolio website using the fetched content (title, metaDescription, headings, content). Give real insights about design, clarity, and role alignment." : "Do NOT mention website. Set websiteInsights to null."}
 - ${showLeetcode ? "Evaluate LeetCode problem solving performance." : "Do NOT mention LeetCode. Set leetcodeInsights to null."}
 - ${showAptitude || showTechnical ? "Evaluate the candidate's aptitude and/or technical test scores and provide a dedicated testScoreInsights section with detailed analysis and comparison." : "Do NOT mention test scores. Set testScoreInsights to null."}
 - ${showResume ? "Evaluate resume: experience, education, skills, ATS compatibility." : "Do NOT generate ATS score. Set atsScore to null."}

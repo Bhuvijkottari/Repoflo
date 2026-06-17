@@ -15,7 +15,16 @@ export interface PortfolioData {
   experience: { company: string; role: string; period: string; description: string }[];
   education: { institution: string; degree: string; period: string }[];
   volunteering: { org: string; role: string; period: string; description: string }[];
-  projects: { name: string; description: string; tech: string[]; stars: number; link: string }[];
+  projects: {
+  name: string;
+  description: string;
+  tech: string[];
+  stars: number;
+  link: string;
+  owner?: string;
+  author?: string;
+  username?: string;
+}[];
   githubStats?: {
     totalCommits: number;
     publicRepos: number;

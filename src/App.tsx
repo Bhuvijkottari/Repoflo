@@ -19,6 +19,7 @@ const ScrollToTop = () => {
 
 import CreateDrive from "./pages/CreateDrivePage";
 import Index from "./pages/Index";
+
 import GeneratePage from "./pages/GeneratePage";
 import RecruiterPage from "./pages/RecruiterPage";
 import RecruiterResultsPage from "./pages/RecruiterResultsPage";
@@ -34,6 +35,7 @@ import AIVsMePage from "./pages/AIVsMePage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminVerifyPage from "./pages/AdminVerifyPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import DriveCandidateResults from "./pages/DriveCandidateResults";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +88,7 @@ const AnimatedRoutes = () => {
                 <CreateDrive />
               </ApprovedRecruiterRoute>
             } />
+            
             <Route path="/ethics-learning" element={<EthicsLearningPage />} />
             <Route path="/ai-vs-me" element={<AIVsMePage />} />
             <Route path="/for-recruiters" element={<RecruiterLandingPage />} />
@@ -97,6 +100,10 @@ const AnimatedRoutes = () => {
             <Route path="/preview/:themeId" element={<PreviewPage />} />
             <Route path="/premium" element={<PremiumPage />} />
             <Route path="*" element={<NotFound />} />
+            <Route
+  path="/drive-results/:driveId"
+  element={<DriveCandidateResults />}
+/>
           </Routes>
         </motion.div>
       </AnimatePresence>

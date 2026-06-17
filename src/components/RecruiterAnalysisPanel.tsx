@@ -189,6 +189,8 @@ const RecruiterAnalysisPanel = ({
       ];
   const showGithub = fields.includes("github");
   const showLinkedin = fields.includes("linkedin");
+  const showInstagram = fields.includes("instagram");
+  const showWebsite = fields.includes("website");
   const showAptitude = fields.includes("aptitudeScore");
   const showTechnical = fields.includes("technicalScore");
   const showLeetcode = fields.includes("leetcode");
@@ -291,15 +293,33 @@ const RecruiterAnalysisPanel = ({
             </Card>
           </motion.div>
 
-          {(showLinkedin || showAptitude || showTechnical) && (
+          {(showLinkedin || showAptitude || showTechnical || showInstagram || showWebsite) && (
             <motion.div {...fadeUp(0.06)}>
               <Card>
-                <CardHeader icon={Shield} title="Additional Candidate Data" subtitle="LinkedIn and test score inputs" />
+                <CardHeader icon={Shield} title="Additional Candidate Data" subtitle="Social, website and test score inputs" />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
                   {showLinkedin && d.linkedin && (
                     <div className="bg-[#0b1f3a] rounded-2xl p-4 border border-[#3fc4e7]/15">
                       <p className="text-sm font-semibold text-[#b8c7e0]">LinkedIn URL</p>
                       <p className="text-sm text-white break-all mt-2">{d.linkedin}</p>
+                    </div>
+                  )}
+                  {showInstagram && (d as any).instagram && (
+                    <div className="bg-[#0b1f3a] rounded-2xl p-4 border border-[#3fc4e7]/15">
+                      <p className="text-sm font-semibold text-[#b8c7e0]">Instagram</p>
+                      <p className="text-sm text-white break-all mt-2">{(d as any).instagram}</p>
+                      {(d as any).instagramContent?.instagramData?.name && (
+                        <p className="text-xs text-emerald-400 mt-1">✓ Profile loaded: {(d as any).instagramContent.instagramData.name}</p>
+                      )}
+                    </div>
+                  )}
+                  {showWebsite && (d as any).website && (
+                    <div className="bg-[#0b1f3a] rounded-2xl p-4 border border-[#3fc4e7]/15">
+                      <p className="text-sm font-semibold text-[#b8c7e0]">Portfolio Website</p>
+                      <p className="text-sm text-white break-all mt-2">{(d as any).website}</p>
+                      {(d as any).websiteContent?.title && (
+                        <p className="text-xs text-emerald-400 mt-1">✓ {(d as any).websiteContent.title}</p>
+                      )}
                     </div>
                   )}
                   {showAptitude && d.aptitudeScore != null && (
@@ -316,7 +336,7 @@ const RecruiterAnalysisPanel = ({
                   )}
                 </div>
                 <div className="px-6 pb-6 pt-2 text-sm leading-6 text-[#b8c7e0]">
-                  Gemini uses LinkedIn signals and candidate test scores alongside the rest of the profile to make a more complete hiring recommendation.
+                  Gemini uses these signals alongside the rest of the profile to make a more complete hiring recommendation.
                 </div>
               </Card>
             </motion.div>
@@ -345,7 +365,61 @@ const RecruiterAnalysisPanel = ({
             </motion.div>
           )}
 
-          {/* ══ TEST SCORE INSIGHTS (from AI analysis) ═════════ */}
+          {/* ══ INSTAGRAM INSIGHTS ══════════════════════════════ */}
+          {showInstagram && analysis.instagramInsights && (
+            <motion.div {...fadeUp(0.067)}>
+              <Card>
+                <CardHeader icon={Briefcase} title="Instagram Profile Assessment" subtitle="Professional presence & personal branding" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Profile Quality</p>
+                    <p className="text-base text-foreground">{analysis.instagramInsights.profileQuality}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Engagement Level</p>
+                    <p className="text-base text-foreground">{analysis.instagramInsights.engagementLevel}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Professional Presence</p>
+                    <p className="text-base text-foreground">{analysis.instagramInsights.professionalPresence}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Summary</p>
+                    <p className="text-base text-foreground">{analysis.instagramInsights.summary}</p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* ══ WEBSITE INSIGHTS ════════════════════════════════ */}
+          {showWebsite && analysis.websiteInsights && (
+            <motion.div {...fadeUp(0.068)}>
+              <Card>
+                <CardHeader icon={Zap} title="Portfolio Website Assessment" subtitle="Design, technology & role alignment" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Website Quality</p>
+                    <p className="text-base text-foreground">{analysis.websiteInsights.websiteQuality}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Technology Use</p>
+                    <p className="text-base text-foreground">{analysis.websiteInsights.technologyUse}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">User Experience</p>
+                    <p className="text-base text-foreground">{analysis.websiteInsights.userExperience}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">Summary</p>
+                    <p className="text-base text-foreground">{analysis.websiteInsights.summary}</p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* ══ TEST SCORE INSIGHTS ═════════════════════════════ */}
           {analysis.testScoreInsights && (analysis.testScoreInsights.aptitudeAnalysis !== "N/A" || analysis.testScoreInsights.technicalAnalysis !== "N/A") && (
             <motion.div {...fadeUp(0.07)}>
               <Card>

@@ -809,10 +809,8 @@ const RecruiterLandingPage = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 mb-6 text-sm text-[#b8c7e0]">
-                          <div className="rounded-2xl bg-[#0b1f3a] p-3 border border-[#3fc4e7]/10">
-                            <p className="font-semibold text-white">Candidates</p>
-                            <p>{driveCounts[drive.id!] ?? 0}</p>
-                          </div>
+                         
+                        
                           <div className="rounded-2xl bg-[#0b1f3a] p-3 border border-[#3fc4e7]/10">
                             <p className="font-semibold text-white">Experience</p>
                             <p>{drive.experienceLevel || "Any"}</p>
@@ -827,12 +825,14 @@ const RecruiterLandingPage = () => {
                             Analyze
                           </Button>
                           <Button
-                            variant="outline"
-                            className="w-full text-[#69d2f1] border-[#3fc4e7]/30"
-                            onClick={() => startDriveAction(drive, "results")}
-                          >
-                            View Candidate Results
-                          </Button>
+  variant="outline"
+  className="w-full text-[#69d2f1] border-[#3fc4e7]/30"
+  onClick={() =>
+    navigate(`/drive-results/${drive.id}`)
+  }
+>
+  View Candidate Results
+</Button>
                         </div>
                         <div className="mt-3">
                           <Button

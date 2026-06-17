@@ -731,9 +731,23 @@ export const subscribeRecruiterRequest = (uid: string, cb: (r: RecruiterRequest 
 
 export const getAllRecruiterRequests = async (): Promise<RecruiterRequest[]> => {
   try {
-    const snap = await getDocs(query(collection(db, "recruiter_requests"), orderBy("requestedAt", "desc")));
-    return snap.docs.map((d) => d.data() as RecruiterRequest);
-  } catch { return []; }
+    const snap = await getDocs(
+      query(collection(db, "recruiter_requests"), orderBy("requestedAt", "desc"))
+    );
+    return snap.docs.map((d) => ({ uid: d.id, ...d.data() } as RecruiterRequest));
+  } catch (error: any) {
+    if (error?.code === "failed-precondition" || error?.message?.includes("index")) {
+      console.warn("recruiter_requests index not ready — sorting client-side");
+      try {
+        const snap = await getDocs(collection(db, "recruiter_requests"));
+        return snap.docs
+          .map((d) => ({ uid: d.id, ...d.data() } as RecruiterRequest))
+          .sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
+      } catch (e) { console.error("Fallback failed:", e); return []; }
+    }
+    console.error("getAllRecruiterRequests error:", error);
+    return [];
+  }
 };
 
 export const approveRecruiterRequest = async (uid: string, packageId: string): Promise<void> => {

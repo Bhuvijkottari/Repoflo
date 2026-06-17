@@ -84,14 +84,16 @@ const langColors = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#ec4899", "#06b
 export function generateReportHtml(data: PortfolioData, analysis: CandidateAnalysis, selectedFields: string[] = []): string {
   // If selectedFields is empty, infer from available data (backwards compat)
   const fields = selectedFields.length > 0 ? selectedFields
-    : [
-        ...(data.githubStats ? ["github"] : []),
-        ...(data.linkedin ? ["linkedin"] : []),
-        ...(data.aptitudeScore != null ? ["aptitudeScore"] : []),
-        ...(data.technicalScore != null ? ["technicalScore"] : []),
-        ...(data.leetcodeStats ? ["leetcode"] : []),
-        ...((data.experience?.length || data.education?.length) ? ["resume"] : []),
-      ];
+  : [
+      ...(data.githubStats ? ["github"] : []),
+      ...(data.linkedin ? ["linkedin"] : []),
+      ...(data.instagram ? ["instagram"] : []),
+      ...(data.website ? ["website"] : []),
+      ...(data.aptitudeScore != null ? ["aptitudeScore"] : []),
+      ...(data.technicalScore != null ? ["technicalScore"] : []),
+      ...(data.leetcodeStats ? ["leetcode"] : []),
+      ...((data.experience?.length || data.education?.length) ? ["resume"] : []),
+    ];
 
   const showGithub = fields.includes("github");
   const showLinkedin = fields.includes("linkedin");
