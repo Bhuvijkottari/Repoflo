@@ -178,7 +178,15 @@ const [selectedDriveId, setSelectedDriveId] = useState<string>("");
   const aptitudeValid = !selectedDrive?.selectedFields.includes("aptitudeScore") || (aptitudeScore !== "" && !isNaN(Number(aptitudeScore)));
   const technicalValid = !selectedDrive?.selectedFields.includes("technicalScore") || (technicalScore !== "" && !isNaN(Number(technicalScore)));
   const isFormValid = Boolean(selectedDrive) && githubValid && resumeValid && leetcodeValid && linkedinValid && instagramValid && websiteValid && aptitudeValid && technicalValid;
-
+  const parseApiJson = async (res: Response) => {
+    const text = await res.text();
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { error: text.trim() || `Invalid JSON response (${res.status})` };
+    }
+  };
 /* ── GitHub Debounce ── */
 useEffect(() => {
   const timer = setTimeout(() => {
@@ -195,15 +203,7 @@ useEffect(() => {
     return;
   }
 
-  const parseApiJson = async (res: Response) => {
-    const text = await res.text();
-    if (!text) return null;
-    try {
-      return JSON.parse(text);
-    } catch {
-      return { error: text.trim() || `Invalid JSON response (${res.status})` };
-    }
-  };
+
 
   const fetchGithub = async () => {
     setGithubFetching(true);

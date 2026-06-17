@@ -61,12 +61,14 @@ const RecruiterNav = ({ user, onSignIn, onSignOut, signingIn, showCreateDrive, o
           >
             Ethics Learning
           </Link>
-          <Link
-            to="/ai-vs-me"
-            className="text-sm font-semibold text-[#b8c7e0] border border-[#3fc4e7]/20 rounded-full px-3 py-2 hover:bg-[#3fc4e7]/10 hover:text-white transition-all"
-          >
-            AI vs Me
-          </Link>
+          <a
+  href="https://www.aiversusme.com/"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-sm font-semibold text-[#b8c7e0] border border-[#3fc4e7]/20 rounded-full px-3 py-2 hover:bg-[#3fc4e7]/10 hover:text-white transition-all"
+>
+  AI vs Me
+</a>
           {showCreateDrive && onCreateDrive && (
             <Button
               size="sm"
